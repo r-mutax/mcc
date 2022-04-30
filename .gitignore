@@ -1,2 +1,4 @@
 load/*
 bin/*
+test/tmp
+test/tmp.s

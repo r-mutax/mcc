@@ -22,6 +22,9 @@ clean:
 	-rmdir $(TARGETDIR)
 	-rmdir $(OBJDIR)
 
+test:$(TARGET)
+	./test/test.sh
+
 .PHONY: clean
 
 -include $(DEPENDS)
