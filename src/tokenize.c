@@ -6,6 +6,7 @@ Token* token;
 
 // local function forward definition. ------------
 Token* new_token(TokenKind kind, Token* cur, char* str);
+
 // -----------------------------------------------
 Token* tk_tokenize(char* p){
 

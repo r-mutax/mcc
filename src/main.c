@@ -1,5 +1,7 @@
 #include "mcc.h"
 #include "tokenize.h"
+#include "node.h"
+#include "codegen.h"
 #include "errormsg.h"
 
 int main(int argc, char **argv){
@@ -14,17 +16,11 @@ int main(int argc, char **argv){
     printf(".intel_syntax noprefix\n");
     printf(".globl main\n");
     printf("main:\n");
-    printf("  mov rax, %d\n", tk_expect_num());
 
-    while(!tk_iseof()){
-        if(tk_consume('+')){
-            printf("  add rax, %d\n", tk_expect_num());
-            continue;
-        }
+    Node* exp = parser();
+    gen(exp);
 
-        tk_expect('-');
-        printf("  sub rax, %d\n", tk_expect_num());
-    }
+    printf("  pop rax\n");
     printf("  ret\n");
     return 0;
 }

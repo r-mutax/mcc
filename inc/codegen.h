@@ -1,0 +1,7 @@
+#ifndef CODEGEN_INC_H
+#define CODEGEN_INC_H
+#include "node.h"
+
+void gen(Node* node);
+
+#endif
