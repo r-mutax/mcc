@@ -1,5 +1,6 @@
 #include "mcc.h"
 #include "tokenize.h"
+#include "errormsg.h"
 
 int main(int argc, char **argv){
 
@@ -7,6 +8,7 @@ int main(int argc, char **argv){
         fprintf(stderr, "mcc: error: Invalid Argument num.");
     }
 
+    error_init(argv[1]);
     tk_tokenize(argv[1]);
 
     printf(".intel_syntax noprefix\n");

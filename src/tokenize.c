@@ -1,11 +1,11 @@
 #include "mcc.h"
 #include "tokenize.h"
+#include "errormsg.h"
 
 Token* token;
 
 // local function forward definition. ------------
 Token* new_token(TokenKind kind, Token* cur, char* str);
-void error(char *fmt, ...);
 // -----------------------------------------------
 Token* tk_tokenize(char* p){
 
@@ -46,14 +46,14 @@ void tk_expect(char p){
     if(token->kind != TK_OPERAND
         || *(token->str) != p)
     {
-        error("expect %c, but get %c\n", p, token->str[0]);
+        error_at(token->str, "expect %c, but get %c\n", p, token->str[0]);
     }
     token = token->next;
 }
 
 int tk_expect_num(){
     if(token->kind != TK_NUM){
-        error("expect number.\n");
+        error_at(token->str, "expect number.\n");
     }
     int ret = token->val;
     token = token->next;
@@ -77,10 +77,3 @@ Token* new_token(TokenKind kind, Token* cur, char* str)
     return tok;
 }
 
-void error(char *fmt, ...) {
-  va_list ap;
-  va_start(ap, fmt);
-  vfprintf(stderr, fmt, ap);
-  fprintf(stderr, "\n");
-  exit(1);
-}
