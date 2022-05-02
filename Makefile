@@ -13,7 +13,7 @@ $(TARGET): $(OBJECTS)
 	-mkdir -p $(TARGETDIR)
 	$(COMPILER) -o $@ $^
 
-$(OBJECTS): $(SOURCES)
+$(OBJDIR)/%.o: $(SRCDIR)/%.c
 	-mkdir -p $(OBJDIR)
 	$(COMPILER) $(CFLAGS) $(INCDIR) -o $@ -c $<
 
@@ -25,7 +25,7 @@ clean:
 test:$(TARGET)
 	./test/test.sh
 
-.PHONY: clean
+.PHONY: clean test
 
 -include $(DEPENDS)
 	

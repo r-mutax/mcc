@@ -1,0 +1,27 @@
+#ifndef TOKENIZE_INC_H
+#define TOKENIZE_INC_H
+
+// token data definition --------------------------
+typedef enum {
+    TK_OPERAND = 0,
+    TK_NUM,
+    TK_EOF
+} TokenKind;
+
+typedef struct Token Token;
+
+struct Token { 
+    TokenKind   kind;
+    Token*      next;
+    int         val;
+    char*       str;
+};
+
+// function definition ----------------------------
+Token*  tk_tokenize(char* p);
+bool    tk_iseof();
+void    tk_expect(char p);
+int     tk_expect_num(); 
+bool    tk_consume(char p);
+
+#endif
