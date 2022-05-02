@@ -15,13 +15,14 @@ struct Token {
     Token*      next;
     int         val;
     char*       str;
+    int         len;
 };
 
 // function definition ----------------------------
 Token*  tk_tokenize(char* p);
 bool    tk_iseof();
-void    tk_expect(char p);
+void    tk_expect(char* p);
 int     tk_expect_num(); 
-bool    tk_consume(char p);
+bool    tk_consume(char* p);
 
 #endif

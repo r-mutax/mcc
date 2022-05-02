@@ -5,7 +5,8 @@
 Token* token;
 
 // local function forward definition. ------------
-Token* new_token(TokenKind kind, Token* cur, char* str);
+Token* new_token(TokenKind kind, Token* cur, char* str, int len);
+bool startswith(char* lhs, char* rhs);
 
 // -----------------------------------------------
 Token* tk_tokenize(char* p){
@@ -22,19 +23,33 @@ Token* tk_tokenize(char* p){
             continue;
         }
 
-        if(strchr("+-*/()", *p)){
-            cur = new_token(TK_OPERAND, cur, p++);
+        if(startswith(p, "==")
+            || startswith(p, "!=")
+            || startswith(p, "<=")
+            || startswith(p, ">="))
+        {
+            cur = new_token(TK_OPERAND, cur, p, 2);
+            cur->len = 2;
+            p += 2;
+            continue;
+        }
+
+        if(strchr("+-*/()<>", *p)){
+            cur = new_token(TK_OPERAND, cur, p++, 1);
+            cur->len = 1;
             continue;
         }
 
         if(isdigit(*p)){
-            cur = new_token(TK_NUM, cur, p);
+            cur = new_token(TK_NUM, cur, p, 0);
+            char* q = p;
             cur->val = strtol(p, &p, 10);
+            cur->len = p - q;
             continue;
         }
     }
 
-    new_token(TK_EOF, cur, p);
+    new_token(TK_EOF, cur, p, 0);
     token = head.next;
     return head.next;
 }
@@ -43,9 +58,10 @@ bool tk_iseof(){
     return (token->kind == TK_EOF);
 }
 
-void tk_expect(char p){
+void tk_expect(char* p){
     if(token->kind != TK_OPERAND
-        || *(token->str) != p)
+        || token->len != strlen(p)
+        || memcmp(p, token->str, token->len))
     {
         error_at(token->str, "expect %c, but get %c\n", p, token->str[0]);
     }
@@ -61,20 +77,25 @@ int tk_expect_num(){
     return ret;
 }
 
-bool tk_consume(char op) {
-    if (token->kind != TK_OPERAND || token->str[0] != op)
+bool tk_consume(char* op) {
+    if (token->kind != TK_OPERAND
+         || token->len != strlen(op)
+         || memcmp(op, token->str, token->len))
         return false;
     token = token->next;
     return true;
 }
 
 // local function ---------------------------------
-Token* new_token(TokenKind kind, Token* cur, char* str)
-{
+Token* new_token(TokenKind kind, Token* cur, char* str, int len){
     Token* tok = calloc(1, sizeof(Token));
     tok->kind = kind;
     tok->str = str;
+    tok->len = len;
     cur->next = tok;
     return tok;
 }
 
+bool startswith(char* lhs, char* rhs){
+    return memcmp(lhs, rhs, strlen(rhs)) == 0;
+}
