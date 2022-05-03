@@ -29,14 +29,17 @@ Token* tk_tokenize(char* p){
             || startswith(p, ">="))
         {
             cur = new_token(TK_OPERAND, cur, p, 2);
-            cur->len = 2;
             p += 2;
             continue;
         }
 
-        if(strchr("+-*/()<>", *p)){
+        if(strchr("+-*/()<>;=", *p)){
             cur = new_token(TK_OPERAND, cur, p++, 1);
-            cur->len = 1;
+            continue;
+        }
+
+        if('a' <= *p && *p <= 'z'){
+            cur = new_token(TK_IDENT, cur, p++, 1);
             continue;
         }
 
@@ -84,6 +87,20 @@ bool tk_consume(char* op) {
         return false;
     token = token->next;
     return true;
+}
+
+Token* tk_consume_ident(){
+    if(token->kind != TK_IDENT){
+        return NULL;
+    }
+
+    Token* tok = token;
+    token = token->next;
+    return tok;
+}
+
+char* tk_getline(){
+    return token->str;
 }
 
 // local function ---------------------------------

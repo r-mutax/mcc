@@ -5,13 +5,16 @@
 /*
     EBNF :
 
-    expr = equality
+    program = stmt*
+    stmt = expr ';'
+    expr = assign
+    assign = equality ( '=' assign )?
     equality = relational ( '==' relational | '!=' relational)*
     relational = add ( '<' add | '<=' add | '>' add | '>=' add)*
     add = mul ( '+' mul | '-' mul )*
     mul = primary ( '*' unary | '/' unary )*
     unary = ('+' | '-')? primary
-    primary = num | '(' expr ')'
+    primary = num | ident | '(' expr ')'
     num = Integer.
 */
 
@@ -19,7 +22,10 @@
 // local function forward declaration. ------------
 static Node* new_node(NodeKind kind, Node* lhs, Node* rhs);
 static Node* new_node_num(int val);
+static Program* program();
+static Node* stmt();
 static Node* expr();
+static Node* assign();
 static Node* equality();
 static Node* relational();
 static Node* add();
@@ -28,12 +34,47 @@ static Node* primary();
 static Node* unary();
 
 // -----------------------------------------------
-Node* parser(){
-    return expr();
+Program* parser(){
+    return program();
+}
+
+Program* program(){
+    Program* prog = calloc(1, sizeof(Program));
+
+    Node  head;
+    Node* cur = &head;
+
+    while(!tk_iseof()){
+        cur->next = stmt();
+        cur = cur->next;
+    }
+
+    prog->body = head.next;
+}
+
+Node* stmt(){
+
+    char* p = tk_getline();
+
+    Node* node = expr();
+    tk_expect(";");
+
+    node->line = p;
+
+    return node;
 }
 
 Node* expr(){
-    return equality();
+    return assign();
+}
+
+Node* assign(){
+    Node* node = equality();
+
+    if(tk_consume("=")){
+        node = new_node(ND_ASSIGN, node, assign());
+    }
+    return node;
 }
 
 Node* equality(){
@@ -110,9 +151,19 @@ Node* unary(){
 
 Node* primary(){
     
+    // expr ?
     if(tk_consume("(")){
         Node* node = expr();
         tk_expect(")");
+        return node;
+    }
+
+    // ident ?
+    Token* tok = tk_consume_ident();
+    if(tok != NULL){
+        Node* node = calloc(1, sizeof(Node));
+        node->kind = ND_LVAR;
+        node->offset = (tok->str[0] - 'a' + 1) * 8;
         return node;
     }
 

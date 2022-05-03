@@ -3,5 +3,6 @@
 #include "node.h"
 
 void gen(Node* node);
+void gen_printline(char* p);
 
 #endif

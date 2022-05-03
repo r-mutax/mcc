@@ -11,18 +11,30 @@ typedef enum {
     ND_EQ,
     ND_NE,
     ND_LT,
-    ND_LE
+    ND_LE,
+    ND_ASSIGN,
+    ND_LVAR
 } NodeKind;
 
 typedef struct Node Node;
+typedef struct Program Program;
 
 struct Node {
     NodeKind    kind;
     Node*       lhs;
     Node*       rhs;
     int         val;
+    int         offset;
+
+    Node*       next;
+
+    char*       line;
+};
+
+struct Program {
+    Node*       body;
 };
 
 // function definition -------------------------------------
-Node* parser();
+Program* parser();
 #endif

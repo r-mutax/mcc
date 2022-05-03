@@ -17,10 +17,22 @@ int main(int argc, char **argv){
     printf(".globl main\n");
     printf("main:\n");
 
-    Node* exp = parser();
-    gen(exp);
+    // prologue
+    printf("  push rbp\n");
+    printf("  mov rbp, rsp\n");
+    printf("  sub rsp, 208\n");
 
-    printf("  pop rax\n");
+    Program* program = parser();
+    Node* cur = program->body;
+    while(cur){
+        gen_printline(cur->line);
+        gen(cur);
+        cur = cur->next;
+        printf("  pop rax\n");
+    }
+
+    printf("  mov rsp, rbp\n");
+    printf("  pop rbp\n");
     printf("  ret\n");
     return 0;
 }
