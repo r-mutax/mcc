@@ -36,4 +36,5 @@ assert 1 "4 <= 4;"
 assert 38 "abc=15;b=23;abc+b;"
 assert 5 "return 5; 4*5;"
 assert 3 "a = 0;while(a < 3) a = a + 1; return a;"
+assert 5 "a = 1; if(a == 1) return 5; return 4;"
 echo OK

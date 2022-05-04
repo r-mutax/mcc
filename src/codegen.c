@@ -4,6 +4,7 @@
 
 // grobal value -----------------------------------
 static int while_label = 0;
+static int if_label = 0;
 
 // local function forward declaration. ------------
 static void gen_lval(Node* node);
@@ -53,6 +54,15 @@ void gen(Node* node){
             printf("  jmp .LBegin%d\n", while_label);
             printf(".LEnd%d:\n", while_label);
             while_label++;
+            return;
+        case ND_IF:
+            gen(node->cond);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+            printf("  je .LIfEnd%d\n", if_label);
+            gen(node->body);            
+            printf(".LIfEnd%d:\n", if_label);
+            if_label++;
             return;
     }
 

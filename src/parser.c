@@ -11,6 +11,7 @@
     compound_stmt = '{' stmt* '}'
     stmt = expr ';'
             | 'return' expr ';'
+            | 'if' '(' expr ')' stmt
             | 'while' '(' expr ')' ( stmt )
     expr = assign
     assign = equality ( '=' assign )?
@@ -65,6 +66,15 @@ Node* stmt(){
     if(tk_consume_keyword("return")){
         node = new_node(ND_RETURN, expr(), NULL);
         tk_expect(";");
+        node->line = p;
+        return node;
+    } else if(tk_consume_keyword("if")) {
+        node = new_node(ND_IF, NULL, NULL);
+
+        tk_expect("(");
+        node->cond = expr();
+        tk_expect(")");
+        node->body = stmt();
         node->line = p;
         return node;
     } else if(tk_consume_keyword("while")) {
