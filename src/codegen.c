@@ -59,8 +59,21 @@ void gen(Node* node){
             gen(node->cond);
             printf("  pop rax\n");
             printf("  cmp rax, 0\n");
-            printf("  je .LIfEnd%d\n", if_label);
-            gen(node->body);            
+
+            if(node->else_body){
+                printf("  je .LIfElse%d\n", if_label);
+            } else {
+                printf("  je .LIfEnd%d\n", if_label);
+            }
+
+            // print true-body
+            gen(node->body);
+            printf("  jmp .LIfEnd%d\n", if_label);
+            
+            if(node->else_body){
+                printf(".LIfElse%d:\n", if_label);
+                gen(node->else_body);
+            }
             printf(".LIfEnd%d:\n", if_label);
             if_label++;
             return;

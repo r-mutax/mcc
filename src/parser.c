@@ -75,6 +75,10 @@ Node* stmt(){
         node->cond = expr();
         tk_expect(")");
         node->body = stmt();
+        if(tk_consume_keyword("else")){
+            node->else_body = stmt();
+        }
+
         node->line = p;
         return node;
     } else if(tk_consume_keyword("while")) {

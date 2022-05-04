@@ -28,11 +28,13 @@ struct Node {
     Node*       rhs;
     int         val;
     int         offset;
+    int a;
 
     Node*       next;
 
     Node*       cond;
     Node*       body;
+    Node*       else_body;
 
     char*       line;
 };
