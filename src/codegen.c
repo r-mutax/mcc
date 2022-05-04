@@ -2,6 +2,9 @@
 #include "codegen.h"
 #include "errormsg.h"
 
+// grobal value -----------------------------------
+static int while_label = 0;
+
 // local function forward declaration. ------------
 static void gen_lval(Node* node);
 void gen_epilogue(void);
@@ -34,6 +37,22 @@ void gen(Node* node){
             printf("  pop rax\n");
             printf("  mov [rax], rdi\n");
             printf("  push rdi\n");
+            return;
+        case ND_RETURN:
+            gen(node->lhs);
+            printf("  pop rax\n");
+            gen_epilogue();
+            return;
+        case ND_WHILE:
+            printf(".LBegin%d:\n", while_label);
+            gen(node->cond);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+            printf("  je .LEnd%d\n", while_label);
+            gen(node->body);
+            printf("  jmp .LBegin%d\n", while_label);
+            printf(".LEnd%d:\n", while_label);
+            while_label++;
             return;
     }
 

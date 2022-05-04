@@ -2,13 +2,16 @@
 #include "node.h"
 #include "tokenize.h"
 #include "symtbl.h"
+#include "errormsg.h"
 
 /*
     EBNF :
 
     program = stmt*
+    compound_stmt = '{' stmt* '}'
     stmt = expr ';'
             | 'return' expr ';'
+            | 'while' '(' expr ')' ( stmt )
     expr = assign
     assign = equality ( '=' assign )?
     equality = relational ( '==' relational | '!=' relational)*
@@ -61,14 +64,27 @@ Node* stmt(){
     Node* node = NULL;
     if(tk_consume_keyword("return")){
         node = new_node(ND_RETURN, expr(), NULL);
+        tk_expect(";");
+        node->line = p;
+        return node;
+    } else if(tk_consume_keyword("while")) {
+        node = new_node(ND_WHILE, NULL, NULL);
+        
+        tk_expect("(");
+        node->cond = expr();
+        tk_expect(")");
+        node->body = stmt();
+        node->line = p;
+        return node;
     } else {
         node = expr();
+        tk_expect(";");
+        node->line = p;
+        return node;
     }
 
-    tk_expect(";");
-    node->line = p;
-
-    return node;
+    error("Expect Statement but get another node.\n");
+    return NULL;
 }
 
 Node* expr(){

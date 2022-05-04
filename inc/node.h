@@ -14,7 +14,8 @@ typedef enum {
     ND_LE,
     ND_ASSIGN,
     ND_LVAR,
-    ND_RETURN
+    ND_RETURN,
+    ND_WHILE
 } NodeKind;
 
 typedef struct Node Node;
@@ -28,6 +29,9 @@ struct Node {
     int         offset;
 
     Node*       next;
+
+    Node*       cond;
+    Node*       body;
 
     char*       line;
 };

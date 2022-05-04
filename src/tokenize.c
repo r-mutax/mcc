@@ -41,7 +41,8 @@ Token* tk_tokenize(char* p){
             continue;
         }
 
-        if(check_keyword("return", &p, &cur)){
+        if(check_keyword("return", &p, &cur)
+            || check_keyword("while", &p, &cur)){
             continue;
         }
 
@@ -155,7 +156,7 @@ bool is_ident2(char p){
 
 bool is_keyword(char* lhs, char* rhs){
 
-    if(memcmp(lhs, rhs, 6) == 0 && !is_ident2(lhs[strlen(rhs)])){
+    if(memcmp(lhs, rhs, strlen(rhs)) == 0 && !is_ident2(lhs[strlen(rhs)])){
         return true;
     }
     return false;
