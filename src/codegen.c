@@ -3,18 +3,18 @@
 #include "errormsg.h"
 
 // local function forward declaration. ------------
-static void gen_lval(Node* node){
-    if(node->kind != ND_LVAR){
-        error("expect local variable, but get another node.");
-    }
-
-    printf("  mov rax, rbp\n");
-    printf("  sub rax, %d\n", node->offset);
-    printf("  push rax\n");
-}
+static void gen_lval(Node* node);
+void gen_epilogue(void);
 
 // generate code with 
 void gen(Node* node){
+
+    if(node->kind == ND_RETURN){
+        gen(node->lhs);
+        printf("  pop rax\n");
+        gen_epilogue();
+        return;
+    }
 
     switch(node->kind){
         case ND_NUM:
@@ -97,3 +97,21 @@ void gen_printline(char* p){
     printf("# %s\n", line);
     free(line);
 }
+
+void gen_epilogue(void){
+    printf("  mov rsp, rbp\n");
+    printf("  pop rbp\n");
+    printf("  ret\n");
+}
+
+// local function ---------------------------------
+static void gen_lval(Node* node){
+    if(node->kind != ND_LVAR){
+        error("expect local variable, but get another node.");
+    }
+
+    printf("  mov rax, rbp\n");
+    printf("  sub rax, %d\n", node->offset);
+    printf("  push rax\n");
+}
+

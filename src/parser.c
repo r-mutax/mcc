@@ -8,6 +8,7 @@
 
     program = stmt*
     stmt = expr ';'
+            | 'return' expr ';'
     expr = assign
     assign = equality ( '=' assign )?
     equality = relational ( '==' relational | '!=' relational)*
@@ -57,9 +58,14 @@ Node* stmt(){
 
     char* p = tk_getline();
 
-    Node* node = expr();
-    tk_expect(";");
+    Node* node = NULL;
+    if(tk_consume_keyword("return")){
+        node = new_node(ND_RETURN, expr(), NULL);
+    } else {
+        node = expr();
+    }
 
+    tk_expect(";");
     node->line = p;
 
     return node;

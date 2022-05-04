@@ -9,7 +9,8 @@ static Token* new_token(TokenKind kind, Token* cur, char* str, int len);
 static bool startswith(char* lhs, char* rhs);
 static bool is_ident1(char p);
 static bool is_ident2(char p);
-
+static bool is_keyword(char* lhs, char* rhs);
+static bool check_keyword(char* keyword, char** p, Token** tok);
 // -----------------------------------------------
 Token* tk_tokenize(char* p){
 
@@ -37,6 +38,10 @@ Token* tk_tokenize(char* p){
 
         if(strchr("+-*/()<>;=", *p)){
             cur = new_token(TK_OPERAND, cur, p++, 1);
+            continue;
+        }
+
+        if(check_keyword("return", &p, &cur)){
             continue;
         }
 
@@ -116,6 +121,16 @@ char* tk_getline(){
     return token->str;
 }
 
+bool tk_consume_keyword(char* keyword){
+    if(token->kind != TK_KEYWORD
+        || token->len != strlen(keyword)
+        || memcmp(keyword, token->str, token->len)){
+        return false;
+    }
+    token = token->next;
+    return true;
+}
+
 // local function ---------------------------------
 Token* new_token(TokenKind kind, Token* cur, char* str, int len){
     Token* tok = calloc(1, sizeof(Token));
@@ -136,4 +151,26 @@ bool is_ident1(char p){
 
 bool is_ident2(char p){
     return is_ident1(p) || isdigit(p);
+}
+
+bool is_keyword(char* lhs, char* rhs){
+
+    if(memcmp(lhs, rhs, 6) == 0 && !is_ident2(lhs[strlen(rhs)])){
+        return true;
+    }
+    return false;
+}
+
+// Check next token is keyword.
+// Then add TK_KEYWORD token, and return true;
+bool check_keyword(char* keyword, char** p, Token** tok){
+
+    if (is_keyword(*p, keyword)){
+        int len = strlen(keyword);
+        *tok = new_token(TK_KEYWORD, *tok, *p, len);
+        *p += len;
+        return true;
+    }
+
+    return false;
 }

@@ -31,8 +31,6 @@ int main(int argc, char **argv){
         printf("  pop rax\n");
     }
 
-    printf("  mov rsp, rbp\n");
-    printf("  pop rbp\n");
-    printf("  ret\n");
+    gen_epilogue();
     return 0;
 }

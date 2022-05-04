@@ -6,6 +6,7 @@ typedef enum {
     TK_OPERAND = 0,
     TK_NUM,
     TK_IDENT,
+    TK_KEYWORD,
     TK_EOF
 } TokenKind;
 
@@ -27,4 +28,5 @@ int     tk_expect_num();
 bool    tk_consume(char* p);
 Token*  tk_consume_ident();
 char*   tk_getline();
+bool    tk_consume_keyword(char* keyword);
 #endif

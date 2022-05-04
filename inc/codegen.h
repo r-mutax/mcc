@@ -4,5 +4,5 @@
 
 void gen(Node* node);
 void gen_printline(char* p);
-
+void gen_epilogue(void);
 #endif
