@@ -11,7 +11,7 @@
     compound_stmt = '{' stmt* '}'
     stmt = expr ';'
             | 'return' expr ';'
-            | 'if' '(' expr ')' stmt
+            | 'if' '(' expr ')' stmt 
             | 'while' '(' expr ')' ( stmt )
     expr = assign
     assign = equality ( '=' assign )?
@@ -29,6 +29,7 @@
 static Node* new_node(NodeKind kind, Node* lhs, Node* rhs);
 static Node* new_node_num(int val);
 static Program* program();
+static Node* compound_stmt();
 static Node* stmt();
 static Node* expr();
 static Node* assign();
@@ -58,7 +59,31 @@ Program* program(){
     prog->body = head.next;
 }
 
+Node* compound_stmt(){
+    if(!tk_consume("{")){
+        return NULL;
+    }
+
+    Node* node = new_node(ND_CMPDSTMT, NULL, NULL);
+    Node head;
+    Node* cur = &head; 
+
+    while(!tk_consume("}") && cur){
+        cur->next = stmt();
+        cur = cur->next;
+    }
+
+    node->body = head.next;
+    return node;
+}
+
 Node* stmt(){
+
+    Node* cmpdstmt = compound_stmt();
+    if(cmpdstmt){
+        return cmpdstmt;
+    }
+
 
     char* p = tk_getline();
 

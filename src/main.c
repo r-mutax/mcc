@@ -24,12 +24,7 @@ int main(int argc, char **argv){
 
     Program* program = parser();
     Node* cur = program->body;
-    while(cur){
-        gen_printline(cur->line);
-        gen(cur);
-        cur = cur->next;
-        printf("  pop rax\n");
-    }
+    gen_compound_stmt(cur);
 
     gen_epilogue();
     return 0;

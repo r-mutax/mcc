@@ -8,17 +8,70 @@ static int if_label = 0;
 
 // local function forward declaration. ------------
 static void gen_lval(Node* node);
-void gen_epilogue(void);
+static void gen_stmt(Node* node);
+
+void gen_compound_stmt(Node* node){
+    Node* cur = node;
+    while(cur){
+        gen_printline(cur->line);
+        gen_stmt(cur);
+        cur = cur->next;
+        printf("  pop rax\n");
+    }
+}
+
+void gen_stmt(Node* node){
+
+    switch(node->kind){
+        case ND_RETURN:
+            gen(node->lhs);
+            printf("  pop rax\n");
+            gen_epilogue();
+            return;
+        case ND_WHILE:
+            printf(".LBegin%d:\n", while_label);
+            gen(node->cond);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+            printf("  je .LEnd%d\n", while_label);
+            gen_stmt(node->body);
+            printf("  jmp .LBegin%d\n", while_label);
+            printf(".LEnd%d:\n", while_label);
+            while_label++;
+            return;
+        case ND_IF:
+            gen(node->cond);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+
+            if(node->else_body){
+                printf("  je .LIfElse%d\n", if_label);
+            } else {
+                printf("  je .LIfEnd%d\n", if_label);
+            }
+
+            // print true-body
+            gen_stmt(node->body);
+            printf("  jmp .LIfEnd%d\n", if_label);
+            
+            if(node->else_body){
+                printf(".LIfElse%d:\n", if_label);
+                gen_stmt(node->else_body);
+            }
+            printf(".LIfEnd%d:\n", if_label);
+            if_label++;
+            return;
+        case ND_CMPDSTMT:
+            gen_compound_stmt(node->body);
+            return;
+        default:
+            gen(node);
+            return;
+    }
+}
 
 // generate code with 
 void gen(Node* node){
-
-    if(node->kind == ND_RETURN){
-        gen(node->lhs);
-        printf("  pop rax\n");
-        gen_epilogue();
-        return;
-    }
 
     switch(node->kind){
         case ND_NUM:
@@ -38,44 +91,6 @@ void gen(Node* node){
             printf("  pop rax\n");
             printf("  mov [rax], rdi\n");
             printf("  push rdi\n");
-            return;
-        case ND_RETURN:
-            gen(node->lhs);
-            printf("  pop rax\n");
-            gen_epilogue();
-            return;
-        case ND_WHILE:
-            printf(".LBegin%d:\n", while_label);
-            gen(node->cond);
-            printf("  pop rax\n");
-            printf("  cmp rax, 0\n");
-            printf("  je .LEnd%d\n", while_label);
-            gen(node->body);
-            printf("  jmp .LBegin%d\n", while_label);
-            printf(".LEnd%d:\n", while_label);
-            while_label++;
-            return;
-        case ND_IF:
-            gen(node->cond);
-            printf("  pop rax\n");
-            printf("  cmp rax, 0\n");
-
-            if(node->else_body){
-                printf("  je .LIfElse%d\n", if_label);
-            } else {
-                printf("  je .LIfEnd%d\n", if_label);
-            }
-
-            // print true-body
-            gen(node->body);
-            printf("  jmp .LIfEnd%d\n", if_label);
-            
-            if(node->else_body){
-                printf(".LIfElse%d:\n", if_label);
-                gen(node->else_body);
-            }
-            printf(".LIfEnd%d:\n", if_label);
-            if_label++;
             return;
     }
 
