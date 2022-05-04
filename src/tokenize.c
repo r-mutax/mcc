@@ -5,8 +5,10 @@
 Token* token;
 
 // local function forward definition. ------------
-Token* new_token(TokenKind kind, Token* cur, char* str, int len);
-bool startswith(char* lhs, char* rhs);
+static Token* new_token(TokenKind kind, Token* cur, char* str, int len);
+static bool startswith(char* lhs, char* rhs);
+static bool is_ident1(char p);
+static bool is_ident2(char p);
 
 // -----------------------------------------------
 Token* tk_tokenize(char* p){
@@ -35,6 +37,17 @@ Token* tk_tokenize(char* p){
 
         if(strchr("+-*/()<>;=", *p)){
             cur = new_token(TK_OPERAND, cur, p++, 1);
+            continue;
+        }
+
+        if(is_ident1(*p)){
+            char* start = p;
+            p++;
+            while(is_ident2(*p)){
+                p++;
+            }
+
+            cur = new_token(TK_IDENT, cur, start, p - start);
             continue;
         }
 
@@ -115,4 +128,12 @@ Token* new_token(TokenKind kind, Token* cur, char* str, int len){
 
 bool startswith(char* lhs, char* rhs){
     return memcmp(lhs, rhs, strlen(rhs)) == 0;
+}
+
+bool is_ident1(char p){
+    return isalpha(p) || p == '_';
+}
+
+bool is_ident2(char p){
+    return is_ident1(p) || isdigit(p);
 }

@@ -1,6 +1,7 @@
 #include "mcc.h"
 #include "node.h"
 #include "tokenize.h"
+#include "symtbl.h"
 
 /*
     EBNF :
@@ -161,9 +162,16 @@ Node* primary(){
     // ident ?
     Token* tok = tk_consume_ident();
     if(tok != NULL){
+
+        Symbol* sym = st_find_symbol(tok);
+        if(sym == NULL){
+            st_declare(tok);
+            sym = st_find_symbol(tok);
+        }
+
         Node* node = calloc(1, sizeof(Node));
         node->kind = ND_LVAR;
-        node->offset = (tok->str[0] - 'a' + 1) * 8;
+        node->offset = sym->offset;
         return node;
     }
 

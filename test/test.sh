@@ -33,5 +33,5 @@ assert 1 "4 >= 4;"
 assert 1 "5 >= 4;"
 assert 1 "4 < 5;"
 assert 1 "4 <= 4;"
-assert 38 "a=15;b=23;a+b;"
+assert 38 "abc=15;b=23;abc+b;"
 echo OK
