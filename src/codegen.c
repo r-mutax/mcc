@@ -101,6 +101,15 @@ void gen(Node* node){
             printf("  mov rax, [rax]\n");
             printf("  push rax\n");
             return;
+        case ND_CALL:
+            {
+                char* fname = calloc(node->len, sizeof(char));
+                strncpy(fname, node->func_name, node->len);
+                printf("  call %s\n", fname);
+                free(fname);
+                printf("  push rax\n");
+                return ;
+            }
         case ND_ASSIGN:
             gen_lval(node->lhs);
             gen(node->rhs);

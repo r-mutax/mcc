@@ -4,7 +4,7 @@ assert() {
   input="$2"
 
   ./bin/mcc "$input" > ./test/tmp.s
-  cc -o ./test/tmp ./test/tmp.s
+  cc -o ./test/tmp ./test/tmp.s ./test/test_func/foo.o
   ./test/tmp
   actual="$?"
 
@@ -39,5 +39,6 @@ assert 3 "a = 0;while(a < 3) a = a + 1; return a;"
 assert 5 "a = 1; if(a == 1) return 5; return 4;"
 assert 3 "a=0; if(4 < 5) a = 2; else a = 3; return 3;"
 assert 6 "a = 3; if(0 < 6) {a = 1; a = a + 5;} return a;"
-assert 4 "a = 0; b = 0; for(a = 1; a < 5; a = a + 1){b = b + 1;} return b; "
+assert 4 "a = 0; b = 0; for(a = 1; a < 5; a = a + 1){b = b + 1;} return b;"
+assert 5 "return foo();"
 echo OK

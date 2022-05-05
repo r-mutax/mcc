@@ -18,7 +18,8 @@ typedef enum {
     ND_IF,
     ND_WHILE,
     ND_CMPDSTMT,
-    ND_FOR
+    ND_FOR,
+    ND_CALL
 } NodeKind;
 
 typedef struct Node Node;
@@ -38,6 +39,9 @@ struct Node {
     Node*       init;
     Node*       iter;
     Node*       else_body;
+
+    char*       func_name;
+    int         len;
 
     char*       line;
 };

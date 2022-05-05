@@ -20,7 +20,9 @@
     add = mul ( '+' mul | '-' mul )*
     mul = primary ( '*' unary | '/' unary )*
     unary = ('+' | '-')? primary
-    primary = num | ident | '(' expr ')'
+    primary = num
+             | ident ( '(' ')' )?
+             | '(' expr ')'
     num = Integer.
 */
 
@@ -237,17 +239,25 @@ Node* primary(){
     // ident ?
     Token* tok = tk_consume_ident();
     if(tok != NULL){
+        if (tk_consume("(")){
+            Node* node = calloc(1, sizeof(Node));
+            node->kind = ND_CALL;
+            node->func_name = tok->str;
+            node->len = tok->len;
+            tk_expect(")");
+            return node;
+        } else {
+            Symbol* sym = st_find_symbol(tok);
+            if(sym == NULL){
+                st_declare(tok);
+                sym = st_find_symbol(tok);
+            }
 
-        Symbol* sym = st_find_symbol(tok);
-        if(sym == NULL){
-            st_declare(tok);
-            sym = st_find_symbol(tok);
+            Node* node = calloc(1, sizeof(Node));
+            node->kind = ND_LVAR;
+            node->offset = sym->offset;
+            return node;
         }
-
-        Node* node = calloc(1, sizeof(Node));
-        node->kind = ND_LVAR;
-        node->offset = sym->offset;
-        return node;
     }
 
     Node* node = new_node_num(tk_expect_num());
