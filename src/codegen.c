@@ -6,6 +6,7 @@
 static int while_label = 0;
 static int if_label = 0;
 static int for_label = 0;
+static const char *argreg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 // local function forward declaration. ------------
 static void gen_lval(Node* node);
@@ -103,8 +104,20 @@ void gen(Node* node){
             return;
         case ND_CALL:
             {
+                // get funcname
                 char* fname = calloc(node->len, sizeof(char));
                 strncpy(fname, node->func_name, node->len);
+
+                int nargs = 0;
+                for(Node* cur = node->arg; cur; cur = cur->next){
+                    gen(cur);
+                    nargs++;
+                }
+
+                for(; nargs > 0; nargs--){
+                    printf("  pop %s\n", argreg[nargs - 1]);
+                }
+
                 printf("  call %s\n", fname);
                 free(fname);
                 printf("  push rax\n");

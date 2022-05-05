@@ -41,4 +41,5 @@ assert 3 "a=0; if(4 < 5) a = 2; else a = 3; return 3;"
 assert 6 "a = 3; if(0 < 6) {a = 1; a = a + 5;} return a;"
 assert 4 "a = 0; b = 0; for(a = 1; a < 5; a = a + 1){b = b + 1;} return b;"
 assert 5 "return foo();"
+assert 15 "return add(7, 8);"
 echo OK

@@ -21,7 +21,7 @@
     mul = primary ( '*' unary | '/' unary )*
     unary = ('+' | '-')? primary
     primary = num
-             | ident ( '(' ')' )?
+             | ident ( '(' expr? ( ',' expr )* ')' )?
              | '(' expr ')'
     num = Integer.
 */
@@ -244,8 +244,22 @@ Node* primary(){
             node->kind = ND_CALL;
             node->func_name = tok->str;
             node->len = tok->len;
-            tk_expect(")");
-            return node;
+
+            // has arguments?
+            if(!tk_consume(")")){
+                Node* arg_head = expr();
+                Node* cur = arg_head;
+
+                while(tk_consume(",")){
+                    cur->next = expr();
+                    cur = cur->next;
+                }
+                node->arg = arg_head;
+                tk_expect(")");
+                return node;
+            } else {
+                return node;
+            }
         } else {
             Symbol* sym = st_find_symbol(tok);
             if(sym == NULL){

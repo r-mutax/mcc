@@ -42,6 +42,7 @@ struct Node {
 
     char*       func_name;
     int         len;
+    Node*       arg;
 
     char*       line;
 };
