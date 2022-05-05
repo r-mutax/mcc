@@ -17,7 +17,8 @@ typedef enum {
     ND_RETURN,
     ND_IF,
     ND_WHILE,
-    ND_CMPDSTMT
+    ND_CMPDSTMT,
+    ND_FOR
 } NodeKind;
 
 typedef struct Node Node;
@@ -34,6 +35,8 @@ struct Node {
 
     Node*       cond;
     Node*       body;
+    Node*       init;
+    Node*       iter;
     Node*       else_body;
 
     char*       line;

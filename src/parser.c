@@ -115,6 +115,20 @@ Node* stmt(){
         node->body = stmt();
         node->line = p;
         return node;
+    } else if(tk_consume_keyword("for")) {
+        node = new_node(ND_FOR, NULL, NULL);
+
+        tk_expect("(");
+        node->init = expr();
+        tk_expect(";");
+        node->cond = expr();
+        tk_expect(";");
+        node->iter = expr();
+        tk_expect(")");
+
+        node->body = stmt();
+        node->line = p;
+        return node;
     } else {
         node = expr();
         tk_expect(";");

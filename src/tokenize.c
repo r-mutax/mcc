@@ -44,6 +44,7 @@ Token* tk_tokenize(char* p){
         if(check_keyword("return", &p, &cur)
             || check_keyword("if", &p, &cur)
             || check_keyword("else", &p, &cur)
+            || check_keyword("for", &p, &cur)
             || check_keyword("while", &p, &cur)){
             continue;
         }
