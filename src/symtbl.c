@@ -1,7 +1,14 @@
 #include "mcc.h"
 #include "symtbl.h"
 
-Scope       func_scope;
+Scope       grobal_scope;
+Scope*      cur_scope;
+int         scope_level = 0;
+
+
+void st_init(){
+    cur_scope = &grobal_scope;
+}
 
 void st_declare(Token* tok){
 
@@ -11,22 +18,48 @@ void st_declare(Token* tok){
     sym->len = tok->len;
 
     // add stack size.
-    func_scope.stacksize += 8;
+    cur_scope->stacksize += 8;
 
-    sym->offset = func_scope.stacksize;
+    sym->offset = cur_scope->stacksize;
 
     // chain symbol to current scope.
-    sym->next = func_scope.symbol;
-    func_scope.symbol = sym;
+    sym->next = cur_scope->symbol;
+    cur_scope->symbol = sym;
 }
 
 Symbol* st_find_symbol(Token* tok){
 
-    for(Symbol* sym = func_scope.symbol; sym; sym = sym->next){
-        if(sym->len == tok->len 
-            && memcmp(sym->name, tok->str, sym->len) == 0){
-            return sym;
+    for(Scope* scp = cur_scope; scp; scp = scp->parent){
+        for(Symbol* sym = scp->symbol; sym; sym = sym->next){
+            if(sym->len == tok->len
+                && memcmp(sym->name, tok->str, sym->len) == 0){
+                    return sym;
+            }
         }
     }
+
     return NULL;
+}
+
+void st_start_scope(){
+    Scope* scp = calloc(1, sizeof(Scope));
+
+    scp->parent = cur_scope;
+    cur_scope->child = scp;
+
+    scope_level++;
+    if(scope_level == 1){
+        scp->kind = SC_FUNCTION;
+    } else if(scope_level >= 2){
+        scp->kind = SC_BLOCK;
+    }
+
+    cur_scope = scp;
+}
+
+void st_end_scope(){
+    Scope* scp = cur_scope;
+    cur_scope = cur_scope->parent;
+    scope_level--;
+    free(scp);
 }

@@ -44,6 +44,9 @@ static Node* unary();
 
 // -----------------------------------------------
 Program* parser(){
+
+    st_init();
+    
     return program();
 }
 
@@ -53,10 +56,12 @@ Program* program(){
     Node  head;
     Node* cur = &head;
 
+    st_start_scope();
     while(!tk_iseof()){
         cur->next = stmt();
         cur = cur->next;
     }
+    st_end_scope();
 
     prog->body = head.next;
 }
@@ -70,11 +75,14 @@ Node* compound_stmt(){
     Node head;
     Node* cur = &head; 
 
+    // start block scope. -->
+    st_start_scope();
     while(!tk_consume("}") && cur){
         cur->next = stmt();
         cur = cur->next;
     }
-
+    st_end_scope();
+    // end block scope <--
     node->body = head.next;
     return node;
 }
