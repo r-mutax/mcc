@@ -32,5 +32,6 @@ void st_declare(Token* tok);
 Symbol* st_find_symbol(Token* tok);
 void st_start_scope();
 void st_end_scope();
+int st_get_stacksize();
 
 #endif

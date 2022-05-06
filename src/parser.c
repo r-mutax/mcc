@@ -8,6 +8,7 @@
     EBNF :
 
     program = stmt*
+    function = ident '(' ( ident ( ',' ident )* )? ')' compound_stmt
     compound_stmt = '{' stmt* '}'
     stmt = expr ';'
             | 'return' expr ';'
@@ -31,6 +32,7 @@
 static Node* new_node(NodeKind kind, Node* lhs, Node* rhs);
 static Node* new_node_num(int val);
 static Program* program();
+static Function* function();
 static Node* compound_stmt();
 static Node* stmt();
 static Node* expr();
@@ -53,17 +55,57 @@ Program* parser(){
 Program* program(){
     Program* prog = calloc(1, sizeof(Program));
 
-    Node  head;
-    Node* cur = &head;
+    Function head;
+    Function* cur = &head;
 
-    st_start_scope();
     while(!tk_iseof()){
-        cur->next = stmt();
+        cur->next = function();
         cur = cur->next;
     }
+
+    prog->func_list = head.next;
+}
+
+static Function* function(){
+    
+    Function* func = calloc(1, sizeof(Function));
+
+    Token* tok = tk_expect_ident();
+    func->name = tok->str;
+    func->len = tok->len;
+    
+    st_start_scope();
+
+    tk_expect("(");
+
+    if(!tk_consume(")")){
+        // this function has parameter.
+        Token* ident_tok = tk_expect_ident();
+        Symbol* sym = st_find_symbol(ident_tok);
+        if(!sym){
+            st_declare(ident_tok);
+            sym = st_find_symbol(ident_tok);
+        }
+        func->param = sym;
+
+        while(tk_consume(",")){
+            ident_tok = tk_expect_ident();
+            sym->next = st_find_symbol(ident_tok);
+            if(!sym->next){
+                st_declare(ident_tok);
+                sym->next = st_find_symbol(ident_tok);
+            }
+            sym = sym->next;
+        }
+        tk_expect(")");
+    }
+
+    func->body = compound_stmt();
+
+    func->stack_size = st_get_stacksize();
     st_end_scope();
 
-    prog->body = head.next;
+    return func;
 }
 
 Node* compound_stmt(){
@@ -89,13 +131,13 @@ Node* compound_stmt(){
 
 Node* stmt(){
 
+    char* p = tk_getline();
+
     Node* cmpdstmt = compound_stmt();
     if(cmpdstmt){
+        cmpdstmt->line = p;
         return cmpdstmt;
     }
-
-
-    char* p = tk_getline();
 
     Node* node = NULL;
     if(tk_consume_keyword("return")){

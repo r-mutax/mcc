@@ -13,19 +13,9 @@ int main(int argc, char **argv){
     error_init(argv[1]);
     tk_tokenize(argv[1]);
 
-    printf(".intel_syntax noprefix\n");
-    printf(".globl main\n");
-    printf("main:\n");
-
-    // prologue
-    printf("  push rbp\n");
-    printf("  mov rbp, rsp\n");
-    printf("  sub rsp, 208\n");
 
     Program* program = parser();
-    Node* cur = program->body;
-    gen_compound_stmt(cur);
+    gen_program(program);
 
-    gen_epilogue();
     return 0;
 }

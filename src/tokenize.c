@@ -121,6 +121,16 @@ Token* tk_consume_ident(){
     return tok;
 }
 
+Token*  tk_expect_ident(){
+    if(token->kind != TK_IDENT){
+        error_at(token->str, "Expect Identifier, but get another token.\n");
+    }
+
+    Token* tok = token;
+    token = token->next;
+    return tok;
+}
+
 char* tk_getline(){
     return token->str;
 }

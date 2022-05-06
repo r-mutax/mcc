@@ -11,6 +11,39 @@ static const char *argreg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 // local function forward declaration. ------------
 static void gen_lval(Node* node);
 static void gen_stmt(Node* node);
+static void gen_function(Function* func);
+
+void gen_program(Program* prog){
+
+    printf(".intel_syntax noprefix\n");
+    printf(".globl main\n");
+
+    Function* cur = prog->func_list;
+    while(cur){
+        gen_function(cur);
+        cur = cur->next;
+    }
+}
+
+void gen_function(Function* func){
+
+    char* func_name = calloc(1, sizeof(char) * func->len);
+    strncpy(func_name, func->name, func->len);
+    printf("%s:\n", func_name);
+
+    // prologue
+    printf("  push rbp\n");
+    printf("  mov rbp, rsp\n");
+
+    // alloc local variable area.
+    int size = func->stack_size;
+    size = ((size + 16) / 16) * 16;
+    printf("  sub rsp, %d\n", size);
+
+    gen_compound_stmt(func->body->body);
+
+    gen_epilogue();
+}
 
 void gen_compound_stmt(Node* node){
     Node* cur = node;

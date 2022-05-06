@@ -24,9 +24,10 @@ struct Token {
 Token*  tk_tokenize(char* p);
 bool    tk_iseof();
 void    tk_expect(char* p);
-int     tk_expect_num(); 
+int     tk_expect_num();
 bool    tk_consume(char* p);
 Token*  tk_consume_ident();
+Token*  tk_expect_ident();
 char*   tk_getline();
 bool    tk_consume_keyword(char* keyword);
 #endif

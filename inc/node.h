@@ -1,5 +1,6 @@
 #ifndef NODE_INC_H
 #define NODE_INC_H
+#include "symtbl.h"
 
 // parser data definition ----------------------------------
 typedef enum {
@@ -24,6 +25,7 @@ typedef enum {
 
 typedef struct Node Node;
 typedef struct Program Program;
+typedef struct Function Function;
 
 struct Node {
     NodeKind    kind;
@@ -47,8 +49,19 @@ struct Node {
     char*       line;
 };
 
-struct Program {
+struct Function {
+    char*       name;
+    int         len;
+    Symbol*     param;
+    int         stack_size;
+
     Node*       body;
+
+    Function*   next;
+};
+
+struct Program {
+    Function*   func_list;
 };
 
 // function definition -------------------------------------

@@ -3,6 +3,7 @@
 
 Scope       grobal_scope;
 Scope*      cur_scope;
+Scope*      func_scope;
 int         scope_level = 0;
 
 
@@ -18,9 +19,9 @@ void st_declare(Token* tok){
     sym->len = tok->len;
 
     // add stack size.
-    cur_scope->stacksize += 8;
+    func_scope->stacksize += 8;
 
-    sym->offset = cur_scope->stacksize;
+    sym->offset = func_scope->stacksize;
 
     // chain symbol to current scope.
     sym->next = cur_scope->symbol;
@@ -50,6 +51,7 @@ void st_start_scope(){
     scope_level++;
     if(scope_level == 1){
         scp->kind = SC_FUNCTION;
+        func_scope = scp;
     } else if(scope_level >= 2){
         scp->kind = SC_BLOCK;
     }
@@ -61,5 +63,15 @@ void st_end_scope(){
     Scope* scp = cur_scope;
     cur_scope = cur_scope->parent;
     scope_level--;
+    
+    if(scope_level == 0){
+        // When end of Function Scope, reset func_scope.
+        func_scope = NULL; 
+    }
+
     free(scp);
+}
+
+int st_get_stacksize(){
+    return func_scope->stacksize;
 }
