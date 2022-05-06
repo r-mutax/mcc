@@ -20,7 +20,7 @@
     relational = add ( '<' add | '<=' add | '>' add | '>=' add)*
     add = mul ( '+' mul | '-' mul | '%' mul )*
     mul = primary ( '*' unary | '/' unary )*
-    unary = ('+' | '-')? primary
+    unary = ('+' | '-')? primary | ( '*' | '/' ) primary
     primary = num
              | ident ( '(' expr? ( ',' expr )* ')' )?
              | '(' expr ')'
@@ -274,6 +274,10 @@ Node* unary(){
         return primary();
     } else if(tk_consume("-")){
         return new_node(ND_SUB, new_node_num(0), primary());
+    } else if(tk_consume("&")){
+        return new_node(ND_ADDR, primary(), NULL);
+    } else if(tk_consume("*")){
+        return new_node(ND_DREF, primary(), NULL);
     } else {
         return primary();
     }

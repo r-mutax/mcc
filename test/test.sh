@@ -45,4 +45,5 @@ assert 15 "main(){return add(7, 8);}"
 assert 5 "foo(){return 5;} main(){return foo();}"
 assert 2 "main(){return 12 % 5;}"
 assert 3 "main(){return 5 % 2 + 12 % 5;}"
+assert 6 "main(){ a = 5; b = &a; *b = 3; return a + *b; }"
 echo OK
