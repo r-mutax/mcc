@@ -43,4 +43,6 @@ assert 4 "main(){a = 0; b = 0; for(a = 1; a < 5; a = a + 1){b = b + 1;} return b
 assert 5 "main(){return foo();}"
 assert 15 "main(){return add(7, 8);}"
 assert 5 "foo(){return 5;} main(){return foo();}"
+assert 2 "main(){return 12 % 5;}"
+assert 3 "main(){return 5 % 2 + 12 % 5;}"
 echo OK
