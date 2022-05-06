@@ -51,12 +51,15 @@ void gen_compound_stmt(Node* node){
         gen_printline(cur->line);
         gen_stmt(cur);
         cur = cur->next;
-        printf("  pop rax\n");
     }
 }
 
 void gen_stmt(Node* node){
 
+    /* 
+        [CAUTION]
+            When end of stmt, aligment stack address to 16byte.
+    */
     switch(node->kind){
         case ND_RETURN:
             gen(node->lhs);
@@ -76,6 +79,7 @@ void gen_stmt(Node* node){
             return;
         case ND_FOR:
             gen(node->init);
+            printf("  pop rax\n");
             printf(".LBeginFor%d:\n", for_label);
             gen(node->cond);
             printf("  pop rax\n");
@@ -83,6 +87,7 @@ void gen_stmt(Node* node){
             printf("  je .LEndFor%d\n", for_label);
             gen_stmt(node->body);
             gen(node->iter);
+            printf("  pop rax\n");
             printf("  jmp .LBeginFor%d\n", for_label);
             printf(".LEndFor%d:\n", for_label);
             for_label++;
@@ -114,6 +119,7 @@ void gen_stmt(Node* node){
             return;
         default:
             gen(node);
+            printf("  pop rax\n");
             return;
     }
 }
