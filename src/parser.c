@@ -155,8 +155,13 @@ Node* declare(){
 
     Node* node = new_node(ND_DECLARE, NULL, NULL);
     if(tk_consume_keyword("long")){
-        Token* tok = tk_expect_ident();
         Type* ty = ty_get_type("long", 4);
+        while(tk_consume("*")){
+            ty = ty_pointer_to(ty);
+        }
+
+        Token* tok = tk_expect_ident();
+
         
         Symbol* sym = st_declare(tok, ty);
         node->offset = sym->offset;
@@ -362,6 +367,7 @@ Node* primary(){
             Node* node = calloc(1, sizeof(Node));
             node->kind = ND_LVAR;
             node->offset = sym->offset;
+            node->type = sym->type;
             return node;
         }
     }

@@ -35,6 +35,20 @@ Type* ty_get_type(char* type_name, int len){
     return NULL;
 }
 
+Type* ty_pointer_to(Type* base_type){
+    if(base_type->pointer_from){
+        return base_type->pointer_from;
+    }
+
+    Type* type = calloc(1, sizeof(Type));
+
+    type->kind = TY_POINTER;
+    type->pointer_to = base_type;
+    base_type->pointer_from = type;
+
+    return type;
+}
+
 void ty_add_type(Node* node){
 
     if(node == NULL || node->type){
@@ -65,6 +79,16 @@ void ty_add_type(Node* node){
         case ND_LT:
         case ND_LE:
             node->type = ty_get_type("long", 4);
+            break;
+        case ND_ADDR:
+            node->type = ty_pointer_to(node->lhs->type);
+            break;
+        case ND_DREF:
+            if(node->lhs->type->kind == TY_POINTER){
+                node->type = node->lhs->type->pointer_to;
+            } else {
+                node->type = ty_get_type("long", 4);
+            }
             break;
     }
 }

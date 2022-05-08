@@ -107,16 +107,17 @@ struct Symbol{
 // type data definition --------------------------
 
 typedef enum {
-    TY_INTEGER = 0
+    TY_INTEGER = 0,
+    TY_POINTER
 } TypeKind;
 
 struct Type {
-    Type*       next;
-
-    TypeKind    kind;
-
     char*       name;
     int         len;
+    Type*       next;
+    TypeKind    kind;
+    Type*       pointer_from;
+    Type*       pointer_to;
 
     int     size;
 };

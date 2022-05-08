@@ -47,4 +47,5 @@ assert 2 "long main(){return 12 % 5;}"
 assert 3 "long main(){return 5 % 2 + 12 % 5;}"
 assert 6 "long main(){ long a; long b;a = 5; b = &a; *b = 3; return a + *b; }"
 assert 15 "long foo(long a, long b){return a+b;} long main(){return foo(3 , 12);}"
+assert 5 "long main(){ long a; long *b; b = &a; *b = 5; return a;}"
 echo OK
