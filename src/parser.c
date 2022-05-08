@@ -37,7 +37,7 @@ static Node* new_node_num(int val);
 static Program* program();
 static Function* function();
 static Node* compound_stmt();
-static void declare();
+static Node* declare();
 static Type* declspec();
 static Node* stmt();
 static Node* expr();
@@ -76,6 +76,8 @@ static Function* function(){
     
     Function* func = calloc(1, sizeof(Function));
 
+    func->ret_type = tk_expect_type();
+
     Token* tok = tk_expect_ident();
     func->name = tok->str;
     func->len = tok->len;
@@ -93,7 +95,10 @@ static Function* function(){
         Type* ty = tk_consume_type();
         Token* ident_tok = tk_expect_ident();
         Symbol* sym = st_declare(ident_tok, ty);
-        func->param = sym;
+        Node* param = new_node(ND_DECLARE, NULL, NULL);
+        param->offset = sym->offset;
+        func->param = param;
+        func->paramnum++;
 
         while(tk_consume(",")){
 
@@ -103,8 +108,11 @@ static Function* function(){
 
             ty = tk_consume_type();
             ident_tok = tk_expect_ident();
-            sym->next = st_declare(ident_tok, ty);
-            sym = sym->next;
+            sym = st_declare(ident_tok, ty);
+            param->next = new_node(ND_DECLARE, NULL, NULL);
+            param->next->offset = sym->offset;
+            func->paramnum++;
+            param = param->next;    
         }
         tk_expect(")");
     }
@@ -130,11 +138,11 @@ Node* compound_stmt(){
     st_start_scope();
     while(!tk_consume("}") && cur){
         if(tk_istype()){
-            declare();
+            cur->next = declare();
         } else {
             cur->next = stmt();
-            cur = cur->next;
         }
+        cur = cur->next;
     }
     st_end_scope();
     // end block scope <--
@@ -142,16 +150,19 @@ Node* compound_stmt(){
     return node;
 }
 
-void declare(){
+Node* declare(){
 
+    Node* node = new_node(ND_DECLARE, NULL, NULL);
     if(tk_consume_keyword("long")){
         Token* tok = tk_expect_ident();
         Type* ty = ty_get_type("long", 4);
         
-        st_declare(tok, ty);
+        Symbol* sym = st_declare(tok, ty);
+        node->offset = sym->offset;
     }
 
     tk_expect(";");
+    return node;
 }
 
 Node* stmt(){

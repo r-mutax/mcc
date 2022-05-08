@@ -160,6 +160,17 @@ Type* tk_consume_type(){
     return ty;
 }
 
+Type* tk_expect_type(){
+    Type* ty = ty_get_type(token->str, token->len);
+    if(ty == NULL){
+        error_at(token->str, "Expect type.\n");
+    }
+    
+    token = token->next;
+    
+    return ty;
+}
+
 // local function ---------------------------------
 Token* new_token(TokenKind kind, Token* cur, char* str, int len){
     Token* tok = calloc(1, sizeof(Token));

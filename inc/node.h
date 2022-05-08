@@ -23,7 +23,8 @@ typedef enum {
     ND_WHILE,
     ND_CMPDSTMT,
     ND_FOR,
-    ND_CALL
+    ND_CALL,
+    ND_DECLARE
 } NodeKind;
 
 typedef struct Node Node;
@@ -55,11 +56,12 @@ struct Node {
 struct Function {
     char*       name;
     int         len;
-    Symbol*     param;
     int         stack_size;
+    Type*       ret_type;
 
     Node*       body;
-
+    Node*       param;
+    int         paramnum;
     Function*   next;
 };
 

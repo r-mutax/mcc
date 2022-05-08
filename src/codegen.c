@@ -40,6 +40,13 @@ void gen_function(Function* func){
     size = ((size + 16) / 16) * 16;
     printf("  sub rsp, %d\n", size);
 
+    // move arguments register to stack.
+    Node* param = func->param;
+    for(int argn = 0; argn < func->paramnum; argn++){
+        printf("  mov [rbp - %d],%s\n", param->offset, argreg[argn]);
+        param = param->next;
+    }
+
     gen_compound_stmt(func->body->body);
 
     gen_epilogue();
@@ -48,8 +55,10 @@ void gen_function(Function* func){
 void gen_compound_stmt(Node* node){
     Node* cur = node;
     while(cur){
-        gen_printline(cur->line);
-        gen_stmt(cur);
+        if(cur->kind != ND_DECLARE){
+            gen_printline(cur->line);
+            gen_stmt(cur);            
+        }
         cur = cur->next;
     }
 }

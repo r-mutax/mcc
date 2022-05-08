@@ -29,6 +29,7 @@ bool    tk_consume(char* p);
 Token*  tk_consume_ident();
 Token*  tk_expect_ident();
 Type*  tk_consume_type();
+Type*  tk_expect_type();
 char*   tk_getline();
 bool    tk_consume_keyword(char* keyword);
 bool tk_istype();
