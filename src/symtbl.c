@@ -11,21 +11,24 @@ void st_init(){
     cur_scope = &grobal_scope;
 }
 
-void st_declare(Token* tok){
+Symbol* st_declare(Token* tok, Type* ty){
 
     Symbol* sym = calloc(1, sizeof(Symbol));
 
     sym->name = tok->str;
     sym->len = tok->len;
+    sym->type = ty;
 
     // add stack size.
-    func_scope->stacksize += 8;
+    func_scope->stacksize += ty->size;
 
     sym->offset = func_scope->stacksize;
 
     // chain symbol to current scope.
     sym->next = cur_scope->symbol;
     cur_scope->symbol = sym;
+
+    return sym;
 }
 
 Symbol* st_find_symbol(Token* tok){

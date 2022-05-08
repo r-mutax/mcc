@@ -1,6 +1,6 @@
 #ifndef TOKENIZE_INC_H
 #define TOKENIZE_INC_H
-
+#include "type.h"
 // token data definition --------------------------
 typedef enum {
     TK_OPERAND = 0,
@@ -28,6 +28,8 @@ int     tk_expect_num();
 bool    tk_consume(char* p);
 Token*  tk_consume_ident();
 Token*  tk_expect_ident();
+Type*  tk_consume_type();
 char*   tk_getline();
 bool    tk_consume_keyword(char* keyword);
+bool tk_istype();
 #endif

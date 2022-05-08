@@ -2,6 +2,7 @@
 #include "node.h"
 #include "tokenize.h"
 #include "symtbl.h"
+#include "type.h"
 #include "errormsg.h"
 
 /*
@@ -9,11 +10,13 @@
 
     program = stmt*
     function = ident '(' ( ident ( ',' ident )* )? ')' compound_stmt
-    compound_stmt = '{' stmt* '}'
+    compound_stmt = '{' ( stmt | declare )* '}'
     stmt = expr ';'
             | 'return' expr ';'
             | 'if' '(' expr ')' stmt 
             | 'while' '(' expr ')' ( stmt )
+    declare = declspec ident ';'
+    declspec = 'long'
     expr = assign
     assign = equality ( '=' assign )?
     equality = relational ( '==' relational | '!=' relational)*
@@ -34,6 +37,8 @@ static Node* new_node_num(int val);
 static Program* program();
 static Function* function();
 static Node* compound_stmt();
+static void declare();
+static Type* declspec();
 static Node* stmt();
 static Node* expr();
 static Node* assign();
@@ -48,6 +53,7 @@ static Node* unary();
 Program* parser(){
 
     st_init();
+    ty_init();
     
     return program();
 }
@@ -80,21 +86,24 @@ static Function* function(){
 
     if(!tk_consume(")")){
         // this function has parameter.
-        Token* ident_tok = tk_expect_ident();
-        Symbol* sym = st_find_symbol(ident_tok);
-        if(!sym){
-            st_declare(ident_tok);
-            sym = st_find_symbol(ident_tok);
+        if(!tk_istype()){
+            error("not a type.\n");
         }
+
+        Type* ty = tk_consume_type();
+        Token* ident_tok = tk_expect_ident();
+        Symbol* sym = st_declare(ident_tok, ty);
         func->param = sym;
 
         while(tk_consume(",")){
-            ident_tok = tk_expect_ident();
-            sym->next = st_find_symbol(ident_tok);
-            if(!sym->next){
-                st_declare(ident_tok);
-                sym->next = st_find_symbol(ident_tok);
+
+            if(!tk_istype()){
+                error("not a type.\n");
             }
+
+            ty = tk_consume_type();
+            ident_tok = tk_expect_ident();
+            sym->next = st_declare(ident_tok, ty);
             sym = sym->next;
         }
         tk_expect(")");
@@ -120,13 +129,29 @@ Node* compound_stmt(){
     // start block scope. -->
     st_start_scope();
     while(!tk_consume("}") && cur){
-        cur->next = stmt();
-        cur = cur->next;
+        if(tk_istype()){
+            declare();
+        } else {
+            cur->next = stmt();
+            cur = cur->next;
+        }
     }
     st_end_scope();
     // end block scope <--
     node->body = head.next;
     return node;
+}
+
+void declare(){
+
+    if(tk_consume_keyword("long")){
+        Token* tok = tk_expect_ident();
+        Type* ty = ty_get_type("long", 4);
+        
+        st_declare(tok, ty);
+    }
+
+    tk_expect(";");
 }
 
 Node* stmt(){
@@ -319,8 +344,7 @@ Node* primary(){
         } else {
             Symbol* sym = st_find_symbol(tok);
             if(sym == NULL){
-                st_declare(tok);
-                sym = st_find_symbol(tok);
+                error_at(tok->str, "%s is not declared.\n", tok->str);
             }
 
             Node* node = calloc(1, sizeof(Node));

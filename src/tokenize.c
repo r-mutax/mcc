@@ -1,5 +1,6 @@
 #include "mcc.h"
 #include "tokenize.h"
+#include "type.h"
 #include "errormsg.h"
 
 Token* token;
@@ -45,7 +46,8 @@ Token* tk_tokenize(char* p){
             || check_keyword("if", &p, &cur)
             || check_keyword("else", &p, &cur)
             || check_keyword("for", &p, &cur)
-            || check_keyword("while", &p, &cur)){
+            || check_keyword("while", &p, &cur)
+            || check_keyword("long", &p, &cur)){
             continue;
         }
 
@@ -143,6 +145,19 @@ bool tk_consume_keyword(char* keyword){
     }
     token = token->next;
     return true;
+}
+
+bool tk_istype(){
+    Type* ty = ty_get_type(token->str, token->len);
+    return ty != NULL;
+}
+
+Type* tk_consume_type(){
+    Type* ty = ty_get_type(token->str, token->len);
+    
+    if(ty != NULL)
+        token = token->next;
+    return ty;
 }
 
 // local function ---------------------------------
