@@ -1,24 +1,6 @@
 #ifndef TOKENIZE_INC_H
 #define TOKENIZE_INC_H
-#include "type.h"
-// token data definition --------------------------
-typedef enum {
-    TK_OPERAND = 0,
-    TK_NUM,
-    TK_IDENT,
-    TK_KEYWORD,
-    TK_EOF
-} TokenKind;
-
-typedef struct Token Token;
-
-struct Token { 
-    TokenKind   kind;
-    Token*      next;
-    int         val;
-    char*       str;
-    int         len;
-};
+#include "mcc.h"
 
 // function definition ----------------------------
 Token*  tk_tokenize(char* p);

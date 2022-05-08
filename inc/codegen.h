@@ -1,6 +1,6 @@
 #ifndef CODEGEN_INC_H
 #define CODEGEN_INC_H
-#include "node.h"
+#include "mcc.h"
 
 void gen_compound_stmt(Node* node);
 void gen(Node* node);

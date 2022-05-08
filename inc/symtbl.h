@@ -1,9 +1,7 @@
 #ifndef SYMTBL_INC_H
 #define SYMTBL_INC_H
-#include "tokenize.h"
-#include "type.h"
+#include "mcc.h"
 
-typedef struct Symbol Symbol;
 typedef struct Scope Scope;
 
 typedef enum {
@@ -11,15 +9,6 @@ typedef enum {
     SC_FUNCTION,
     SC_BLOCK
 } ScopeKind;
-
-
-struct Symbol{
-    Symbol*     next;
-    char*       name;
-    int         len;
-    int         offset;
-    Type*       type;
-};
 
 struct Scope{
     ScopeKind   kind;
