@@ -9,7 +9,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:extension.vscode-wsl-workspaceFolder}/bin/mcc",
-            "args": ["foo(long a, long b){long c;return a + b;}main(){return foo(3 , 12);}"],
+            "args": ["long foo(long a, long b){long c;return a + b;}long main(){return foo(3 , 12);}"],
             "stopAtEntry": false,
             "cwd": "${command:extension.vscode-wsl-workspaceFolder}/bin",
             "environment": [],

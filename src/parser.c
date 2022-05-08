@@ -118,6 +118,7 @@ static Function* function(){
     }
 
     func->body = compound_stmt();
+    ty_add_type(func->body);
 
     func->stack_size = st_get_stacksize();
     st_end_scope();

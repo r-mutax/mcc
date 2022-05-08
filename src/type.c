@@ -34,3 +34,37 @@ Type* ty_get_type(char* type_name, int len){
     }
     return NULL;
 }
+
+void ty_add_type(Node* node){
+
+    if(node == NULL || node->type){
+        return;
+    }
+
+    ty_add_type(node->lhs);
+    ty_add_type(node->rhs);
+    ty_add_type(node->cond);
+    ty_add_type(node->body);
+    ty_add_type(node->init);
+    ty_add_type(node->iter);
+    ty_add_type(node->else_body);
+    ty_add_type(node->next);
+    ty_add_type(node->arg);
+
+    switch(node->kind){
+        case ND_ADD:
+        case ND_SUB:
+        case ND_MUL:
+        case ND_DIV:
+        case ND_MOD:
+        case ND_ASSIGN:
+            node->type = node->lhs->type;
+            break;
+        case ND_EQ:
+        case ND_NE:
+        case ND_LT:
+        case ND_LE:
+            node->type = ty_get_type("long", 4);
+            break;
+    }
+}

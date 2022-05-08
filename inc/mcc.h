@@ -62,6 +62,7 @@ struct Node {
     Node*       rhs;
     int         val;
     int         offset;
+    Type*       type;
 
     Node*       next;
 
