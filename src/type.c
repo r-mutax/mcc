@@ -78,6 +78,7 @@ void ty_add_type(Node* node){
         case ND_NE:
         case ND_LT:
         case ND_LE:
+        case ND_NUM:
             node->type = ty_get_type("long", 4);
             break;
         case ND_ADDR:

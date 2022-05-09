@@ -34,6 +34,7 @@
 // local function forward declaration. ------------
 static Node* new_node(NodeKind kind, Node* lhs, Node* rhs);
 static Node* new_node_num(int val);
+static Node* new_node_add(Node* lhs, Node* rhs);
 static Program* program();
 static Function* function();
 static Node* compound_stmt();
@@ -285,7 +286,7 @@ Node* add(){
 
     for(;;){
         if(tk_consume("+")){
-            node = new_node(ND_ADD, node, mul());
+            node = new_node_add(node, mul());
         } else if(tk_consume("-")){
             node = new_node(ND_SUB, node, mul());
         } else {
@@ -391,5 +392,44 @@ Node* new_node_num(int val){
 
     node->kind = ND_NUM;
     node->val = val;
+    return node;
+}
+
+static Node* new_node_add(Node* lhs, Node* rhs){
+
+    ty_add_type(lhs);
+    ty_add_type(rhs);
+
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_ADD;
+
+    // num + num
+    if(!lhs->type->pointer_to
+        && !rhs->type->pointer_to){
+            node->lhs = lhs;
+            node->rhs = rhs;
+            return node;
+        }
+
+    // pointer + pointer
+    if(lhs->type->pointer_to && rhs->type->pointer_to){
+        error("Try add pointer and pointer.");
+    }
+
+    // pointer + num
+    if(!lhs->type->pointer_to && rhs->type->pointer_to){
+        Node* buf = lhs;
+        lhs = rhs;
+        rhs = lhs;
+    }
+
+    Node* node_mul = calloc(1, sizeof(Node));
+    node_mul->kind = ND_MUL;
+    node_mul->lhs = rhs;
+    node_mul->rhs = new_node_num(8);
+
+    node->lhs = lhs;
+    node->rhs = node_mul;
+
     return node;
 }
