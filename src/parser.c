@@ -35,6 +35,7 @@
 static Node* new_node(NodeKind kind, Node* lhs, Node* rhs);
 static Node* new_node_num(int val);
 static Node* new_node_add(Node* lhs, Node* rhs);
+static Node* new_node_sub(Node* lhs, Node* rhs);
 static Program* program();
 static Function* function();
 static Node* compound_stmt();
@@ -288,7 +289,7 @@ static Node* add(){
         if(tk_consume("+")){
             node = new_node_add(node, mul());
         } else if(tk_consume("-")){
-            node = new_node(ND_SUB, node, mul());
+            node = new_node_sub(node, mul());
         } else {
             return node;
         }
@@ -426,7 +427,7 @@ static Node* new_node_add(Node* lhs, Node* rhs){
     Node* node_mul = calloc(1, sizeof(Node));
     node_mul->kind = ND_MUL;
     node_mul->lhs = rhs;
-    node_mul->rhs = new_node_num(8);
+    node_mul->rhs = new_node_num(lhs->type->pointer_to->size);
 
     node->lhs = lhs;
     node->rhs = node_mul;
@@ -434,3 +435,37 @@ static Node* new_node_add(Node* lhs, Node* rhs){
     return node;
 }
 
+static Node* new_node_sub(Node* lhs, Node* rhs){
+    
+    ty_add_type(lhs);
+    ty_add_type(rhs);
+
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_SUB;
+
+    // num - num
+    if(!lhs->type->pointer_to && !rhs->type->pointer_to){
+        node->lhs = lhs;
+        node->rhs = rhs;
+        return node;
+    }
+
+    // pointer - pointer
+    // num - pointer
+    if(rhs->type->pointer_to){
+        error("Try subtraction pointer\n");
+    }
+
+    // pointer - num
+    if(lhs->type->pointer_to && !rhs->type->pointer_to){
+        Node* node_mul = calloc(1, sizeof(Node));
+        node_mul->kind = ND_MUL;
+        node_mul->lhs = rhs;
+        node_mul->rhs = new_node_num(lhs->type->pointer_to->size);
+
+        node->lhs = lhs;
+        node->rhs = node_mul;
+
+        return node;
+    }
+}

@@ -44,6 +44,7 @@ Type* ty_pointer_to(Type* base_type){
 
     type->kind = TY_POINTER;
     type->pointer_to = base_type;
+    type->size = 8;
     base_type->pointer_from = type;
 
     return type;
