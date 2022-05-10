@@ -314,7 +314,11 @@ static Node* mul(){
 
 static Node* unary(){
     
-    if(tk_consume("+")){
+    if(tk_consume_keyword("sizeof")){
+        Node* node = unary();
+        ty_add_type(node);
+        return new_node_num(node->type->size);
+    } else if(tk_consume("+")){
         return primary();
     } else if(tk_consume("-")){
         return new_node(ND_SUB, new_node_num(0), primary());

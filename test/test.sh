@@ -50,4 +50,5 @@ assert 15 "long foo(long a, long b){return a+b;} long main(){return foo(3 , 12);
 assert 5 "long main(){ long a; long *b; b = &a; *b = 5; return a;}"
 assert 2 "long main(){ long* a; tmalloc(&a); return *(a + 1);}"
 assert 3 "long main(){ long* a; tmalloc(&a); long* b; b = a + 3; return *(b - 1);}"
+assert 8 "long main(){ long a; return sizeof (a) ;}"
 echo OK
