@@ -12,6 +12,10 @@ static const char *argreg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 static void gen_lval(Node* node);
 static void gen_stmt(Node* node);
 static void gen_function(Function* func);
+static void gen_compound_stmt(Node* node);
+static void gen_printline(char* p);
+static void gen_epilogue(void);
+static void gen(Node* node);
 
 void gen_program(Program* prog){
 
@@ -25,7 +29,7 @@ void gen_program(Program* prog){
     }
 }
 
-void gen_function(Function* func){
+static void gen_function(Function* func){
 
     char* func_name = calloc(1, sizeof(char) * func->len);
     strncpy(func_name, func->name, func->len);
@@ -52,7 +56,7 @@ void gen_function(Function* func){
     gen_epilogue();
 }
 
-void gen_compound_stmt(Node* node){
+static void gen_compound_stmt(Node* node){
     Node* cur = node;
     while(cur){
         if(cur->kind != ND_DECLARE){
@@ -63,7 +67,7 @@ void gen_compound_stmt(Node* node){
     }
 }
 
-void gen_stmt(Node* node){
+static void gen_stmt(Node* node){
 
     /* 
         [CAUTION]
@@ -134,7 +138,7 @@ void gen_stmt(Node* node){
 }
 
 // generate code with 
-void gen(Node* node){
+static void gen(Node* node){
 
     if(node == NULL){
         return;
@@ -247,7 +251,7 @@ void gen(Node* node){
     return;
 }
 
-void gen_printline(char* p){
+static void gen_printline(char* p){
 
     char* pos = strchr(p, ';');
     char* line = calloc(pos - p + 1, sizeof(char));
@@ -257,7 +261,7 @@ void gen_printline(char* p){
     free(line);
 }
 
-void gen_epilogue(void){
+static void gen_epilogue(void){
     printf("  mov rsp, rbp\n");
     printf("  pop rbp\n");
     printf("  ret\n");

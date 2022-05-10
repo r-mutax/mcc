@@ -59,7 +59,7 @@ Program* parser(){
     return program();
 }
 
-Program* program(){
+static Program* program(){
     Program* prog = calloc(1, sizeof(Program));
 
     Function head;
@@ -127,7 +127,7 @@ static Function* function(){
     return func;
 }
 
-Node* compound_stmt(){
+static Node* compound_stmt(){
     if(!tk_consume("{")){
         return NULL;
     }
@@ -152,7 +152,7 @@ Node* compound_stmt(){
     return node;
 }
 
-Node* declare(){
+static Node* declare(){
 
     Node* node = new_node(ND_DECLARE, NULL, NULL);
     if(tk_consume_keyword("long")){
@@ -172,7 +172,7 @@ Node* declare(){
     return node;
 }
 
-Node* stmt(){
+static Node* stmt(){
 
     char* p = tk_getline();
 
@@ -235,11 +235,11 @@ Node* stmt(){
     return NULL;
 }
 
-Node* expr(){
+static Node* expr(){
     return assign();
 }
 
-Node* assign(){
+static Node* assign(){
     Node* node = equality();
 
     if(tk_consume("=")){
@@ -248,7 +248,7 @@ Node* assign(){
     return node;
 }
 
-Node* equality(){
+static Node* equality(){
     Node* node = relational();
 
     for(;;){
@@ -262,7 +262,7 @@ Node* equality(){
     }
 }
 
-Node* relational(){
+static Node* relational(){
     Node* node = add();
 
     for(;;){
@@ -281,7 +281,7 @@ Node* relational(){
 }
 
 
-Node* add(){
+static Node* add(){
     Node* node = mul();
 
     for(;;){
@@ -295,7 +295,7 @@ Node* add(){
     }
 }
 
-Node* mul(){
+static Node* mul(){
     Node* node = unary();
     
     for(;;){
@@ -311,7 +311,7 @@ Node* mul(){
     }
 }
 
-Node* unary(){
+static Node* unary(){
     
     if(tk_consume("+")){
         return primary();
@@ -326,7 +326,7 @@ Node* unary(){
     }
 }
 
-Node* primary(){
+static Node* primary(){
     
     // expr ?
     if(tk_consume("(")){
@@ -378,7 +378,7 @@ Node* primary(){
 }
 
 // local function definition ----------------------
-Node* new_node(NodeKind kind, Node* lhs, Node* rhs){
+static Node* new_node(NodeKind kind, Node* lhs, Node* rhs){
     Node* node = calloc(1, sizeof(Node));
 
     node->kind = kind;
@@ -387,7 +387,7 @@ Node* new_node(NodeKind kind, Node* lhs, Node* rhs){
     return node;
 }
 
-Node* new_node_num(int val){
+static Node* new_node_num(int val){
     Node* node = calloc(1, sizeof(Node));
 
     node->kind = ND_NUM;
@@ -433,3 +433,4 @@ static Node* new_node_add(Node* lhs, Node* rhs){
 
     return node;
 }
+

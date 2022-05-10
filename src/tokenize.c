@@ -172,7 +172,7 @@ Type* tk_expect_type(){
 }
 
 // local function ---------------------------------
-Token* new_token(TokenKind kind, Token* cur, char* str, int len){
+static Token* new_token(TokenKind kind, Token* cur, char* str, int len){
     Token* tok = calloc(1, sizeof(Token));
     tok->kind = kind;
     tok->str = str;
@@ -181,19 +181,19 @@ Token* new_token(TokenKind kind, Token* cur, char* str, int len){
     return tok;
 }
 
-bool startswith(char* lhs, char* rhs){
+static bool startswith(char* lhs, char* rhs){
     return memcmp(lhs, rhs, strlen(rhs)) == 0;
 }
 
-bool is_ident1(char p){
+static bool is_ident1(char p){
     return isalpha(p) || p == '_';
 }
 
-bool is_ident2(char p){
+static bool is_ident2(char p){
     return is_ident1(p) || isdigit(p);
 }
 
-bool is_keyword(char* lhs, char* rhs){
+static bool is_keyword(char* lhs, char* rhs){
 
     if(memcmp(lhs, rhs, strlen(rhs)) == 0 && !is_ident2(lhs[strlen(rhs)])){
         return true;
@@ -203,7 +203,7 @@ bool is_keyword(char* lhs, char* rhs){
 
 // Check next token is keyword.
 // Then add TK_KEYWORD token, and return true;
-bool check_keyword(char* keyword, char** p, Token** tok){
+static bool check_keyword(char* keyword, char** p, Token** tok){
 
     if (is_keyword(*p, keyword)){
         int len = strlen(keyword);
