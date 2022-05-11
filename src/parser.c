@@ -156,18 +156,24 @@ static Node* compound_stmt(){
 static Node* declare(){
 
     Node* node = new_node(ND_DECLARE, NULL, NULL);
+    Type* ty;
     if(tk_consume_keyword("long")){
-        Type* ty = ty_get_type("long", 4);
-        while(tk_consume("*")){
-            ty = ty_pointer_to(ty);
-        }
-
-        Token* tok = tk_expect_ident();
-
-        
-        Symbol* sym = st_declare(tok, ty);
-        node->offset = sym->offset;
+        ty = ty_get_type("long", 4);
     }
+
+    while(tk_consume("*")){
+        ty = ty_pointer_to(ty);
+    }
+    Token* tok = tk_expect_ident();
+
+    if(tk_consume("[")){
+        int len = tk_expect_num();
+        ty = ty_array_of(ty, len);
+        tk_expect("]");
+    }
+
+    Symbol* sym = st_declare(tok, ty);
+    node->offset = sym->offset;
 
     tk_expect(";");
     return node;
@@ -374,6 +380,14 @@ static Node* primary(){
             node->kind = ND_LVAR;
             node->offset = sym->offset;
             node->type = sym->type;
+
+            if(tk_consume("[")){
+                // array
+                Node* node_deref = new_node(ND_DREF, new_node_add(node, expr()), NULL);
+                tk_expect("]");
+                return node_deref;
+            }
+
             return node;
         }
     }

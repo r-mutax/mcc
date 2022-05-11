@@ -10,7 +10,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:extension.vscode-wsl-workspaceFolder}/bin/mcc",
-            "args": ["long main(){ long* a; tmalloc(&a); long* b; b = a + 3; return *(b - 1);}"],
+            "args": ["long main(){ long a[10]; a[3] = 3;return a[3];}"],
             "stopAtEntry": false,
             "cwd": "${command:extension.vscode-wsl-workspaceFolder}/bin",
             "environment": [],

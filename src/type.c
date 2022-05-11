@@ -26,6 +26,20 @@ Type* ty_register_type(char* type_name, int type_size, TypeKind type_kind){
     }
 }
 
+// In mcc Compiler type system,
+// different length array is different type.
+Type* ty_array_of(Type* base_type, int array_len){
+
+    Type* ty = calloc(1, sizeof(Type));
+
+    ty->kind = TY_ARRAY;
+    ty->size = base_type->size;
+    ty->array_len = array_len;
+    ty->pointer_to = base_type;
+
+    return ty;
+}
+
 Type* ty_get_type(char* type_name, int len){
     for(Type* cur = type_head; cur; cur = cur->next){
         if(cur->len == len && memcmp(cur->name, type_name, len) == 0){

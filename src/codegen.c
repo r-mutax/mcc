@@ -41,7 +41,7 @@ static void gen_function(Function* func){
 
     // alloc local variable area.
     int size = func->stack_size;
-    size = ((size + 16) / 16) * 16;
+    size = ((size + 15) / 16) * 16;
     printf("  sub rsp, %d\n", size);
 
     // move arguments register to stack.
@@ -150,9 +150,11 @@ static void gen(Node* node){
             return;
         case ND_LVAR:
             gen_lval(node);
-            printf("  pop rax\n");
-            printf("  mov rax, [rax]\n");
-            printf("  push rax\n");
+            if(node->type->kind != TY_ARRAY){
+                printf("  pop rax\n");
+                printf("  mov rax, [rax]\n");
+                printf("  push rax\n");
+            }
             return;
         case ND_CALL:
             {

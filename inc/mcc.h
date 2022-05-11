@@ -108,7 +108,8 @@ struct Symbol{
 
 typedef enum {
     TY_INTEGER = 0,
-    TY_POINTER
+    TY_POINTER,
+    TY_ARRAY
 } TypeKind;
 
 struct Type {
@@ -118,6 +119,8 @@ struct Type {
     TypeKind    kind;
     Type*       pointer_from;
     Type*       pointer_to;
+    
+    int         array_len;
 
     int     size;
 };

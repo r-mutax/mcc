@@ -20,7 +20,11 @@ Symbol* st_declare(Token* tok, Type* ty){
     sym->type = ty;
 
     // add stack size.
-    func_scope->stacksize += ty->size;
+    if(ty->kind == TY_ARRAY){
+        func_scope->stacksize += ty->size * ty->array_len;
+    } else {
+        func_scope->stacksize += ty->size;
+    }
 
     sym->offset = func_scope->stacksize;
 

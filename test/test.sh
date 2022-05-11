@@ -51,4 +51,8 @@ assert 5 "long main(){ long a; long *b; b = &a; *b = 5; return a;}"
 assert 2 "long main(){ long* a; tmalloc(&a); return *(a + 1);}"
 assert 3 "long main(){ long* a; tmalloc(&a); long* b; b = a + 3; return *(b - 1);}"
 assert 8 "long main(){ long a; return sizeof (a) ;}"
+assert 3 'long main(){long p[3]; p[0] = 3; p[1] = 2; long *q; q = p + 1; return p[0];}'
+assert 123 'long main(){long a[10]; a[0] = 3; a[1] = 4; a[1+2*2] = 123; return a[5];}'
+assert 4 'long main(){long a[10]; a[0] = 3; a[1] = 4; return a[1];}'
+assert 4 'long main(){long a[10]; *a = 3; *(a + 1) = 4; return *(a + 1);}'
 echo OK
