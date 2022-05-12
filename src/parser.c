@@ -8,15 +8,17 @@
 /*
     EBNF :
 
-    program = stmt*
-    function = ident '(' ( ident ( ',' ident )* )? ')' compound_stmt
+    program = ( function | declaration )*
+    function = declspec ident '(' ( ident ( ',' ident )* )? ')' compound_stmt
     compound_stmt = '{' ( stmt | declare )* '}'
     stmt = expr ';'
             | 'return' expr ';'
             | 'if' '(' expr ')' stmt 
             | 'while' '(' expr ')' ( stmt )
-    declare = declspec ident ';'
-    declspec = 'long'
+    declaration = decl_spec* declarator ";"
+    decl_spec = type_spec
+    type_spec = "long"
+    declarator = '*' * ( ident | ident '[' num ']') 
     expr = assign
     assign = equality ( '=' assign )?
     equality = relational ( '==' relational | '!=' relational)*
@@ -39,8 +41,10 @@ static Node* new_node_sub(Node* lhs, Node* rhs);
 static Program* program();
 static Function* function();
 static Node* compound_stmt();
-static Node* declare();
+static Node* declaration();
 static Type* declspec();
+static Type* type_spec();
+static Symbol* declare(Type* ty);
 static Node* stmt();
 static Node* expr();
 static Node* assign();
@@ -141,7 +145,7 @@ static Node* compound_stmt(){
     st_start_scope();
     while(!tk_consume("}") && cur){
         if(tk_istype()){
-            cur->next = declare();
+            cur->next = declaration();
         } else {
             cur->next = stmt();
         }
@@ -153,17 +157,40 @@ static Node* compound_stmt(){
     return node;
 }
 
-static Node* declare(){
-
-    Node* node = new_node(ND_DECLARE, NULL, NULL);
-    Type* ty;
+static Type* type_spec(){
     if(tk_consume_keyword("long")){
-        ty = ty_get_type("long", 4);
+        return ty_get_type("long", 4);
     }
 
+    return NULL;
+}
+
+static Type* decl_spec(){
+    
+    Type* ty = type_spec();
+    if(ty == NULL){
+        error("expect type.\n");
+    }
+
+    return ty;
+}
+
+static Node* declaration(){
+    Type* ty = decl_spec();
+    Symbol* sym = declare(ty);
+
+    Node* node = new_node(ND_DECLARE, NULL, NULL);
+    node->offset = sym->offset;
+
+    tk_expect(";");
+    return node;
+}
+
+static Symbol* declare(Type* ty){
     while(tk_consume("*")){
         ty = ty_pointer_to(ty);
     }
+
     Token* tok = tk_expect_ident();
 
     if(tk_consume("[")){
@@ -173,10 +200,7 @@ static Node* declare(){
     }
 
     Symbol* sym = st_declare(tok, ty);
-    node->offset = sym->offset;
-
-    tk_expect(";");
-    return node;
+    return sym;
 }
 
 static Node* stmt(){
