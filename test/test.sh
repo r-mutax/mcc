@@ -4,7 +4,7 @@ assert() {
   input="$2"
 
   ./bin/mcc "$input" > ./test/tmp.s
-  cc -static -o ./test/tmp  -no-pie ./test/tmp.s ./test/test_func/foo.o
+  cc -static -o ./test/tmp ./test/tmp.s ./test/test_func/foo.o
   ./test/tmp
   actual="$?"
 
@@ -41,11 +41,11 @@ assert 6 "long main(){long a;a = 3; if(0 < 6) {a = 1; a = a + 5;} return a;}"
 assert 4 "long main(){long a; long b;a = 0; b = 0; for(a = 1; a < 5; a = a + 1){b = b + 1;} return b;}"
 assert 5 "long foo();long main(){return foo();}"
 assert 15 "long add();long main(){return add(7, 8);}"
-assert 5 "long foo(){return 5;} long main(){return foo();}"
+assert 5 "long footest(){return 5;} long main(){return footest();}"
 assert 2 "long main(){return 12 % 5;}"
 assert 3 "long main(){return 5 % 2 + 12 % 5;}"
 assert 6 "long main(){ long a; long b;a = 5; b = &a; *b = 3; return a + *b; }"
-assert 15 "long foo(long a, long b){return a+b;} long main(){return foo(3 , 12);}"
+assert 15 "long footest(long a, long b){return a+b;} long main(){return footest(3 , 12);}"
 assert 5 "long main(){ long a; long *b; b = &a; *b = 5; return a;}"
 assert 2 "long tmalloc();long main(){ long* a; tmalloc(&a); return *(a + 1);}"
 assert 3 "long tmalloc();long main(){ long* a; tmalloc(&a); long* b; b = a + 3; return *(b - 1);}"

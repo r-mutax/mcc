@@ -95,7 +95,6 @@ struct Program {
 struct Symbol{
     Symbol*     next;
     char*       name;
-    int         len;
     int         offset;
     bool        is_func;
     bool        is_grobalvar;

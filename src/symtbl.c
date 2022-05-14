@@ -15,8 +15,8 @@ Symbol* st_declare(Token* tok, Type* ty){
 
     Symbol* sym = calloc(1, sizeof(Symbol));
 
-    sym->name = tok->str;
-    sym->len = tok->len;
+    sym->name = calloc(1, sizeof(char) * tok->len);
+    strncpy(sym->name, tok->str, tok->len);
     sym->type = ty;
 
     // add stack size.
@@ -42,8 +42,7 @@ Symbol* st_find_symbol(Token* tok){
 
     for(Scope* scp = cur_scope; scp; scp = scp->parent){
         for(Symbol* sym = scp->symbol; sym; sym = sym->next){
-            if(sym->len == tok->len
-                && memcmp(sym->name, tok->str, sym->len) == 0){
+            if(memcmp(sym->name, tok->str, tok->len) == 0){
                     return sym;
             }
         }

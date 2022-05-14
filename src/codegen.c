@@ -22,8 +22,6 @@ static void gen(Node* node);
 void gen_program(Program* prog){
 
     printf(".intel_syntax noprefix\n");
-    printf(".globl main\n");
-
     Node* cur = prog->func_list;
     while(cur){
         if(cur->kind == ND_FUNCTION){
@@ -36,10 +34,7 @@ void gen_program(Program* prog){
 }
 
 static void gen_print_sym(Symbol* sym){
-    char* str = calloc(1, sizeof(char) * sym->len);
-    strncpy(str, sym->name, sym->len);
-    printf("%s:\n", str);
-    free(str);    
+    printf("%s:\n", sym->name);
 }
 
 static void gen_grobal_variable(Node* node){
@@ -60,6 +55,7 @@ static void gen_function(Node* func){
         return;
     }
 
+    printf("  .global %s\n", func->func_sym->name);
     printf("  .text\n");
     gen_print_sym(func->func_sym);
 
@@ -186,10 +182,6 @@ static void gen(Node* node){
             return;
         case ND_CALL:
             {
-                // get funcname
-                char* fname = calloc(node->sym->len, sizeof(char));
-                strncpy(fname, node->sym->name, node->sym->len);
-
                 int nargs = 0;
                 for(Node* cur = node->arg; cur; cur = cur->next){
                     gen(cur);
@@ -200,8 +192,7 @@ static void gen(Node* node){
                     printf("  pop %s\n", argreg[nargs - 1]);
                 }
 
-                printf("  call %s\n", fname);
-                free(fname);
+                printf("  call %s\n", node->sym->name);
                 printf("  push rax\n");
                 return ;
             }
@@ -303,11 +294,8 @@ static void gen_lval(Node* node){
     switch (node->kind){
         case ND_LVAR:
             if(node->sym->is_grobalvar){
-                char* nm = calloc(1, sizeof(char) * node->sym->len);
-                strncpy(nm, node->sym->name, node->sym->len);
-                printf("  mov rax, OFFSET FLAT:%s\n", nm);
+                printf("  mov rax, OFFSET FLAT:%s\n", node->sym->name);
                 printf("  push rax\n");
-                free(nm);
             } else {
                 printf("  mov rax, rbp\n");
                 printf("  sub rax, %d\n", node->offset);
