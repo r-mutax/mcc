@@ -172,6 +172,14 @@ Type* tk_expect_type(){
     return ty;
 }
 
+Token* tk_get_token(){
+    return token;
+}
+
+void tk_set_token(Token* tok){
+    token = tok;
+}
+
 // local function ---------------------------------
 static Token* new_token(TokenKind kind, Token* cur, char* str, int len){
     Token* tok = calloc(1, sizeof(Token));

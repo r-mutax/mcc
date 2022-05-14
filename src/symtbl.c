@@ -20,13 +20,16 @@ Symbol* st_declare(Token* tok, Type* ty){
     sym->type = ty;
 
     // add stack size.
-    if(ty->kind == TY_ARRAY){
-        func_scope->stacksize += ty->size * ty->array_len;
+    if(cur_scope->kind != SC_GROBAL){
+        if(ty->kind == TY_ARRAY){
+            func_scope->stacksize += ty->size * ty->array_len;
+        } else {
+            func_scope->stacksize += ty->size;
+        }
+        sym->offset = func_scope->stacksize;
     } else {
-        func_scope->stacksize += ty->size;
+        sym->is_grobalvar = true;
     }
-
-    sym->offset = func_scope->stacksize;
 
     // chain symbol to current scope.
     sym->next = cur_scope->symbol;

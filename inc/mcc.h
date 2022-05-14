@@ -53,7 +53,8 @@ typedef enum {
     ND_CMPDSTMT,
     ND_FOR,
     ND_CALL,
-    ND_DECLARE
+    ND_DECLARE,
+    ND_FUNCTION
 } NodeKind;
 
 struct Node {
@@ -71,28 +72,24 @@ struct Node {
     Node*       init;
     Node*       iter;
     Node*       else_body;
+    Symbol*     sym;
 
     char*       func_name;
     int         len;
     Node*       arg;
 
     char*       line;
-};
 
-struct Function {
-    char*       name;
-    int         len;
+    // function definition.
+    Symbol*     func_sym;
     int         stack_size;
-    Type*       ret_type;
-
-    Node*       body;
     Node*       param;
     int         paramnum;
-    Function*   next;
+    int         stacksize;
 };
 
 struct Program {
-    Function*   func_list;
+    Node*   func_list;
 };
 
 // symbol table data definition ----------------------------------
@@ -101,6 +98,8 @@ struct Symbol{
     char*       name;
     int         len;
     int         offset;
+    bool        is_func;
+    bool        is_grobalvar;
     Type*       type;
 };
 

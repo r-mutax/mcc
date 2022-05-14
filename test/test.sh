@@ -4,7 +4,7 @@ assert() {
   input="$2"
 
   ./bin/mcc "$input" > ./test/tmp.s
-  cc -o ./test/tmp ./test/tmp.s ./test/test_func/foo.o
+  cc -static -o ./test/tmp  -no-pie ./test/tmp.s ./test/test_func/foo.o
   ./test/tmp
   actual="$?"
 
@@ -16,7 +16,6 @@ assert() {
   fi
 }
 
-assert 0 "long main(){return 0;}"
 assert 42 "long main(){return 42;}"
 assert 15 "long main(){return 3 + 16 -    4;}"
 assert 14 "long main(){return 4+2*5;}"
@@ -54,5 +53,7 @@ assert 8 "long main(){ long a; return sizeof (a) ;}"
 assert 3 'long main(){long p[3]; p[0] = 3; p[1] = 2; long *q; q = p + 1; return p[0];}'
 assert 123 'long main(){long a[10]; a[0] = 3; a[1] = 4; a[1+2*2] = 123; return a[5];}'
 assert 4 'long main(){long a[10]; a[0] = 3; a[1] = 4; return a[1];}'
-assert 4 'long main(){long a[10]; *a = 3; *(a + 1) = 4; return *(a + 1);}'
+assert 4 'long x;long main(){long a[10]; *a = 3; *(a + 1) = 4; return *(a + 1);}'
+assert 5 'long x; long main(){x = 5; return x;}'
+assert 0 "long a;long main(){return 0;}"
 echo OK

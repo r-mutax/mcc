@@ -9,7 +9,7 @@
     EBNF :
 
     program = ( function | declaration )*
-    function = declspec ident '(' ( ident ( ',' ident )* )? ')' compound_stmt
+    function = declspec* ident '(' ( ident ( ',' ident )* )? ')' compound_stmt
     compound_stmt = '{' ( stmt | declare )* '}'
     stmt = expr ';'
             | 'return' expr ';'
@@ -39,10 +39,10 @@ static Node* new_node_num(int val);
 static Node* new_node_add(Node* lhs, Node* rhs);
 static Node* new_node_sub(Node* lhs, Node* rhs);
 static Program* program();
-static Function* function();
+static Node* function();
 static Node* compound_stmt();
 static Node* declaration();
-static Type* declspec();
+static Type* decl_spec();
 static Type* type_spec();
 static Symbol* declare(Type* ty);
 static Node* stmt();
@@ -54,6 +54,7 @@ static Node* add();
 static Node* mul();
 static Node* primary();
 static Node* unary();
+static bool is_function();
 
 // -----------------------------------------------
 Program* parser(){
@@ -67,27 +68,51 @@ Program* parser(){
 static Program* program(){
     Program* prog = calloc(1, sizeof(Program));
 
-    Function head;
-    Function* cur = &head;
+    Node head;
+    Node* cur = &head;
 
     while(!tk_iseof()){
-        cur->next = function();
+        if(is_function()){
+            cur->next = function();
+        } else {
+            cur->next = declaration();
+        }
         cur = cur->next;
     }
 
     prog->func_list = head.next;
 }
 
-static Function* function(){
-    
-    Function* func = calloc(1, sizeof(Function));
+static bool is_function(){
 
-    func->ret_type = tk_expect_type();
+    Token* bkup_tok = tk_get_token();
+    bool retval = false;
 
-    Token* tok = tk_expect_ident();
-    func->name = tok->str;
-    func->len = tok->len;
+    Type* ty = decl_spec();
+
+    while(tk_consume("*")){
+        ;
+    }
+
+    tk_expect_ident();
+    if(tk_consume("(")){
+        retval = true;
+    }
+
+    tk_set_token(bkup_tok);
+    return retval;
+}
+
+static Node* function(){
     
+    Node* func = calloc(1, sizeof(Node));
+    func->kind = ND_FUNCTION;
+
+    Type* ty = decl_spec();
+    Symbol* sym = declare(ty);
+    sym->is_func = true;
+    func->func_sym = sym;
+
     st_start_scope();
 
     tk_expect("(");
@@ -180,6 +205,7 @@ static Node* declaration(){
     Symbol* sym = declare(ty);
 
     Node* node = new_node(ND_DECLARE, NULL, NULL);
+    node->sym = sym;
     node->offset = sym->offset;
 
     tk_expect(";");
@@ -404,6 +430,7 @@ static Node* primary(){
             node->kind = ND_LVAR;
             node->offset = sym->offset;
             node->type = sym->type;
+            node->sym = sym;
 
             if(tk_consume("[")){
                 // array

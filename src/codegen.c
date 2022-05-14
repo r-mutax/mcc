@@ -11,9 +11,11 @@ static const char *argreg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 // local function forward declaration. ------------
 static void gen_lval(Node* node);
 static void gen_stmt(Node* node);
-static void gen_function(Function* func);
+static void gen_function(Node* func);
+static void gen_grobal_variable(Node* node);
 static void gen_compound_stmt(Node* node);
 static void gen_printline(char* p);
+static void gen_printsym(Symbol* sym);
 static void gen_epilogue(void);
 static void gen(Node* node);
 
@@ -22,18 +24,40 @@ void gen_program(Program* prog){
     printf(".intel_syntax noprefix\n");
     printf(".globl main\n");
 
-    Function* cur = prog->func_list;
+    Node* cur = prog->func_list;
     while(cur){
-        gen_function(cur);
+        if(cur->kind == ND_FUNCTION){
+            gen_function(cur);
+        } else {
+            gen_grobal_variable(cur);
+        }
         cur = cur->next;
     }
 }
 
-static void gen_function(Function* func){
+static void gen_print_sym(Symbol* sym){
+    char* str = calloc(1, sizeof(char) * sym->len);
+    strncpy(str, sym->name, sym->len);
+    printf("%s:\n", str);
+    free(str);    
+}
 
-    char* func_name = calloc(1, sizeof(char) * func->len);
-    strncpy(func_name, func->name, func->len);
-    printf("%s:\n", func_name);
+static void gen_grobal_variable(Node* node){
+
+    printf("  .data\n");
+
+    gen_print_sym(node->sym);
+    int size = node->sym->type->size;
+    if(node->sym->type->pointer_to){
+        size *= node->sym->type->array_len;
+    }
+    printf("  .zero %d\n", size);
+}
+
+static void gen_function(Node* func){
+
+    printf("  .text\n");
+    gen_print_sym(func->func_sym);
 
     // prologue
     printf("  push rbp\n");
@@ -274,9 +298,17 @@ static void gen_lval(Node* node){
 
     switch (node->kind){
         case ND_LVAR:
-            printf("  mov rax, rbp\n");
-            printf("  sub rax, %d\n", node->offset);
-            printf("  push rax\n");
+            if(node->sym->is_grobalvar){
+                char* nm = calloc(1, sizeof(char) * node->sym->len);
+                strncpy(nm, node->sym->name, node->sym->len);
+                printf("  mov rax, OFFSET FLAT:%s\n", nm);
+                printf("  push rax\n");
+                free(nm);
+            } else {
+                printf("  mov rax, rbp\n");
+                printf("  sub rax, %d\n", node->offset);
+                printf("  push rax\n");
+            }
             return;
         case ND_DREF:
             gen(node->lhs);
