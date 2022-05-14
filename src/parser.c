@@ -432,7 +432,12 @@ static Node* primary(){
             }
 
             Node* node = calloc(1, sizeof(Node));
-            node->kind = ND_LVAR;
+            if(sym->is_grobalvar){
+                node->kind = ND_GVAR;
+            } else {
+                node->kind = ND_LVAR;
+            }
+
             node->offset = sym->offset;
             node->type = sym->type;
             node->sym = sym;

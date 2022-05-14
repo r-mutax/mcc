@@ -173,6 +173,7 @@ static void gen(Node* node){
             printf("  push %d\n", node->val);
             return;
         case ND_LVAR:
+        case ND_GVAR:
             gen_lval(node);
             if(node->type->kind != TY_ARRAY){
                 printf("  pop rax\n");
@@ -293,14 +294,13 @@ static void gen_lval(Node* node){
 
     switch (node->kind){
         case ND_LVAR:
-            if(node->sym->is_grobalvar){
-                printf("  mov rax, OFFSET FLAT:%s\n", node->sym->name);
-                printf("  push rax\n");
-            } else {
-                printf("  mov rax, rbp\n");
-                printf("  sub rax, %d\n", node->offset);
-                printf("  push rax\n");
-            }
+            printf("  mov rax, rbp\n");
+            printf("  sub rax, %d\n", node->offset);
+            printf("  push rax\n");
+            return;
+        case ND_GVAR:
+            printf("  mov rax, OFFSET FLAT:%s\n", node->sym->name);
+            printf("  push rax\n");
             return;
         case ND_DREF:
             gen(node->lhs);
