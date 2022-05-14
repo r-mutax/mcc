@@ -56,6 +56,10 @@ static void gen_grobal_variable(Node* node){
 
 static void gen_function(Node* func){
 
+    if(func->is_declare){
+        return;
+    }
+
     printf("  .text\n");
     gen_print_sym(func->func_sym);
 
@@ -183,8 +187,8 @@ static void gen(Node* node){
         case ND_CALL:
             {
                 // get funcname
-                char* fname = calloc(node->len, sizeof(char));
-                strncpy(fname, node->func_name, node->len);
+                char* fname = calloc(node->sym->len, sizeof(char));
+                strncpy(fname, node->sym->name, node->sym->len);
 
                 int nargs = 0;
                 for(Node* cur = node->arg; cur; cur = cur->next){

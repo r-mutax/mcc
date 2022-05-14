@@ -74,8 +74,6 @@ struct Node {
     Node*       else_body;
     Symbol*     sym;
 
-    char*       func_name;
-    int         len;
     Node*       arg;
 
     char*       line;
@@ -86,6 +84,7 @@ struct Node {
     Node*       param;
     int         paramnum;
     int         stacksize;
+    bool        is_declare;
 };
 
 struct Program {

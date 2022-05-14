@@ -154,6 +154,11 @@ static Node* function(){
     func->stack_size = st_get_stacksize();
     st_end_scope();
 
+    if(func->body == NULL){
+        func->is_declare = true;
+        tk_expect(";");
+    }
+
     return func;
 }
 
@@ -399,11 +404,12 @@ static Node* primary(){
     // ident ?
     Token* tok = tk_consume_ident();
     if(tok != NULL){
+        Symbol* sym = st_find_symbol(tok);
+
         if (tk_consume("(")){
             Node* node = calloc(1, sizeof(Node));
             node->kind = ND_CALL;
-            node->func_name = tok->str;
-            node->len = tok->len;
+            node->sym = sym;
 
             // has arguments?
             if(!tk_consume(")")){
@@ -421,7 +427,6 @@ static Node* primary(){
                 return node;
             }
         } else {
-            Symbol* sym = st_find_symbol(tok);
             if(sym == NULL){
                 error_at(tok->str, "%s is not declared.\n", tok->str);
             }
