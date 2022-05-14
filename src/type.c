@@ -6,6 +6,7 @@ Type* type_tail;
 
 void ty_init(){
     ty_register_type("long", 8, TY_INTEGER);
+    ty_register_type("int", 4, TY_INTEGER);
 }
 
 Type* ty_register_type(char* type_name, int type_size, TypeKind type_kind){
@@ -105,6 +106,9 @@ void ty_add_type(Node* node){
             } else {
                 node->type = ty_get_type("long", 4);
             }
+            break;
+        case ND_DECLARE:
+            node->type = node->sym->type;
             break;
     }
 }

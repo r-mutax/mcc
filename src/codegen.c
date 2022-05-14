@@ -6,7 +6,8 @@
 static int while_label = 0;
 static int if_label = 0;
 static int for_label = 0;
-static const char *argreg[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+static const char *argreg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
+static const char *argreg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
 // local function forward declaration. ------------
 static void gen_lval(Node* node);
@@ -71,7 +72,11 @@ static void gen_function(Node* func){
     // move arguments register to stack.
     Node* param = func->param;
     for(int argn = 0; argn < func->paramnum; argn++){
-        printf("  mov [rbp - %d],%s\n", param->offset, argreg[argn]);
+        if(param->type->size == 4){
+            printf("  mov [rbp - %d],%s\n", param->offset, argreg32[argn]);
+        } else if(param->type->size == 8){
+            printf("  mov [rbp - %d],%s\n", param->offset, argreg64[argn]);
+        }
         param = param->next;
     }
 
@@ -177,7 +182,11 @@ static void gen(Node* node){
             gen_lval(node);
             if(node->type->kind != TY_ARRAY){
                 printf("  pop rax\n");
-                printf("  mov rax, [rax]\n");
+                if(node->type->size == 4){
+                    printf("  mov eax, [rax]\n");
+                } else if(node->type->size == 8){
+                    printf("  mov rax, [rax]\n");
+                }
                 printf("  push rax\n");
             }
             return;
@@ -186,11 +195,12 @@ static void gen(Node* node){
                 int nargs = 0;
                 for(Node* cur = node->arg; cur; cur = cur->next){
                     gen(cur);
+                    if(cur->type->size == 4){
+                        printf("  pop %s\n", argreg32[nargs]);
+                    } else if(cur->type->size == 8){
+                        printf("  pop %s\n", argreg64[nargs]);
+                    }
                     nargs++;
-                }
-
-                for(; nargs > 0; nargs--){
-                    printf("  pop %s\n", argreg[nargs - 1]);
                 }
 
                 printf("  call %s\n", node->sym->name);
@@ -203,7 +213,11 @@ static void gen(Node* node){
 
             printf("  pop rdi\n");
             printf("  pop rax\n");
-            printf("  mov [rax], rdi\n");
+            if(node->lhs->type->size == 4){
+                printf("  mov [rax], edi\n");
+            } else if(node->lhs->type->size == 8){
+                printf("  mov [rax], rdi\n");
+            }
             printf("  push rdi\n");
             return;
         case ND_ADDR:
@@ -212,7 +226,11 @@ static void gen(Node* node){
         case ND_DREF:
             gen(node->lhs);
             printf("  pop rax\n");
-            printf("  mov rax, [rax]\n");
+            if(node->type->size == 4){
+                printf("  mov eax, [rax]\n");
+            } else if(node->type->size == 8){
+                printf("  mov rax, [rax]\n");
+            }
             printf("  push rax\n");
             return;
     }

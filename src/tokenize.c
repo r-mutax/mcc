@@ -48,6 +48,7 @@ Token* tk_tokenize(char* p){
             || check_keyword("for", &p, &cur)
             || check_keyword("while", &p, &cur)
             || check_keyword("sizeof", &p, &cur)
+            || check_keyword("int", &p, &cur)
             || check_keyword("long", &p, &cur)){
             continue;
         }

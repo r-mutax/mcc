@@ -57,4 +57,16 @@ assert 4 'long x;long main(){long a[10]; *a = 3; *(a + 1) = 4; return *(a + 1);}
 assert 5 'long x; long main(){x = 5; return x;}'
 assert 0 "long a;long main(){return 0;}"
 assert 50 "long a[5]; long main(){ a[3] = 50; a[1] = 25; return a[3];}"
+assert 81 "int main(){ int a; a = 67; int b; b = 14; return a + b;}"
+assert 3 'int main() { int x[3]; *x=3; *(x+1)=4; *(x+2)=5; return *x; }'
+assert 4 'int main() { int x[3]; *x=3; *(x+1)=4; *(x+2)=5; return *(x+1); }'
+assert 5 'int main() { int x[3]; *x=3; *(x+1)=4; *(x+2)=5; return *(x+2); }'
+assert 3 'int main() { int x[3]; *x=3; x[1]=4; x[2]=5; return *x; }'
+assert 4 'int main() { int x[3]; *x=3; x[1]=4; x[2]=5; return *(x+1); }'
+assert 5 'int main() { int x[3]; *x=3; x[1]=4; x[2]=5; return *(x+2); }'
+assert 5 'int main() { int x[3]; *x=3; x[1]=4; x[2]=5; return *(x+2); }'
+assert 4 'int main() { int a; return sizeof(a);}'
+assert 12 'int main() { int a[3]; return sizeof(a);}'
+assert 24 'int main() { long a[3]; return sizeof(a);}'
+assert 9 'int intadd(int a, int b){ return a + b;} int main(){return intadd(4, 5);}'
 echo OK

@@ -128,6 +128,7 @@ static Node* function(){
         Symbol* sym = st_declare(ident_tok, ty);
         Node* param = new_node(ND_DECLARE, NULL, NULL);
         param->offset = sym->offset;
+        param->type = ty;
         func->param = param;
         func->paramnum++;
 
@@ -142,8 +143,9 @@ static Node* function(){
             sym = st_declare(ident_tok, ty);
             param->next = new_node(ND_DECLARE, NULL, NULL);
             param->next->offset = sym->offset;
+            param->next->type = ty;
             func->paramnum++;
-            param = param->next;    
+            param = param->next;
         }
         tk_expect(")");
     }
@@ -190,6 +192,8 @@ static Node* compound_stmt(){
 static Type* type_spec(){
     if(tk_consume_keyword("long")){
         return ty_get_type("long", 4);
+    } else if(tk_consume_keyword("int")){
+        return ty_get_type("int", 3);
     }
 
     return NULL;
@@ -378,7 +382,12 @@ static Node* unary(){
     if(tk_consume_keyword("sizeof")){
         Node* node = unary();
         ty_add_type(node);
-        return new_node_num(node->type->size);
+
+        if(node->type->kind == TY_ARRAY){
+            return new_node_num(node->type->size * node->type->array_len);
+        } else {
+            return new_node_num(node->type->size);
+        }
     } else if(tk_consume("+")){
         return primary();
     } else if(tk_consume("-")){
