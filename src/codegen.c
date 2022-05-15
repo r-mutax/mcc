@@ -71,7 +71,7 @@ static void gen_function(Node* func){
     printf("  sub rsp, %d\n", size);
 
     // move arguments register to stack.
-    Node* param = func->param;
+    Symbol* param = func->param;
     for(int argn = 0; argn < func->paramnum; argn++){
         if(param->type->size == 1) {
             printf("  mov [rbp - %d],%s\n", param->offset, argreg8[argn]);
@@ -93,7 +93,7 @@ static void gen_compound_stmt(Node* node){
     while(cur){
         if(cur->kind != ND_DECLARE){
             gen_printline(cur->line);
-            gen_stmt(cur);            
+            gen_stmt(cur);
         }
         cur = cur->next;
     }

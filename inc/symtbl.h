@@ -24,5 +24,6 @@ Symbol* st_find_symbol(Token* tok);
 void st_start_scope();
 void st_end_scope();
 int st_get_stacksize();
+Symbol* st_copy_symbol(Symbol* sym);
 
 #endif

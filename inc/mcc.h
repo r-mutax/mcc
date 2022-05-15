@@ -82,7 +82,7 @@ struct Node {
     // function definition.
     Symbol*     func_sym;
     int         stack_size;
-    Node*       param;
+    Symbol*     param;
     int         paramnum;
     int         stacksize;
     bool        is_declare;

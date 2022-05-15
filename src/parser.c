@@ -126,11 +126,10 @@ static Node* function(){
         Type* ty = tk_consume_type();
         Token* ident_tok = tk_expect_ident();
         Symbol* sym = st_declare(ident_tok, ty);
-        Node* param = new_node(ND_DECLARE, NULL, NULL);
-        param->offset = sym->offset;
-        param->type = ty;
-        func->param = param;
+        func->param = st_copy_symbol(sym);
         func->paramnum++;
+
+        Symbol* cur = func->param;
 
         while(tk_consume(",")){
 
@@ -141,11 +140,10 @@ static Node* function(){
             ty = tk_consume_type();
             ident_tok = tk_expect_ident();
             sym = st_declare(ident_tok, ty);
-            param->next = new_node(ND_DECLARE, NULL, NULL);
-            param->next->offset = sym->offset;
-            param->next->type = ty;
+            
+            cur->next = st_copy_symbol(sym);
+            cur = cur->next;
             func->paramnum++;
-            param = param->next;
         }
         tk_expect(")");
     }
@@ -181,7 +179,7 @@ static Node* compound_stmt(){
         } else {
             cur->next = stmt();
         }
-        cur = cur->next;
+        cur = cur->next;        
     }
     st_end_scope();
     // end block scope <--

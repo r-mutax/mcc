@@ -84,3 +84,10 @@ void st_end_scope(){
 int st_get_stacksize(){
     return func_scope->stacksize;
 }
+
+Symbol* st_copy_symbol(Symbol* sym){
+    Symbol* cpysym = calloc(1, sizeof(Symbol));
+    memcpy(cpysym, sym, sizeof(Symbol));
+    cpysym->next = NULL;
+    return cpysym;
+}
