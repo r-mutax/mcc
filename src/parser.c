@@ -194,6 +194,8 @@ static Type* type_spec(){
         return ty_get_type("long", 4);
     } else if(tk_consume_keyword("int")){
         return ty_get_type("int", 3);
+    } else if(tk_consume_keyword("char")){
+        return ty_get_type("char", 4);
     }
 
     return NULL;

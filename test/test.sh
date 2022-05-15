@@ -15,7 +15,6 @@ assert() {
     exit 1
   fi
 }
-
 assert 42 "long main(){return 42;}"
 assert 15 "long main(){return 3 + 16 -    4;}"
 assert 14 "long main(){return 4+2*5;}"
@@ -69,4 +68,11 @@ assert 4 'int main() { int a; return sizeof(a);}'
 assert 12 'int main() { int a[3]; return sizeof(a);}'
 assert 24 'int main() { long a[3]; return sizeof(a);}'
 assert 9 'int intadd(int a, int b){ return a + b;} int main(){return intadd(4, 5);}'
+assert 25 'int main(){ char a; a = 10; return 15 + a;}'
+assert 1 'int main() { char x; x=1; return x; }'
+assert 1 'int main() { char x; x=1; char y; y=2; return x; }'
+assert 2 'int main() { char x; x=1; char y; y=2; return y; }'
+assert 1 'int main() { char x; return sizeof(x); }'
+assert 10 'int main() { char x[10]; return sizeof(x); }'
+assert 1 'int sub_char(char a, char b, char c) { return a-b-c; } int main() { return sub_char(7, 3, 3); } '
 echo OK
