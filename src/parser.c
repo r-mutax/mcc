@@ -38,6 +38,7 @@ static Node* new_node(NodeKind kind, Node* lhs, Node* rhs);
 static Node* new_node_num(int val);
 static Node* new_node_add(Node* lhs, Node* rhs);
 static Node* new_node_sub(Node* lhs, Node* rhs);
+static Node* new_var(Symbol* sym);
 static Program* program();
 static Node* function();
 static Node* compound_stmt();
@@ -210,14 +211,36 @@ static Type* decl_spec(){
 }
 
 static Node* declaration(){
+
     Type* ty = decl_spec();
-    Symbol* sym = declare(ty);
 
-    Node* node = new_node(ND_DECLARE, NULL, NULL);
-    node->sym = sym;
-    node->offset = sym->offset;
+    Node head = {};
+    Node* cur = &head;
 
+    do {
+        Symbol* sym = declare(ty);
+        if(sym->is_grobalvar){
+            cur->next = calloc(1, sizeof(Node));
+            cur->next->kind = ND_DECLARE;
+            cur->next->sym = sym;
+            cur = cur->next;
+        } else {
+            if(tk_consume("=")){
+                cur->next = calloc(1, sizeof(Node));
+                cur->next->kind = ND_ASSIGN;
+                cur->next->lhs = new_var(sym);
+                cur->next->rhs = expr();
+
+                cur = cur->next;
+            }
+        }
+    } while(tk_consume(","));
     tk_expect(";");
+
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_CMPDSTMT;
+    node->body = head.next;
+
     return node;
 }
 
@@ -440,17 +463,7 @@ static Node* primary(){
                 error_at(tok->str, "%s is not declared.\n", tok->str);
             }
 
-            Node* node = calloc(1, sizeof(Node));
-            if(sym->is_grobalvar){
-                node->kind = ND_GVAR;
-            } else {
-                node->kind = ND_LVAR;
-            }
-
-            node->offset = sym->offset;
-            node->type = sym->type;
-            node->sym = sym;
-
+            Node* node = new_var(sym);
             if(tk_consume("[")){
                 // array
                 Node* node_deref = new_node(ND_DREF, new_node_add(node, expr()), NULL);
@@ -556,4 +569,20 @@ static Node* new_node_sub(Node* lhs, Node* rhs){
 
         return node;
     }
+}
+
+static Node* new_var(Symbol* sym){
+
+    Node* node = calloc(1, sizeof(Node));
+    if(sym->is_grobalvar){
+        node->kind = ND_GVAR;
+    } else {
+        node->kind = ND_LVAR;
+    }
+
+    node->offset = sym->offset;
+    node->type = sym->type;
+    node->sym = sym;
+
+    return node;
 }

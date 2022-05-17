@@ -41,14 +41,18 @@ static void gen_print_sym(Symbol* sym){
 
 static void gen_grobal_variable(Node* node){
 
-    printf("  .data\n");
+    Node* cur = node->body;
+    while(cur){
+        printf("  .data\n");
 
-    gen_print_sym(node->sym);
-    int size = node->sym->type->size;
-    if(node->sym->type->pointer_to){
-        size *= node->sym->type->array_len;
+        gen_print_sym(cur->sym);
+        int size = cur->sym->type->size;
+        if(cur->sym->type->pointer_to){
+            size *= cur->sym->type->array_len;
+        }
+        printf("  .zero %d\n", size);
+        cur = cur->next;
     }
-    printf("  .zero %d\n", size);
 }
 
 static void gen_function(Node* func){
@@ -295,6 +299,8 @@ static void gen(Node* node){
 }
 
 static void gen_printline(char* p){
+
+    if(p == NULL) return;
 
     char* pos = strchr(p, ';');
     char* line = calloc(pos - p + 1, sizeof(char));
