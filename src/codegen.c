@@ -17,13 +17,24 @@ static void gen_function(Node* func);
 static void gen_grobal_variable(Node* node);
 static void gen_compound_stmt(Node* node);
 static void gen_printline(char* p);
-static void gen_printsym(Symbol* sym);
+static void gen_print_sym(Symbol* sym);
 static void gen_epilogue(void);
 static void gen(Node* node);
 
 void gen_program(Program* prog){
 
     printf(".intel_syntax noprefix\n");
+
+    // string constant output
+    Symbol* sym = prog->string_list;
+    while(sym){
+        printf("  .data\n");
+        gen_print_sym(sym);
+        printf("  .string \"%s\"\n", sym->str);
+        sym = sym->next;
+    }
+
+    // data / text section print
     Node* cur = prog->func_list;
     while(cur){
         if(cur->kind == ND_FUNCTION){
@@ -233,7 +244,9 @@ static void gen(Node* node){
         case ND_DREF:
             gen(node->lhs);
             printf("  pop rax\n");
-            if(node->type->size == 4){
+            if(node->type->size == 1){
+                printf("  movzx eax, BYTE PTR [rax]\n");
+            } else if(node->type->size == 4){
                 printf("  mov eax, [rax]\n");
             } else if(node->type->size == 8){
                 printf("  mov rax, [rax]\n");

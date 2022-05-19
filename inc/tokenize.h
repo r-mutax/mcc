@@ -17,4 +17,5 @@ bool    tk_consume_keyword(char* keyword);
 bool    tk_istype();
 Token*  tk_get_token();
 void    tk_set_token(Token* tok);
+Token*  tk_consume_string();
 #endif

@@ -20,6 +20,7 @@ typedef enum {
     TK_NUM,
     TK_IDENT,
     TK_KEYWORD,
+    TK_STRING_CONST,
     TK_EOF
 } TokenKind;
 
@@ -90,6 +91,7 @@ struct Node {
 
 struct Program {
     Node*   func_list;
+    Symbol* string_list;
 };
 
 // symbol table data definition ----------------------------------
@@ -100,6 +102,7 @@ struct Symbol{
     bool        is_func;
     bool        is_grobalvar;
     Type*       type;
+    char*       str;
 };
 
 // type data definition --------------------------

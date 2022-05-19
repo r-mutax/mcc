@@ -1,11 +1,19 @@
 #include "mcc.h"
 #include "symtbl.h"
+#include "type.h"
 
 Scope       grobal_scope;
 Scope*      cur_scope;
 Scope*      func_scope;
 int         scope_level = 0;
 
+Symbol*     str_head;
+Symbol*     str_tail;
+
+static int st_unique_no(){
+    static int no = 0;
+    return no++;
+}
 
 void st_init(){
     cur_scope = &grobal_scope;
@@ -15,7 +23,7 @@ Symbol* st_declare(Token* tok, Type* ty){
 
     Symbol* sym = calloc(1, sizeof(Symbol));
 
-    sym->name = calloc(1, sizeof(char) * tok->len);
+    sym->name = calloc(1, sizeof(char) * (tok->len + 1));
     strncpy(sym->name, tok->str, tok->len);
     sym->type = ty;
 
@@ -90,4 +98,34 @@ Symbol* st_copy_symbol(Symbol* sym){
     memcpy(cpysym, sym, sizeof(Symbol));
     cpysym->next = NULL;
     return cpysym;
+}
+
+Symbol* st_register_literal(Token* tok){
+    Symbol* sym = calloc(1, sizeof(Symbol));
+
+    sym->str = calloc(1, sizeof(char) * (tok->len + 1));
+    strncpy(sym->str, tok->str, tok->len);
+
+    // string literal is including the null teminator.
+    // so that length is string length + 1.
+    sym->type = ty_get_type("char", 4);
+    sym->type = ty_array_of(sym->type, tok->len + 1);
+
+    sym->name = calloc(1, sizeof(char) * 20);
+    sprintf(sym->name, ".LSTR%d", st_unique_no());
+
+    sym->is_grobalvar = true;
+
+    if(str_head){
+        str_tail->next = sym;
+        str_tail = sym;
+    } else {
+        str_head = str_tail = sym;
+    }
+
+    return sym;
+}
+
+Symbol* st_get_string_list(){
+    return str_head;
 }

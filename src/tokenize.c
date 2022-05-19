@@ -27,6 +27,16 @@ Token* tk_tokenize(char* p){
             continue;
         }
 
+        if(*p == '"'){
+            char* start = ++p;
+            while(*p != '"'){
+                p++;
+            }
+            cur = new_token(TK_STRING_CONST, cur, start, p - start);
+            p++;
+            continue;
+        }
+
         if(startswith(p, "==")
             || startswith(p, "!=")
             || startswith(p, "<=")
@@ -180,6 +190,16 @@ Token* tk_get_token(){
 
 void tk_set_token(Token* tok){
     token = tok;
+}
+
+Token* tk_consume_string(){
+    if(token->kind != TK_STRING_CONST){
+        return NULL;
+    }
+
+    Token* tok = token;
+    token = token->next;
+    return tok;
 }
 
 // local function ---------------------------------

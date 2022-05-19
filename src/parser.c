@@ -29,7 +29,9 @@
     primary = num
              | ident ( '(' expr? ( ',' expr )* ')' )?
              | '(' expr ')'
+             | string_literal
     num = Integer.
+    string_literal = '"' chalacter* '"'
 */
 
 
@@ -39,6 +41,8 @@ static Node* new_node_num(int val);
 static Node* new_node_add(Node* lhs, Node* rhs);
 static Node* new_node_sub(Node* lhs, Node* rhs);
 static Node* new_var(Symbol* sym);
+static Node* new_string_literal(Token* tok);
+static int new_unique_no();
 static Program* program();
 static Node* function();
 static Node* compound_stmt();
@@ -82,6 +86,9 @@ static Program* program(){
     }
 
     prog->func_list = head.next;
+    prog->string_list = st_get_string_list();
+
+    return prog;
 }
 
 static bool is_function(){
@@ -432,9 +439,25 @@ static Node* primary(){
         tk_expect(")");
         return node;
     }
+    Token* tok;
+    // string constant?
+    tok = tk_consume_string();
+    if(tok != NULL){
+        Symbol* sym = st_register_literal(tok);
+        Node* node = new_var(sym);
+
+        if(tk_consume("[")){
+            // array
+            Node* node_deref = new_node(ND_DREF, new_node_add(node, expr()), NULL);
+            tk_expect("]");
+            return node_deref;
+        }
+
+        return node;;
+    }
 
     // ident ?
-    Token* tok = tk_consume_ident();
+    tok = tk_consume_ident();
     if(tok != NULL){
         Symbol* sym = st_find_symbol(tok);
 
