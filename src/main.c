@@ -34,8 +34,7 @@ int main(int argc, char **argv){
     }
 
     char* p = read_file(argv[1]);
-//    char* p = argv[1];
-    error_init(p);
+    error_init(p, argv[1]);
     tk_tokenize(p);
 
 

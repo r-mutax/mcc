@@ -120,7 +120,9 @@ void tk_expect(char* p){
         || token->len != strlen(p)
         || memcmp(p, token->str, token->len))
     {
-        error_at(token->str, "expect %c, but get %c\n", p, token->str[0]);
+        char msg[256];
+        sprintf(msg, "expect %s, but get %s\n", p, token->str);
+        error_at(token->str, msg);
     }
     token = token->next;
 }

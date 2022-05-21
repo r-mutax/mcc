@@ -490,7 +490,7 @@ static Node* primary(){
             }
         } else {
             if(sym == NULL){
-                error_at(tok->str, "%s is not declared.\n", tok->str);
+                error_at(tok->str, "Not declared.\n");
             }
 
             Node* node = new_var(sym);
