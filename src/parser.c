@@ -132,6 +132,9 @@ static Node* function(){
         }
 
         Type* ty = tk_consume_type();
+        while(tk_consume("*"))
+            ty = ty_pointer_to(ty);
+
         Token* ident_tok = tk_expect_ident();
         Symbol* sym = st_declare(ident_tok, ty);
         func->param = st_copy_symbol(sym);
@@ -146,6 +149,9 @@ static Node* function(){
             }
 
             ty = tk_consume_type();
+            while(tk_consume("*"))
+                ty = ty_pointer_to(ty);
+
             ident_tok = tk_expect_ident();
             sym = st_declare(ident_tok, ty);
             
@@ -221,7 +227,8 @@ static Node* declaration(){
 
     Type* ty = decl_spec();
 
-    Node head = {};
+    Node head;
+    memset(&head, 0, sizeof(Node));
     Node* cur = &head;
 
     do {
@@ -491,6 +498,9 @@ static Node* primary(){
                 // array
                 Node* node_deref = new_node(ND_DREF, new_node_add(node, expr()), NULL);
                 tk_expect("]");
+                
+                ty_add_type(node_deref);
+
                 return node_deref;
             }
 

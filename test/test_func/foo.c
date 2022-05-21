@@ -1,6 +1,11 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+int exit_error(char* p){
+    fprintf(stderr, "%s", p);
+    exit(1);
+}
+
 int add(int a, int b){
     return a + b;
 }

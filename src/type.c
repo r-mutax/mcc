@@ -102,7 +102,7 @@ void ty_add_type(Node* node){
             node->type = ty_pointer_to(node->lhs->type);
             break;
         case ND_DREF:
-            if(node->lhs->type->kind == TY_POINTER){
+            if(node->lhs->type->pointer_to){
                 node->type = node->lhs->type->pointer_to;
             } else {
                 node->type = ty_get_type("long", 4);

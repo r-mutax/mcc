@@ -10,7 +10,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:extension.vscode-wsl-workspaceFolder}/bin/mcc",
-            "args": ["long main(){long abc; abc=15;long b; b=23; return abc+b;}"],
+            "args": ["/mnt/c/source/mcc/test/tt.c"],
             "stopAtEntry": false,
             "cwd": "${command:extension.vscode-wsl-workspaceFolder}/bin",
             "environment": [],

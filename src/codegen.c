@@ -215,8 +215,11 @@ static void gen(Node* node){
                 int nargs = 0;
                 for(Node* cur = node->arg; cur; cur = cur->next){
                     gen(cur);
-                    printf("  pop %s\n", argreg64[nargs]);
                     nargs++;
+                }
+
+                for(;nargs; nargs--){
+                    printf("  pop %s\n", argreg64[nargs - 1]);
                 }
 
                 printf("  call %s\n", node->sym->name);
@@ -315,7 +318,11 @@ static void gen_printline(char* p){
 
     if(p == NULL) return;
 
-    char* pos = strchr(p, ';');
+    char* semi = strchr(p, ';');
+    char* nl = strchr(p, '\n') - 1;
+
+    char* pos = semi < nl ? semi : nl;
+
     char* line = calloc(pos - p + 1, sizeof(char));
 
     strncpy(line, p, pos - p + 1);

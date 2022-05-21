@@ -23,7 +23,9 @@ clean:
 	-rmdir $(OBJDIR)
 
 test:$(TARGET)
-	./test/test.sh
+	./bin/mcc ./test/test.c > ./test/test.s
+	cc -s -static ./test/test.s ./test/test_func/foo.o -o ./test/a.out
+	./test/a.out
 
 .PHONY: clean test
 

@@ -6,6 +6,7 @@
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
+#include <errno.h>
 
 typedef struct Token Token;
 typedef struct Type Type;
@@ -99,6 +100,7 @@ struct Symbol{
     Symbol*     next;
     char*       name;
     int         offset;
+    int         len;
     bool        is_func;
     bool        is_grobalvar;
     Type*       type;
