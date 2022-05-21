@@ -202,6 +202,16 @@ int test_string(){
     printf("string test is completed !\n");
 }
 
+int test_comment(){
+    // exit_error("error : row comment.\n");
+
+    /*
+        exit_error("error : block comment.\n");
+    */
+
+    printf("comment test is completed !\n");
+}
+
 int main(){   
     test_expr();
     test_stmt();
@@ -209,6 +219,7 @@ int main(){
     test_variable();
     test_sizeof();
     test_string();
+    test_comment();
 
     printf("test completed !\n");
 
