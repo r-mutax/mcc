@@ -86,6 +86,8 @@ int test_stmt(){
 
 int test_expr(){
 
+    int a = 0;
+
     assert(42, 42, "error : numeric.\n");
     assert(15, 3 + 16 -    4, "error : add and sub.\n");
     assert(14, 4 + 2 * 5, "error : multiple.\n");
@@ -107,6 +109,24 @@ int test_expr(){
     assert(3, 5 % 2 + 12 % 5, "error : test left associated.\n");
 
     assert(38, test_lvar(), "error : local variable.\n");
+    a += 1;
+    assert(1, a, "error : += operand.\n");
+
+    a -= 2;
+    assert(-1, a, "error : -= operand.\n");
+
+    a *= -6;
+    assert(6, a, "error : *= operand.\n");
+
+    a /= 3;
+    assert(2, a, "error : /= operand.\n");
+
+    a = 12;
+    a %= 5;
+    assert(2, a, "error : %= operand.\n");
+
+    a += 3 + 5;
+    assert(10, a, "error : += operand, when rvalue is expr.\n");
 
     printf("expr test is completed !\n");
 }

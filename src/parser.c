@@ -40,6 +40,9 @@ static Node* new_node(NodeKind kind, Node* lhs, Node* rhs);
 static Node* new_node_num(int val);
 static Node* new_node_add(Node* lhs, Node* rhs);
 static Node* new_node_sub(Node* lhs, Node* rhs);
+static Node* new_node_mul(Node* lhs, Node* rhs);
+static Node* new_node_div(Node* lhs, Node* rhs);
+static Node* new_node_mod(Node* lhs, Node* rhs);
 static Node* new_var(Symbol* sym);
 static Node* new_string_literal(Token* tok);
 static int new_unique_no();
@@ -342,11 +345,27 @@ static Node* expr(){
     return assign();
 }
 
+static Node* assign_to(){
+
+
+
+}
+
 static Node* assign(){
     Node* node = equality();
 
     if(tk_consume("=")){
         node = new_node(ND_ASSIGN, node, assign());
+    } else if(tk_consume("+=")){
+        node = new_node(ND_ASSIGN, node, new_node_add(node, assign()));
+    } else if(tk_consume("-=")){
+        node = new_node(ND_ASSIGN, node, new_node_sub(node, assign()));
+    } else if(tk_consume("*=")){
+        node = new_node(ND_ASSIGN, node, new_node_mul(node, assign()));
+    } else if(tk_consume("/=")){
+        node = new_node(ND_ASSIGN, node, new_node_div(node, assign()));
+    } else if(tk_consume("%=")){
+        node = new_node(ND_ASSIGN, node, new_node_mod(node, assign()));
     }
     return node;
 }
@@ -617,5 +636,53 @@ static Node* new_var(Symbol* sym){
     node->type = sym->type;
     node->sym = sym;
 
+    return node;
+}
+
+static Node* new_node_mul(Node* lhs, Node* rhs){
+    ty_add_type(lhs);
+    ty_add_type(rhs);
+
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_MUL;
+
+    if(lhs->type->pointer_to || rhs->type->pointer_to){
+        error("error : Try multiple pointer.\n");
+    }
+
+    node->lhs = lhs;
+    node->rhs = rhs;    
+    return node;
+}
+
+static Node* new_node_div(Node* lhs, Node* rhs){
+    ty_add_type(lhs);
+    ty_add_type(rhs);
+
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_DIV;
+
+    if(lhs->type->pointer_to || rhs->type->pointer_to){
+        error("error : Try division pointer.\n");
+    }
+
+    node->lhs = lhs;
+    node->rhs = rhs;    
+    return node;
+}
+
+static Node* new_node_mod(Node* lhs, Node* rhs){
+    ty_add_type(lhs);
+    ty_add_type(rhs);
+
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_MOD;
+
+    if(lhs->type->pointer_to || rhs->type->pointer_to){
+        error("error : Try division pointer.\n");
+    }
+
+    node->lhs = lhs;
+    node->rhs = rhs;    
     return node;
 }
