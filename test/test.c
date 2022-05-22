@@ -87,6 +87,7 @@ int test_stmt(){
 int test_expr(){
 
     int a = 0;
+    int b = 0;
 
     assert(42, 42, "error : numeric.\n");
     assert(15, 3 + 16 -    4, "error : add and sub.\n");
@@ -139,6 +140,10 @@ int test_expr(){
 
     assert(4, a--, "error : post-decrement operater.\n");
     assert(3, a, "error : post-decrement operater.\n");
+
+    a = 100;
+    b = 44;
+    assert(36, a & b, "error : bitwise-AND.\n");
 
     printf("expr test is completed !\n");
 }

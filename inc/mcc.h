@@ -58,7 +58,10 @@ typedef enum {
     ND_CALL,
     ND_DECLARE,
     ND_FUNCTION,
-    ND_COMMA
+    ND_COMMA,
+    ND_BIT_AND,
+    ND_BIT_OR,
+    ND_BIT_XOR
 } NodeKind;
 
 struct Node {

@@ -20,12 +20,14 @@
     type_spec = "long"
     declarator = '*' * ( ident | ident '[' num ']') 
     expr = assign (',' assign)*
-    assign = equality ( '=' assign 
+
+    assign = bitAnd ( '=' assign 
                         | '+=' assign
                         | '-=' assign
                         | '*=' assign
                         | '/=' assign
                         | '%=' assign )?
+    bitAnd = equality ('&' equality)*
     equality = relational ( '==' relational | '!=' relational)*
     relational = add ( '<' add | '<=' add | '>' add | '>=' add)*
     add = mul ( '+' mul | '-' mul | '%' mul )*
@@ -69,6 +71,7 @@ static Symbol* declare(Type* ty);
 static Node* stmt();
 static Node* expr();
 static Node* assign();
+static Node* bitAnd();
 static Node* equality();
 static Node* relational();
 static Node* add();
@@ -373,7 +376,7 @@ static Node* expr(){
 }
 
 static Node* assign(){
-    Node* node = equality();
+    Node* node = bitAnd();
 
     if(tk_consume("=")){
         node = new_node(ND_ASSIGN, node, assign());
@@ -388,6 +391,20 @@ static Node* assign(){
     } else if(tk_consume("%=")){
         node = new_node(ND_ASSIGN, node, new_node_mod(node, assign()));
     }
+    return node;
+}
+
+static Node* bitAnd(){
+    Node* node = equality();
+
+    for(;;){
+        if(tk_consume("&")){
+            node = new_node(ND_BIT_AND, node, equality());
+        } else {
+            break;
+        }
+    }
+
     return node;
 }
 
