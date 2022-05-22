@@ -134,6 +134,12 @@ int test_expr(){
     assert(4, ++a, "error : increment operater.\n");
     assert(3, --a, "error : comma operater.\n");
 
+    assert(3, a++, "error : post-increment operater.\n");
+    assert(4, a, "error : post-increment operater 2.\n");
+
+    assert(4, a--, "error : post-decrement operater.\n");
+    assert(3, a, "error : post-decrement operater.\n");
+
     printf("expr test is completed !\n");
 }
 

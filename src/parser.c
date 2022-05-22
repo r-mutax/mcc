@@ -30,7 +30,12 @@
     relational = add ( '<' add | '<=' add | '>' add | '>=' add)*
     add = mul ( '+' mul | '-' mul | '%' mul )*
     mul = primary ( '*' unary | '/' unary )*
-    unary = ('+' | '-')? primary | ( '*' | '/' ) primary
+    unary = postfix
+            | '++' unary
+            | '--' unary
+            | 'sizeof' unary
+            | ('+' | '-' | '*' | '&' ) postfix
+    postfix = primary ('[' expr ']' | '++' | '--')?
     primary = num
              | ident ( '(' expr? ( ',' expr )* ')' )?
              | '(' expr ')'
@@ -49,6 +54,8 @@ static Node* new_node_mul(Node* lhs, Node* rhs);
 static Node* new_node_div(Node* lhs, Node* rhs);
 static Node* new_node_mod(Node* lhs, Node* rhs);
 static Node* new_var(Symbol* sym);
+static Node* new_inc(Node* var);
+static Node* new_dec(Node* var);
 static Node* new_string_literal(Token* tok);
 static int new_unique_no();
 static Program* program();
@@ -65,6 +72,7 @@ static Node* equality();
 static Node* relational();
 static Node* add();
 static Node* mul();
+static Node* postfix();
 static Node* primary();
 static Node* unary();
 static bool is_function();
@@ -450,24 +458,41 @@ static Node* unary(){
             return new_node_num(node->type->size);
         }
     } else if(tk_consume("+")){
-        return primary();
+        return unary();
     } else if(tk_consume("-")){
-        return new_node(ND_SUB, new_node_num(0), primary());
+        return new_node(ND_SUB, new_node_num(0), unary());
     } else if(tk_consume("&")){
-        return new_node(ND_ADDR, primary(), NULL);
+        return new_node(ND_ADDR, unary(), NULL);
     } else if(tk_consume("*")){
-        return new_node(ND_DREF, primary(), NULL);
+        return new_node(ND_DREF, unary(), NULL);
     } else if(tk_consume("++")){
         // ++a -> a = a + 1
-        Node* node = primary();
+        Node* node = unary();
         return new_node(ND_ASSIGN, node, new_node_add(node, new_node_num(1)));
     } else if(tk_consume("--")){     
         // --a -> a = a - 1
-        Node* node = primary();
+        Node* node = unary();
         return new_node(ND_ASSIGN, node, new_node_sub(node, new_node_num(1)));
     } else {
-        return primary();
+        return postfix();
     }
+}
+
+static Node* postfix(){
+    Node* node = primary();
+
+    if(tk_consume("[")){
+        // array
+        node = new_node(ND_DREF, new_node_add(node, expr()), NULL);
+        tk_expect("]");
+        ty_add_type(node);
+    } else if(tk_consume("++")){
+        node = new_inc(node);
+    } else if(tk_consume("--")){
+        node = new_dec(node);
+    }
+
+    return node;
 }
 
 static Node* primary(){
@@ -478,6 +503,7 @@ static Node* primary(){
         tk_expect(")");
         return node;
     }
+
     Token* tok;
     // string constant?
     tok = tk_consume_string();
@@ -491,7 +517,6 @@ static Node* primary(){
             tk_expect("]");
             return node_deref;
         }
-
         return node;;
     }
 
@@ -526,16 +551,6 @@ static Node* primary(){
             }
 
             Node* node = new_var(sym);
-            if(tk_consume("[")){
-                // array
-                Node* node_deref = new_node(ND_DREF, new_node_add(node, expr()), NULL);
-                tk_expect("]");
-                
-                ty_add_type(node_deref);
-
-                return node_deref;
-            }
-
             return node;
         }
     }
@@ -697,5 +712,42 @@ static Node* new_node_mod(Node* lhs, Node* rhs){
 
     node->lhs = lhs;
     node->rhs = rhs;    
+    return node;
+}
+
+// Type* tmp = x; x += 1; *tmp;
+static Node* new_inc(Node* var){
+    Token tok;
+    tok.str = "tmp";
+    tok.len = 3;
+    tok.kind = TK_IDENT; 
+    st_start_scope();
+    Symbol* tmp = st_declare(&tok, var->type);
+
+    Node* node_tmp = new_var(tmp);
+    Node* node_assign = new_node(ND_ASSIGN, node_tmp, var);
+    Node* node_inc = new_node(ND_ASSIGN, var, new_node_add(var, new_node_num(1)));
+    Node* node = new_node(ND_COMMA, node_assign, new_node(ND_COMMA, node_inc, node_tmp));
+
+    st_end_scope();
+
+    return node;
+}
+
+static Node* new_dec(Node* var){
+    Token tok;
+    tok.str = "tmp";
+    tok.len = 3;
+    tok.kind = TK_IDENT; 
+    st_start_scope();
+    Symbol* tmp = st_declare(&tok, var->type);
+
+    Node* node_tmp = new_var(tmp);
+    Node* node_assign = new_node(ND_ASSIGN, node_tmp, var);
+    Node* node_inc = new_node(ND_ASSIGN, var, new_node_sub(var, new_node_num(1)));
+    Node* node = new_node(ND_COMMA, node_assign, new_node(ND_COMMA, node_inc, node_tmp));
+
+    st_end_scope();
+
     return node;
 }
