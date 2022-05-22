@@ -35,8 +35,8 @@ Type* ty_array_of(Type* base_type, int array_len){
     Type* ty = calloc(1, sizeof(Type));
 
     ty->kind = TY_ARRAY;
-    ty->size = base_type->size;
     ty->array_len = array_len;
+    ty->size = base_type->size * ty->array_len;
     ty->pointer_to = base_type;
 
     return ty;

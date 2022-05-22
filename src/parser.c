@@ -451,12 +451,7 @@ static Node* unary(){
     if(tk_consume_keyword("sizeof")){
         Node* node = unary();
         ty_add_type(node);
-
-        if(node->type->kind == TY_ARRAY){
-            return new_node_num(node->type->size * node->type->array_len);
-        } else {
-            return new_node_num(node->type->size);
-        }
+        return new_node_num(node->type->size);
     } else if(tk_consume("+")){
         return unary();
     } else if(tk_consume("-")){
