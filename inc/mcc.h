@@ -57,7 +57,8 @@ typedef enum {
     ND_FOR,
     ND_CALL,
     ND_DECLARE,
-    ND_FUNCTION
+    ND_FUNCTION,
+    ND_COMMA
 } NodeKind;
 
 struct Node {

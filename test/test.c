@@ -128,6 +128,8 @@ int test_expr(){
     a += 3 + 5;
     assert(10, a, "error : += operand, when rvalue is expr.\n");
 
+    assert(5, (a = 3, a = a + 2), "error : comma operater.\n");
+
     printf("expr test is completed !\n");
 }
 

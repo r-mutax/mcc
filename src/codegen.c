@@ -256,6 +256,11 @@ static void gen(Node* node){
             }
             printf("  push rax\n");
             return;
+        case ND_COMMA:
+            gen(node->lhs);
+            printf("  pop rax\n");
+            gen(node->rhs);
+            return;
     }
 
     if(node->kind == ND_NUM){

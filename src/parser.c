@@ -19,8 +19,13 @@
     decl_spec = type_spec
     type_spec = "long"
     declarator = '*' * ( ident | ident '[' num ']') 
-    expr = assign
-    assign = equality ( '=' assign )?
+    expr = assign (',' assign)*
+    assign = equality ( '=' assign 
+                        | '+=' assign
+                        | '-=' assign
+                        | '*=' assign
+                        | '/=' assign
+                        | '%=' assign )?
     equality = relational ( '==' relational | '!=' relational)*
     relational = add ( '<' add | '<=' add | '>' add | '>=' add)*
     add = mul ( '+' mul | '-' mul | '%' mul )*
@@ -246,7 +251,7 @@ static Node* declaration(){
                 cur->next = calloc(1, sizeof(Node));
                 cur->next->kind = ND_ASSIGN;
                 cur->next->lhs = new_var(sym);
-                cur->next->rhs = expr();
+                cur->next->rhs = assign();
 
                 cur = cur->next;
             }
@@ -342,13 +347,13 @@ static Node* stmt(){
 }
 
 static Node* expr(){
-    return assign();
-}
+    Node* node = assign();
 
-static Node* assign_to(){
+    if (tk_consume(",")){
+        node = new_node(ND_COMMA, node, expr());
+    }
 
-
-
+    return node;
 }
 
 static Node* assign(){
@@ -494,11 +499,11 @@ static Node* primary(){
 
             // has arguments?
             if(!tk_consume(")")){
-                Node* arg_head = expr();
+                Node* arg_head = assign();
                 Node* cur = arg_head;
 
                 while(tk_consume(",")){
-                    cur->next = expr();
+                    cur->next = assign();
                     cur = cur->next;
                 }
                 node->arg = arg_head;
