@@ -206,6 +206,13 @@ int test_variable(){
     assert(3, da[0][3], "error : array of array access.\n");
     assert(6, da[1][2], "error : array of array access.\n");
 
+    int dv[3][3][3];
+    //memset(dv, 0, sizeof(dv));
+    dv[0][1][2] = 25;
+    dv[2][1][0] = 52;
+    assert(25, dv[0][1][2], "error : array of array of array access.\n");
+    assert(52, dv[2][1][0], "error : array of array of array access.2\n");
+
     printf("variable test is completed !\n");
 }
 
