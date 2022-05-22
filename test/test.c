@@ -110,25 +110,29 @@ int test_expr(){
 
     assert(38, test_lvar(), "error : local variable.\n");
     a += 1;
-    assert(1, a, "error : += operand.\n");
+    assert(1, a, "error : += operater.\n");
 
     a -= 2;
-    assert(-1, a, "error : -= operand.\n");
+    assert(-1, a, "error : -= operater.\n");
 
     a *= -6;
-    assert(6, a, "error : *= operand.\n");
+    assert(6, a, "error : *= operater.\n");
 
     a /= 3;
-    assert(2, a, "error : /= operand.\n");
+    assert(2, a, "error : /= operater.\n");
 
     a = 12;
     a %= 5;
-    assert(2, a, "error : %= operand.\n");
+    assert(2, a, "error : %= operater.\n");
 
     a += 3 + 5;
     assert(10, a, "error : += operand, when rvalue is expr.\n");
 
     assert(5, (a = 3, a = a + 2), "error : comma operater.\n");
+
+    a = 3;
+    assert(4, ++a, "error : increment operater.\n");
+    assert(3, --a, "error : comma operater.\n");
 
     printf("expr test is completed !\n");
 }
