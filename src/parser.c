@@ -64,6 +64,7 @@ static Node* compound_stmt();
 static Node* declaration();
 static Type* decl_spec();
 static Type* type_spec();
+static Type* type_suffix(Type* ty);
 static Symbol* declare(Type* ty);
 static Node* stmt();
 static Node* expr();
@@ -280,15 +281,22 @@ static Symbol* declare(Type* ty){
     }
 
     Token* tok = tk_expect_ident();
-
-    if(tk_consume("[")){
-        int len = tk_expect_num();
-        ty = ty_array_of(ty, len);
-        tk_expect("]");
-    }
+    ty = type_suffix(ty);
 
     Symbol* sym = st_declare(tok, ty);
     return sym;
+}
+
+static Type* type_suffix(Type* ty){
+
+    if(tk_consume("[")){
+        int len = tk_expect_num();
+        tk_expect("]");
+        ty = type_suffix(ty);
+        return ty_array_of(ty, len);
+    }
+
+    return ty;
 }
 
 static Node* stmt(){
@@ -476,18 +484,27 @@ static Node* unary(){
 static Node* postfix(){
     Node* node = primary();
 
-    if(tk_consume("[")){
+    for(;;){
+        if(tk_consume("[")){
         // array
-        node = new_node(ND_DREF, new_node_add(node, expr()), NULL);
-        tk_expect("]");
-        ty_add_type(node);
-    } else if(tk_consume("++")){
-        node = new_inc(node);
-    } else if(tk_consume("--")){
-        node = new_dec(node);
-    }
+            node = new_node(ND_DREF, new_node_add(node, expr()), NULL);
+            tk_expect("]");
+            ty_add_type(node);
+            continue;
+        }
 
-    return node;
+        if(tk_consume("++")){
+            node = new_inc(node);
+            continue;
+        }
+
+        if(tk_consume("--")){
+            node = new_dec(node);
+            continue;
+        }
+        
+        return node;
+    }
 }
 
 static Node* primary(){

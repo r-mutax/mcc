@@ -30,11 +30,7 @@ Symbol* st_declare(Token* tok, Type* ty){
 
     // add stack size.
     if(cur_scope->kind != SC_GROBAL){
-        if(ty->kind == TY_ARRAY){
-            func_scope->stacksize += ty->size * ty->array_len;
-        } else {
-            func_scope->stacksize += ty->size;
-        }
+        func_scope->stacksize += ty->size;
         sym->offset = func_scope->stacksize;
     } else {
         sym->is_grobalvar = true;

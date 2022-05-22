@@ -196,6 +196,15 @@ int test_variable(){
     assert(8, y, "error : char type : memory allocation.\n");
     assert(2, x, "error : char type : memory allocation.\n");
 
+    int da[2][4];
+    int k = 0;
+    int i = 0;
+    int j = 0;
+    for(i = 0; i < 2; i++)
+    for(j = 0; j < 4; j++)
+        da[i][j] = k,k++;
+    assert(3, da[0][3], "error : array of array access.\n");
+    assert(6, da[1][2], "error : array of array access.\n");
 
     printf("variable test is completed !\n");
 }

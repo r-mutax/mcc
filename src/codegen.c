@@ -127,53 +127,60 @@ static void gen_stmt(Node* node){
             gen_epilogue();
             return;
         case ND_WHILE:
-            printf(".LBegin%d:\n", while_label);
-            gen(node->cond);
-            printf("  pop rax\n");
-            printf("  cmp rax, 0\n");
-            printf("  je .LEnd%d\n", while_label);
-            gen_stmt(node->body);
-            printf("  jmp .LBegin%d\n", while_label);
-            printf(".LEnd%d:\n", while_label);
-            while_label++;
-            return;
+            {
+                int label = while_label++;
+                printf(".LBegin%d:\n", label);
+                gen(node->cond);
+                printf("  pop rax\n");
+                printf("  cmp rax, 0\n");
+                printf("  je .LEnd%d\n", label);
+                gen_stmt(node->body);
+                printf("  jmp .LBegin%d\n", label);
+                printf(".LEnd%d:\n", label);
+                while_label++;
+                return;                
+            }
         case ND_FOR:
-            gen(node->init);
-            printf("  pop rax\n");
-            printf(".LBeginFor%d:\n", for_label);
-            gen(node->cond);
-            printf("  pop rax\n");
-            printf("  cmp rax, 0\n");
-            printf("  je .LEndFor%d\n", for_label);
-            gen_stmt(node->body);
-            gen(node->iter);
-            printf("  pop rax\n");
-            printf("  jmp .LBeginFor%d\n", for_label);
-            printf(".LEndFor%d:\n", for_label);
-            for_label++;
-            return;
+            {
+                int label = for_label++;
+                gen(node->init);
+                printf("  pop rax\n");
+                printf(".LBeginFor%d:\n", label);
+                gen(node->cond);
+                printf("  pop rax\n");
+                printf("  cmp rax, 0\n");
+                printf("  je .LEndFor%d\n", label);
+                gen_stmt(node->body);
+                gen(node->iter);
+                printf("  pop rax\n");
+                printf("  jmp .LBeginFor%d\n", label);
+                printf(".LEndFor%d:\n", label);
+                return;
+            }
         case ND_IF:
+        {
+            int label = if_label++;
             gen(node->cond);
             printf("  pop rax\n");
             printf("  cmp rax, 0\n");
 
             if(node->else_body){
-                printf("  je .LIfElse%d\n", if_label);
+                printf("  je .LIfElse%d\n", label);
             } else {
-                printf("  je .LIfEnd%d\n", if_label);
+                printf("  je .LIfEnd%d\n", label);
             }
 
             // print true-body
             gen_stmt(node->body);
-            printf("  jmp .LIfEnd%d\n", if_label);
+            printf("  jmp .LIfEnd%d\n", label);
             
             if(node->else_body){
-                printf(".LIfElse%d:\n", if_label);
+                printf(".LIfElse%d:\n", label);
                 gen_stmt(node->else_body);
             }
-            printf(".LIfEnd%d:\n", if_label);
-            if_label++;
+            printf(".LIfEnd%d:\n", label);
             return;
+        }
         case ND_CMPDSTMT:
             gen_compound_stmt(node->body);
             return;
