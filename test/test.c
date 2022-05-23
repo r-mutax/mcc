@@ -144,6 +144,8 @@ int test_expr(){
     a = 100;
     b = 44;
     assert(36, a & b, "error : bitwise-AND.\n");
+    assert(153, 115 ^ 234, "error : bitwise-Xor.\n");
+    assert(28, 100 & 44 ^ 56, "error : priority of bitwise operater.\n");
 
     printf("expr test is completed !\n");
 }

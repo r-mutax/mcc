@@ -323,6 +323,9 @@ static void gen(Node* node){
         case ND_BIT_AND:
             printf("  and rax, rdi\n");
             break;
+        case ND_BIT_XOR:
+            printf("  xor rax, rdi\n");
+            break;
     }
 
     printf("  push rax\n");
