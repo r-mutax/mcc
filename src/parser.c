@@ -27,6 +27,7 @@
                         | '*=' assign
                         | '/=' assign
                         | '%=' assign )?
+    bitOr = bitXor ( '|' bitXor )*
     bitXor = bitAnd ( '^' bitAnd )*
     bitAnd = equality ('&' equality)*
     equality = relational ( '==' relational | '!=' relational)*
@@ -71,9 +72,10 @@ static Type* type_suffix(Type* ty);
 static Symbol* declare(Type* ty);
 static Node* stmt();
 static Node* expr();
-static Node* assign();
+static Node* bitOr();
 static Node* bitXor();
 static Node* bitAnd();
+static Node* assign();
 static Node* equality();
 static Node* relational();
 static Node* add();
@@ -378,7 +380,7 @@ static Node* expr(){
 }
 
 static Node* assign(){
-    Node* node = bitXor();
+    Node* node = bitOr();
 
     if(tk_consume("=")){
         node = new_node(ND_ASSIGN, node, assign());
@@ -393,6 +395,20 @@ static Node* assign(){
     } else if(tk_consume("%=")){
         node = new_node(ND_ASSIGN, node, new_node_mod(node, assign()));
     }
+    return node;
+}
+
+static Node* bitOr(){
+    Node* node = bitXor();
+
+    for(;;){
+        if(tk_consume("|")){
+            node = new_node(ND_BIT_OR, node, bitXor());
+        } else {
+            break;
+        }
+    }
+
     return node;
 }
 

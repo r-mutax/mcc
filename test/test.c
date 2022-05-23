@@ -141,11 +141,10 @@ int test_expr(){
     assert(4, a--, "error : post-decrement operater.\n");
     assert(3, a, "error : post-decrement operater.\n");
 
-    a = 100;
-    b = 44;
-    assert(36, a & b, "error : bitwise-AND.\n");
+    assert(36, 100 & 44, "error : bitwise-AND.\n");
     assert(153, 115 ^ 234, "error : bitwise-Xor.\n");
-    assert(28, 100 & 44 ^ 56, "error : priority of bitwise operater.\n");
+    assert(126, 78 | 56, "error : bitwise-OR.\n");
+    assert(31, 15 | 56 ^ 100 & 44, "error : priority of bitwise operater.\n");
 
     printf("expr test is completed !\n");
 }
