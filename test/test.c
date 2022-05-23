@@ -146,6 +146,20 @@ int test_expr(){
     assert(126, 78 | 56, "error : bitwise-OR.\n");
     assert(31, 15 | 56 ^ 100 & 44, "error : priority of bitwise operater.\n");
 
+    assert(23, 3 | 4 | 5 | 19, "error : multiple bitwise-Or.\n");
+
+    assert(1, 1 && 44, "error : logical AND , both value is true.\n");
+    assert(0, 0 && 44, "error : logical AND , lvalue is true.\n");
+    assert(0, 1 && 0, "error : logical AND , rvalue is true.\n");
+    assert(0, 0 && 0, "error : logical AND , both value is false.\n");
+
+    assert(1, 1 || 44, "error : logical OR , both value is true.\n");
+    assert(1, 0 || 44, "error : logical OR , lvalue is true.\n");
+    assert(1, 1 || 0, "error : logical OR , rvalue is true.\n");
+    assert(0, 0 || 0, "error : logical OR , both value is false.\n");
+
+    assert(0, 0 || 1 && 0, "error : operater priority, logical OR and logical AND.\n");
+
     printf("expr test is completed !\n");
 }
 

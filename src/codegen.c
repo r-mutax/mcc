@@ -3,6 +3,7 @@
 #include "errormsg.h"
 
 // grobal value -----------------------------------
+static int label = 0;
 static int while_label = 0;
 static int if_label = 0;
 static int for_label = 0;
@@ -268,6 +269,44 @@ static void gen(Node* node){
             printf("  pop rax\n");
             gen(node->rhs);
             return;
+        case ND_AND:
+        {
+            int c = label++;
+            gen(node->lhs);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+            printf("  je .L.false%d\n", c);
+            gen(node->rhs);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+            printf("  je .L.false%d\n", c);
+            printf("  mov rax, 1\n");
+            printf("  jmp .L.End%d\n", c);
+            printf(".L.false%d:\n", c);
+            printf("  mov rax, 0\n");
+            printf(".L.End%d:\n", c);
+            printf("  push rax\n");
+            return;
+        }
+        case ND_OR:
+        {
+            int c = label++;
+            gen(node->lhs);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+            printf("  jne .L.true%d\n", c);
+            gen(node->rhs);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+            printf("  jne .L.true%d\n", c);
+            printf("  mov rax, 0\n");
+            printf("  jmp .L.End%d\n", c);
+            printf(".L.true%d:\n", c);
+            printf("  mov rax, 1\n");
+            printf(".L.End%d:\n", c);
+            printf("  push rax\n");
+            return;
+        }
     }
 
     if(node->kind == ND_NUM){

@@ -27,6 +27,8 @@
                         | '*=' assign
                         | '/=' assign
                         | '%=' assign )?
+    logicOR = logicAnd ('||' logicAnd)*
+    logicAnd = bitOr ('&&' bitOr)*
     bitOr = bitXor ( '|' bitXor )*
     bitXor = bitAnd ( '^' bitAnd )*
     bitAnd = equality ('&' equality)*
@@ -72,6 +74,8 @@ static Type* type_suffix(Type* ty);
 static Symbol* declare(Type* ty);
 static Node* stmt();
 static Node* expr();
+static Node* logicOr();
+static Node* logicAnd();
 static Node* bitOr();
 static Node* bitXor();
 static Node* bitAnd();
@@ -380,7 +384,7 @@ static Node* expr(){
 }
 
 static Node* assign(){
-    Node* node = bitOr();
+    Node* node = logicOr();
 
     if(tk_consume("=")){
         node = new_node(ND_ASSIGN, node, assign());
@@ -394,6 +398,26 @@ static Node* assign(){
         node = new_node(ND_ASSIGN, node, new_node_div(node, assign()));
     } else if(tk_consume("%=")){
         node = new_node(ND_ASSIGN, node, new_node_mod(node, assign()));
+    }
+    return node;
+}
+
+static Node* logicOr(){
+    Node* node = logicAnd();
+
+    while(tk_consume("||")){
+        node = new_node(ND_OR, node, logicAnd());
+    }
+    return node;
+}
+static Node* logicAnd(){
+    Node* node = bitOr();
+    for(;;){
+        if(tk_consume("&&")){
+            node = new_node(ND_AND, node, bitOr());
+        } else {
+            break;
+        }
     }
     return node;
 }

@@ -64,7 +64,9 @@ Token* tk_tokenize(char* p){
             || startswith(p, "/=")
             || startswith(p, "%=")
             || startswith(p, "++")
-            || startswith(p, "--"))
+            || startswith(p, "--")
+            || startswith(p, "&&")
+            || startswith(p, "||"))
         {
             cur = new_token(TK_OPERAND, cur, p, 2);
             p += 2;

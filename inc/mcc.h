@@ -61,7 +61,9 @@ typedef enum {
     ND_COMMA,
     ND_BIT_AND,
     ND_BIT_OR,
-    ND_BIT_XOR
+    ND_BIT_XOR,
+    ND_AND,
+    ND_OR
 } NodeKind;
 
 struct Node {
