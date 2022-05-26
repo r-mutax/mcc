@@ -19,7 +19,8 @@ struct Scope{
 };
 
 void st_init();
-Symbol* st_declare(Token* tok, Type* ty);
+Symbol* st_make_symbol(Token* tok, Type* ty);
+void st_declare(Symbol* sym);
 Symbol* st_find_symbol(Token* tok);
 void st_start_scope();
 void st_end_scope();

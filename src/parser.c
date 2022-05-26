@@ -146,6 +146,8 @@ static Node* function(){
 
     Type* ty = decl_spec();
     Symbol* sym = declare(ty);
+    st_declare(sym);
+
     sym->is_func = true;
     func->func_sym = sym;
 
@@ -158,35 +160,23 @@ static Node* function(){
         if(!tk_istype()){
             error("not a type.\n");
         }
-
-        Type* ty = tk_consume_type();
-        while(tk_consume("*"))
-            ty = ty_pointer_to(ty);
-
-        Token* ident_tok = tk_expect_ident();
-        Symbol* sym = st_declare(ident_tok, ty);
-        func->param = st_copy_symbol(sym);
-        func->paramnum++;
-
-        Symbol* cur = func->param;
-
-        while(tk_consume(",")){
-
-            if(!tk_istype()){
-                error("not a type.\n");
-            }
-
-            ty = tk_consume_type();
+        
+        Symbol head;
+        Symbol* cur = &head;
+        do{
+            Type* ty = tk_consume_type();
             while(tk_consume("*"))
                 ty = ty_pointer_to(ty);
-
-            ident_tok = tk_expect_ident();
-            sym = st_declare(ident_tok, ty);
             
-            cur->next = st_copy_symbol(sym);
-            cur = cur->next;
+            Token* ident_tok = tk_expect_ident();
+            Symbol* sym = st_make_symbol(ident_tok, ty);
+            st_declare(sym);
+
+            cur = cur->next = st_copy_symbol(sym);
             func->paramnum++;
-        }
+        } while(tk_consume(","));
+        func->param = head.next;
+
         tk_expect(")");
     }
 
@@ -261,6 +251,7 @@ static Node* declaration(){
 
     do {
         Symbol* sym = declare(ty);
+        st_declare(sym);
         if(sym->is_grobalvar){
             cur->next = calloc(1, sizeof(Node));
             cur->next->kind = ND_DECLARE;
@@ -294,7 +285,7 @@ static Symbol* declare(Type* ty){
     Token* tok = tk_expect_ident();
     ty = type_suffix(ty);
 
-    Symbol* sym = st_declare(tok, ty);
+    Symbol* sym = st_make_symbol(tok, ty);
     return sym;
 }
 
@@ -807,7 +798,8 @@ static Node* new_inc(Node* var){
     tok.len = 3;
     tok.kind = TK_IDENT; 
     st_start_scope();
-    Symbol* tmp = st_declare(&tok, var->type);
+    Symbol* tmp = st_make_symbol(&tok, var->type);
+    st_declare(tmp);
 
     Node* node_tmp = new_var(tmp);
     Node* node_assign = new_node(ND_ASSIGN, node_tmp, var);
@@ -825,7 +817,8 @@ static Node* new_dec(Node* var){
     tok.len = 3;
     tok.kind = TK_IDENT; 
     st_start_scope();
-    Symbol* tmp = st_declare(&tok, var->type);
+    Symbol* tmp = st_make_symbol(&tok, var->type);
+    st_declare(tmp);
 
     Node* node_tmp = new_var(tmp);
     Node* node_assign = new_node(ND_ASSIGN, node_tmp, var);

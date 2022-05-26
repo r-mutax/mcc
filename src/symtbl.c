@@ -19,8 +19,7 @@ void st_init(){
     cur_scope = &grobal_scope;
 }
 
-Symbol* st_declare(Token* tok, Type* ty){
-
+Symbol* st_make_symbol(Token* tok, Type* ty){
     Symbol* sym = calloc(1, sizeof(Symbol));
 
     sym->name = calloc(1, sizeof(char) * (tok->len + 1));
@@ -28,6 +27,12 @@ Symbol* st_declare(Token* tok, Type* ty){
     sym->len = tok->len;
     sym->type = ty;
 
+    return sym;
+}
+
+void st_declare(Symbol* sym){
+
+    Type* ty = sym->type;
     // add stack size.
     if(cur_scope->kind != SC_GROBAL){
         func_scope->stacksize += ty->size;
@@ -39,8 +44,6 @@ Symbol* st_declare(Token* tok, Type* ty){
     // chain symbol to current scope.
     sym->next = cur_scope->symbol;
     cur_scope->symbol = sym;
-
-    return sym;
 }
 
 Symbol* st_find_symbol(Token* tok){
