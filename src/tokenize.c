@@ -73,7 +73,7 @@ Token* tk_tokenize(char* p){
             continue;
         }
 
-        if(strchr("+-*/,()<>;={}&|^[]%", *p)){
+        if(strchr("+-*/,()<>;={}&|^[].%", *p)){
             cur = new_token(TK_OPERAND, cur, p++, 1);
             continue;
         }
@@ -86,7 +86,8 @@ Token* tk_tokenize(char* p){
             || check_keyword("sizeof", &p, &cur)
             || check_keyword("int", &p, &cur)
             || check_keyword("char", &p, &cur)
-            || check_keyword("long", &p, &cur)){
+            || check_keyword("long", &p, &cur)
+            || check_keyword("struct", &p, &cur)){
             continue;
         }
 
@@ -190,7 +191,7 @@ bool tk_consume_keyword(char* keyword){
 
 bool tk_istype(){
     Type* ty = ty_get_type(token->str, token->len);
-    return ty != NULL;
+    return (ty != NULL || memcmp(token->str, "struct", token->len) == 0);
 }
 
 Type* tk_consume_type(){

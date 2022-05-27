@@ -66,6 +66,16 @@ Type* ty_pointer_to(Type* base_type){
     return type;
 }
 
+Symbol* ty_get_member(Type* ty, Token* tok){
+    for(Member* cur = ty->member; cur; cur = cur->next){
+        Symbol* sym = cur->sym;
+        if(sym->len == tok->len && memcmp(sym->name, tok->str, tok->len) == 0){
+            return sym;
+        }
+    }
+    return NULL;
+}
+
 void ty_add_type(Node* node){
 
     if(node == NULL || node->type){

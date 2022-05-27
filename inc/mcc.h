@@ -14,6 +14,7 @@ typedef struct Node Node;
 typedef struct Program Program;
 typedef struct Function Function;
 typedef struct Symbol Symbol;
+typedef struct Member Member;
 
 // token data definition --------------------------
 typedef enum {
@@ -63,7 +64,8 @@ typedef enum {
     ND_BIT_OR,
     ND_BIT_XOR,
     ND_AND,
-    ND_OR
+    ND_OR,
+    ND_MEMBER
 } NodeKind;
 
 struct Node {
@@ -115,10 +117,16 @@ struct Symbol{
 
 // type data definition --------------------------
 
+struct Member {
+    Symbol* sym;
+    Member* next;
+};
+
 typedef enum {
     TY_INTEGER = 0,
     TY_POINTER,
-    TY_ARRAY
+    TY_ARRAY,
+    TY_STRUCT
 } TypeKind;
 
 struct Type {
@@ -129,6 +137,8 @@ struct Type {
     Type*       pointer_from;
     Type*       pointer_to;
     
+    Member*     member;
+
     int         array_len;
 
     int     size;

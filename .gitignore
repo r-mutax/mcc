@@ -5,3 +5,4 @@ test/tmp.s
 test/test_func/*.o
 test/a.out
 test/test.s
+test/tt.c

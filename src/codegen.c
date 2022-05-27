@@ -205,6 +205,7 @@ static void gen(Node* node){
             return;
         case ND_LVAR:
         case ND_GVAR:
+        case ND_MEMBER:
             gen_lval(node);
             if(node->type->kind != TY_ARRAY){
                 printf("  pop rax\n");
@@ -412,6 +413,12 @@ static void gen_lval(Node* node){
         case ND_DREF:
             gen(node->lhs);
             return;
+        case ND_MEMBER:
+            gen_lval(node->lhs);
+            printf("  pop rax\n");
+            printf("  add rax, %d\n", node->offset);
+            printf("  push rax\n");
+            return;        
     }
 
     error("Not a Variable.\n");

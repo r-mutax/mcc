@@ -17,7 +17,8 @@
             | 'while' '(' expr ')' ( stmt )
     declaration = decl_spec* declarator ";"
     decl_spec = type_spec
-    type_spec = "long"
+    type_spec = "long" | "int" | "char" | struct_spec
+    struct_spec = 'struct' '{' struct_declar* '}'
     declarator = '*' * ( ident | ident '[' num ']') 
     expr = assign (',' assign)*
 
@@ -70,6 +71,7 @@ static Node* compound_stmt();
 static Node* declaration();
 static Type* decl_spec();
 static Type* type_spec();
+static Type* struct_spec();
 static Type* type_suffix(Type* ty);
 static Symbol* declare(Type* ty);
 static Node* stmt();
@@ -219,6 +221,36 @@ static Node* compound_stmt(){
     return node;
 }
 
+static Member* struct_member(){
+    Member head;
+    Member* cur = &head;
+    do{
+        cur = cur->next = calloc(1, sizeof(Member));
+        Type* ty = decl_spec();
+        cur->sym = declare(ty);
+        tk_expect(";");
+    } while(!tk_consume("}"));
+
+    return head.next;
+}
+
+static Type* struct_spec(){
+    tk_expect("{");
+
+    Type* ty = calloc(1, sizeof(Type));
+    ty->kind = TY_STRUCT;
+    ty->name = "__unnamed_struct";
+    
+    ty->member = struct_member();
+
+    int offset = 0;
+    for(Member* cur = ty->member; cur; cur = cur->next){
+        cur->sym->offset = offset;
+        offset += cur->sym->type->size;
+    }
+    ty->size = offset;
+}
+
 static Type* type_spec(){
     if(tk_consume_keyword("long")){
         return ty_get_type("long", 4);
@@ -226,6 +258,8 @@ static Type* type_spec(){
         return ty_get_type("int", 3);
     } else if(tk_consume_keyword("char")){
         return ty_get_type("char", 4);
+    } else if(tk_consume_keyword("struct")){
+        return struct_spec();
     }
 
     return NULL;
@@ -564,6 +598,18 @@ static Node* postfix(){
 
         if(tk_consume("--")){
             node = new_dec(node);
+            continue;
+        }
+
+        if(tk_consume(".")){
+            node = new_node(ND_MEMBER, node,NULL);
+            Token* tok = tk_expect_ident();
+            Symbol* sym = ty_get_member(node->lhs->sym->type, tok);
+            if(sym == NULL){
+                error_at(tok->str, "Not a member.\n");
+            }
+            node->type = sym->type;
+            node->offset = sym->offset;
             continue;
         }
         

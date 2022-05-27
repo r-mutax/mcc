@@ -280,6 +280,22 @@ int test_comment(){
     printf("comment test is completed !\n");
 }
 
+int test_struct(){
+
+    struct {
+        int a;
+        long b;
+        char ab[4];
+    } abd;
+    
+    abd.b = 25;
+    abd.ab[2] = 123;
+    assert(25, abd.b, "error : struct member operater.\n");
+    assert(123, abd.ab[2], "error : struct array member access.\n");
+
+    printf("struct test is completed !\n");    
+}
+
 int main(){   
     test_expr();
     test_stmt();
@@ -288,6 +304,7 @@ int main(){
     test_sizeof();
     test_string();
     test_comment();
+    test_struct();
 
     printf("test completed !\n");
 
