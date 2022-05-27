@@ -286,12 +286,27 @@ int test_struct(){
         int a;
         long b;
         char ab[4];
-    } abd;
+        struct {
+            long ai;
+            long k;
+        } abdd;
+    } abd, *c;
     
     abd.b = 25;
-    abd.ab[2] = 123;
+    abd.abdd.ai = 139;
     assert(25, abd.b, "error : struct member operater.\n");
+    assert(139, abd.abdd.ai, "error : struct of strcut.\n");
+
+    abd.ab[2] = 123;
     assert(123, abd.ab[2], "error : struct array member access.\n");
+
+    long *x = &(abd.b);
+    assert(25, *x, "error : struct member address.\n");
+
+    c = &abd;
+    c->abdd.k = 45;
+    assert(25, c->b, "error : struct arrow operater.\n");
+    assert(45, c->abdd.k, "error : arrow operater with struct of struct.\n");
 
     printf("struct test is completed !\n");    
 }

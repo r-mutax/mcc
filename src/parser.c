@@ -601,10 +601,26 @@ static Node* postfix(){
             continue;
         }
 
-        if(tk_consume(".")){
+        if(tk_consume("->")){
+            node = new_node(ND_DREF, node, NULL);
+            ty_add_type(node);
             node = new_node(ND_MEMBER, node,NULL);
             Token* tok = tk_expect_ident();
-            Symbol* sym = ty_get_member(node->lhs->sym->type, tok);
+            Symbol* sym = ty_get_member(node->lhs->type, tok);
+            if(sym == NULL){
+                error_at(tok->str, "Not a member.\n");
+            }
+            node->type = sym->type;
+            node->offset = sym->offset;
+            continue;
+        }
+
+        if(tk_consume(".")){
+            ty_add_type(node);
+            node = new_node(ND_MEMBER, node,NULL);
+            node->type = node->lhs->type;
+            Token* tok = tk_expect_ident();
+            Symbol* sym = ty_get_member(node->lhs->type, tok);
             if(sym == NULL){
                 error_at(tok->str, "Not a member.\n");
             }
