@@ -144,4 +144,20 @@ struct Type {
     int     size;
 };
 
+typedef struct Scope Scope;
+
+typedef enum {
+    SC_GROBAL = 0,
+    SC_FUNCTION,
+    SC_BLOCK
+} ScopeKind;
+
+struct Scope{
+    ScopeKind   kind;
+    Symbol*     symbol;
+    int         stacksize;
+    Scope*      child;
+    Scope*      parent;
+};
+
 #endif

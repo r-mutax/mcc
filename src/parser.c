@@ -3,6 +3,7 @@
 #include "tokenize.h"
 #include "symtbl.h"
 #include "type.h"
+#include "scope.h"
 #include "errormsg.h"
 
 /*
@@ -153,7 +154,7 @@ static Node* function(){
     sym->is_func = true;
     func->func_sym = sym;
 
-    st_start_scope();
+    sc_start_scope();
 
     tk_expect("(");
 
@@ -186,7 +187,7 @@ static Node* function(){
     ty_add_type(func->body);
 
     func->stack_size = st_get_stacksize();
-    st_end_scope();
+    sc_end_scope();
 
     if(func->body == NULL){
         func->is_declare = true;
@@ -206,7 +207,7 @@ static Node* compound_stmt(){
     Node* cur = &head; 
 
     // start block scope. -->
-    st_start_scope();
+    sc_start_scope();
     while(!tk_consume("}") && cur){
         if(tk_istype()){
             cur->next = declaration();
@@ -215,7 +216,7 @@ static Node* compound_stmt(){
         }
         cur = cur->next;        
     }
-    st_end_scope();
+    sc_end_scope();
     // end block scope <--
     node->body = head.next;
     return node;
@@ -861,7 +862,7 @@ static Node* new_inc(Node* var){
     tok.str = "tmp";
     tok.len = 3;
     tok.kind = TK_IDENT; 
-    st_start_scope();
+    sc_start_scope();
     Symbol* tmp = st_make_symbol(&tok, var->type);
     st_declare(tmp);
 
@@ -870,7 +871,7 @@ static Node* new_inc(Node* var){
     Node* node_inc = new_node(ND_ASSIGN, var, new_node_add(var, new_node_num(1)));
     Node* node = new_node(ND_COMMA, node_assign, new_node(ND_COMMA, node_inc, node_tmp));
 
-    st_end_scope();
+    sc_end_scope();
 
     return node;
 }
@@ -880,7 +881,7 @@ static Node* new_dec(Node* var){
     tok.str = "tmp";
     tok.len = 3;
     tok.kind = TK_IDENT; 
-    st_start_scope();
+    sc_start_scope();
     Symbol* tmp = st_make_symbol(&tok, var->type);
     st_declare(tmp);
 
@@ -889,7 +890,7 @@ static Node* new_dec(Node* var){
     Node* node_inc = new_node(ND_ASSIGN, var, new_node_sub(var, new_node_num(1)));
     Node* node = new_node(ND_COMMA, node_assign, new_node(ND_COMMA, node_inc, node_tmp));
 
-    st_end_scope();
+    sc_end_scope();
 
     return node;
 }

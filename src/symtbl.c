@@ -1,11 +1,8 @@
 #include "mcc.h"
 #include "symtbl.h"
 #include "type.h"
+#include "scope.h"
 
-Scope       grobal_scope;
-Scope*      cur_scope;
-Scope*      func_scope;
-int         scope_level = 0;
 
 Symbol*     str_head;
 Symbol*     str_tail;
@@ -16,7 +13,7 @@ static int st_unique_no(){
 }
 
 void st_init(){
-    cur_scope = &grobal_scope;
+    sc_init_scope();
 }
 
 Symbol* st_make_symbol(Token* tok, Type* ty){
@@ -34,21 +31,20 @@ void st_declare(Symbol* sym){
 
     Type* ty = sym->type;
     // add stack size.
-    if(cur_scope->kind != SC_GROBAL){
-        func_scope->stacksize += ty->size;
-        sym->offset = func_scope->stacksize;
+    if(!sc_is_grobal()){
+        sc_add_funcstack(ty->size);
+        sym->offset = sc_get_funcstack();
     } else {
         sym->is_grobalvar = true;
     }
 
     // chain symbol to current scope.
-    sym->next = cur_scope->symbol;
-    cur_scope->symbol = sym;
+    sc_add_symbol(sym);
 }
 
 Symbol* st_find_symbol(Token* tok){
 
-    for(Scope* scp = cur_scope; scp; scp = scp->parent){
+    for(Scope* scp = sc_get_cur_scope(); scp; scp = scp->parent){
         for(Symbol* sym = scp->symbol; sym; sym = sym->next){
             if(memcmp(sym->name, tok->str, tok->len) == 0
                 && (sym->len == tok->len)){
@@ -60,38 +56,8 @@ Symbol* st_find_symbol(Token* tok){
     return NULL;
 }
 
-void st_start_scope(){
-    Scope* scp = calloc(1, sizeof(Scope));
-
-    scp->parent = cur_scope;
-    cur_scope->child = scp;
-
-    scope_level++;
-    if(scope_level == 1){
-        scp->kind = SC_FUNCTION;
-        func_scope = scp;
-    } else if(scope_level >= 2){
-        scp->kind = SC_BLOCK;
-    }
-
-    cur_scope = scp;
-}
-
-void st_end_scope(){
-    Scope* scp = cur_scope;
-    cur_scope = cur_scope->parent;
-    scope_level--;
-    
-    if(scope_level == 0){
-        // When end of Function Scope, reset func_scope.
-        func_scope = NULL; 
-    }
-
-    free(scp);
-}
-
 int st_get_stacksize(){
-    return func_scope->stacksize;
+    return sc_get_funcstack();
 }
 
 Symbol* st_copy_symbol(Symbol* sym){
