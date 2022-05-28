@@ -155,6 +155,7 @@ typedef enum {
 struct Scope{
     ScopeKind   kind;
     Symbol*     symbol;
+    Type*       type;
     int         stacksize;
     Scope*      child;
     Scope*      parent;

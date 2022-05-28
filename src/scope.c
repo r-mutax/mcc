@@ -59,3 +59,13 @@ void sc_add_symbol(Symbol* sym){
 Scope* sc_get_cur_scope(){
     return cur_scope;
 }
+
+void sc_add_type(Type* type){
+    
+    if(!cur_scope->type){
+        cur_scope->type = type;
+    } else {
+        type->next = cur_scope->type;
+        cur_scope->type = type;
+    }
+}

@@ -1,8 +1,6 @@
 #include "mcc.h"
 #include "type.h"
-
-Type* type_head;
-Type* type_tail;
+#include "scope.h"
 
 void ty_init(){
     ty_register_type("long", 8, TY_INTEGER);
@@ -20,13 +18,7 @@ Type* ty_register_type(char* type_name, int type_size, TypeKind type_kind){
     ty->size = type_size;
     ty->kind = type_kind;
 
-    if(type_head == NULL){
-        type_head = ty;
-        type_tail = ty;
-    } else {
-        type_tail->next = ty;
-        type_tail = ty;
-    }
+    sc_add_type(ty);
 }
 
 // In mcc Compiler type system,
@@ -44,11 +36,15 @@ Type* ty_array_of(Type* base_type, int array_len){
 }
 
 Type* ty_get_type(char* type_name, int len){
-    for(Type* cur = type_head; cur; cur = cur->next){
-        if(cur->len == len && memcmp(cur->name, type_name, len) == 0){
-            return cur;
+
+    for(Scope* sc = sc_get_cur_scope(); sc; sc = sc->parent){
+        for(Type* cur = sc->type; cur; cur = cur->next){
+            if(cur->len == len && memcmp(cur->name, type_name, len) == 0){
+                return cur;
+            }
         }
     }
+
     return NULL;
 }
 
