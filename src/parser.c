@@ -17,7 +17,7 @@
             | 'while' '(' expr ')' ( stmt )
     declaration = decl_spec* declarator ";"
     decl_spec = type_spec
-    type_spec = "long" | "int" | "char" | struct_spec
+    type_spec = "long" | "int" | "char" | 'short' | struct_spec
     struct_spec = 'struct' '{' struct_declar* '}'
     declarator = '*' * ( ident | ident '[' num ']') 
     expr = assign (',' assign)*
@@ -258,6 +258,8 @@ static Type* type_spec(){
         return ty_get_type("int", 3);
     } else if(tk_consume_keyword("char")){
         return ty_get_type("char", 4);
+    } else if(tk_consume_keyword("short")){
+        return ty_get_type("short", 5);
     } else if(tk_consume_keyword("struct")){
         return struct_spec();
     }

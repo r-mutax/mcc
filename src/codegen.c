@@ -8,6 +8,7 @@ static int while_label = 0;
 static int if_label = 0;
 static int for_label = 0;
 static const char *argreg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
+static const char *argreg16[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
 static const char *argreg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static const char *argreg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
@@ -91,6 +92,8 @@ static void gen_function(Node* func){
     for(int argn = 0; argn < func->paramnum; argn++){
         if(param->type->size == 1) {
             printf("  mov [rbp - %d],%s\n", param->offset, argreg8[argn]);
+        }else if(param->type->size == 2){
+            printf("  mov [rbp - %d],%s\n", param->offset, argreg16[argn]);
         }else if(param->type->size == 4){
             printf("  mov [rbp - %d],%s\n", param->offset, argreg32[argn]);
         } else if(param->type->size == 8){
@@ -211,6 +214,8 @@ static void gen(Node* node){
                 printf("  pop rax\n");
                 if(node->type->size == 1){
                     printf("  movsx eax, BYTE PTR [rax]\n");
+                }else if(node->type->size == 2){
+                    printf("  movsx eax, WORD PTR [rax]\n");
                 }else if(node->type->size == 4){
                     printf("  mov eax, [rax]\n");
                 } else if(node->type->size == 8){
@@ -243,6 +248,8 @@ static void gen(Node* node){
             printf("  pop rax\n");
             if(node->lhs->type->size == 1){
                 printf("  mov [rax], dil\n");
+            } else if(node->lhs->type->size == 2){
+                printf("  mov [rax], di\n");
             } else if(node->lhs->type->size == 4){
                 printf("  mov [rax], edi\n");
             } else if(node->lhs->type->size == 8){
@@ -257,7 +264,9 @@ static void gen(Node* node){
             gen(node->lhs);
             printf("  pop rax\n");
             if(node->type->size == 1){
-                printf("  movzx eax, BYTE PTR [rax]\n");
+                printf("  movsbq rax, BYTE PTR [rax]\n");
+            } else if(node->type->size == 2){
+                printf("  movswq rax, WORD PTR [rax]\n");
             } else if(node->type->size == 4){
                 printf("  mov eax, [rax]\n");
             } else if(node->type->size == 8){

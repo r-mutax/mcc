@@ -88,6 +88,7 @@ Token* tk_tokenize(char* p){
             || check_keyword("int", &p, &cur)
             || check_keyword("char", &p, &cur)
             || check_keyword("long", &p, &cur)
+            || check_keyword("short", &p, &cur)
             || check_keyword("struct", &p, &cur)){
             continue;
         }

@@ -8,6 +8,7 @@ void ty_init(){
     ty_register_type("long", 8, TY_INTEGER);
     ty_register_type("int", 4, TY_INTEGER);
     ty_register_type("char", 1, TY_INTEGER);
+    ty_register_type("short", 2, TY_INTEGER);
 }
 
 Type* ty_register_type(char* type_name, int type_size, TypeKind type_kind){

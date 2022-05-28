@@ -233,6 +233,13 @@ int test_variable(){
     assert(25, dv[0][1][2], "error : array of array of array access.\n");
     assert(52, dv[2][1][0], "error : array of array of array access.2\n");
 
+    short sa = 10;
+    short sar[12];
+
+    assert(10, sa, "error : short variable.\n");
+    sar[sa] = 5;
+    assert(5, sar[sa], "error : short array.\n");
+
     printf("variable test is completed !\n");
 }
 
@@ -307,6 +314,8 @@ int test_struct(){
     c->abdd.k = 45;
     assert(25, c->b, "error : struct arrow operater.\n");
     assert(45, c->abdd.k, "error : arrow operater with struct of struct.\n");
+
+    assert(32, sizeof(abd), "error : sizeof struct.\n");
 
     printf("struct test is completed !\n");    
 }
