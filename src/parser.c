@@ -253,15 +253,14 @@ static Type* struct_spec(){
 }
 
 static Type* type_spec(){
-    if(tk_consume_keyword("long")){
-        return ty_get_type("long", 4);
-    } else if(tk_consume_keyword("int")){
-        return ty_get_type("int", 3);
-    } else if(tk_consume_keyword("char")){
-        return ty_get_type("char", 4);
-    } else if(tk_consume_keyword("short")){
-        return ty_get_type("short", 5);
-    } else if(tk_consume_keyword("struct")){
+
+    Type* ty = tk_consume_type();
+
+    if(ty){
+        return ty;
+    }
+
+    if(tk_consume_keyword("struct")){
         return struct_spec();
     }
 
@@ -288,6 +287,10 @@ static Node* declaration(){
 
     do {
         Symbol* sym = declare(ty);
+        if(sym->type->kind == TY_VOID){
+            error("declare variable with void type.\n");
+        }
+
         st_declare(sym);
         if(sym->is_grobalvar){
             cur->next = calloc(1, sizeof(Node));

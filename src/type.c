@@ -1,12 +1,14 @@
 #include "mcc.h"
 #include "type.h"
 #include "scope.h"
+#include "errormsg.h"
 
 void ty_init(){
     ty_register_type("long", 8, TY_INTEGER);
     ty_register_type("int", 4, TY_INTEGER);
     ty_register_type("char", 1, TY_INTEGER);
     ty_register_type("short", 2, TY_INTEGER);
+    ty_register_type("void", 0, TY_VOID);
 }
 
 Type* ty_register_type(char* type_name, int type_size, TypeKind type_kind){
@@ -109,11 +111,12 @@ void ty_add_type(Node* node){
             node->type = ty_pointer_to(node->lhs->type);
             break;
         case ND_DREF:
-            if(node->lhs->type->pointer_to){
-                node->type = node->lhs->type->pointer_to;
-            } else {
-                node->type = ty_get_type("long", 4);
-            }
+            if(!node->lhs->type->pointer_to)
+                error("invalid dereference pointer.\n");
+            if(node->lhs->type->pointer_to->kind == TY_VOID)
+                error("try dereference void pointer.\n");
+
+            node->type = node->lhs->type->pointer_to;
             break;
         case ND_DECLARE:
             node->type = node->sym->type;

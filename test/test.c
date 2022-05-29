@@ -5,17 +5,15 @@ int print_int(int a);
 
 long g_x;
 
-int assert(int lhs, int rhs, char* p){
+void assert(int lhs, int rhs, char* p){
     if(lhs != rhs)
         exit_error(p);
-    return 0;
 }
 
-int assert2(int lhs, int rhs, char* p){
+void assert2(int lhs, int rhs, char* p){
     print_int(rhs);
     print_int(lhs);
     exit_error(p);
-    return 0;
 }
 
 int test_lvar(){
@@ -33,7 +31,7 @@ int test_add(int a, int b){
     return a + b;
 }
 
-int test_func(){
+void test_func(){
 
     assert(5, test_add(1, 4), "error : multi paramaters function call.\n");
 
@@ -41,7 +39,7 @@ int test_func(){
     printf("function test is completed !\n");
 }
 
-int test_stmt(){
+void test_stmt(){
 
     assert(5, test_return(), "error : return.\n");
 
@@ -84,7 +82,7 @@ int test_stmt(){
     printf("stmt test is completed !\n");
 }
 
-int test_expr(){
+void test_expr(){
 
     int a = 0;
     int b = 0;
@@ -163,7 +161,7 @@ int test_expr(){
     printf("expr test is completed !\n");
 }
 
-int test_variable(){
+void test_variable(){
 
     int a;
     int *b = &a;
@@ -240,10 +238,11 @@ int test_variable(){
     sar[sa] = 5;
     assert(5, sar[sa], "error : short array.\n");
 
+
     printf("variable test is completed !\n");
 }
 
-int test_sizeof(){
+void test_sizeof(){
     char c;
     int a;
     long x;
@@ -268,7 +267,7 @@ int test_sizeof(){
     printf("sizeof test is completed !\n");
 }
 
-int test_string(){
+void test_string(){
     assert(0, ""[0], "error : void string literal.\n");
     assert(97, "abc"[0], "error : string literal access.\n");
     assert(98, "abc"[1], "error : string literal access.\n");
@@ -277,7 +276,7 @@ int test_string(){
     printf("string test is completed !\n");
 }
 
-int test_comment(){
+void test_comment(){
     // exit_error("error : row comment.\n");
 
     /*
@@ -287,7 +286,7 @@ int test_comment(){
     printf("comment test is completed !\n");
 }
 
-int test_struct(){
+void test_struct(){
 
     struct {
         int a;
