@@ -288,15 +288,16 @@ void test_comment(){
 
 void test_struct(){
 
-    struct {
+    struct TEST_STRUCT {
         int a;
         long b;
         char ab[4];
-        struct {
+        struct TEST_2STRUCT{
             long ai;
             long k;
         } abdd;
     } abd, *c;
+    struct TEST_STRUCT k;
     
     abd.b = 25;
     abd.abdd.ai = 139;
@@ -315,6 +316,9 @@ void test_struct(){
     assert(45, c->abdd.k, "error : arrow operater with struct of struct.\n");
 
     assert(32, sizeof(abd), "error : sizeof struct.\n");
+
+    k.a = 124;
+    assert(124, k.a, "error : named struct.\n");
 
     printf("struct test is completed !\n");    
 }

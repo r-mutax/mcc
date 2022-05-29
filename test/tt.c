@@ -1,6 +1,6 @@
 int main(){
 
-        struct {
+    struct TEST_STRUCT{
         int a;
         long b;
         char ab[4];
@@ -9,6 +9,7 @@ int main(){
             long k;
         } abdd;
     } abd, *c;
+    struct TEST_STRUCT k;
 
     return sizeof(abd);
 }

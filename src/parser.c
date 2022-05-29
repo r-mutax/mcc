@@ -19,7 +19,7 @@
     declaration = decl_spec* declarator ";"
     decl_spec = type_spec
     type_spec = "long" | "int" | "char" | 'short' | struct_spec
-    struct_spec = 'struct' '{' struct_declar* '}'
+    struct_spec = 'struct' ident? '{' struct_declar* '}'
     declarator = '*' * ( ident | ident '[' num ']') 
     expr = assign (',' assign)*
 
@@ -236,13 +236,26 @@ static Member* struct_member(){
 }
 
 static Type* struct_spec(){
-    tk_expect("{");
 
+    Token* tok = tk_consume_ident();
+
+    if(tok){
+        if(!tk_consume("{")){
+            // registerd struct.
+            Type* ty = ty_find_struct(tok->str, tok->len);
+
+            if(!ty) error_at(tok->str, "implicit type.");
+            return ty;
+        }
+    }
+    tk_consume("{");
+    sc_start_scope();
+    // this point.
+    // unnamed struct or named struct.
     Type* ty = calloc(1, sizeof(Type));
     ty->kind = TY_STRUCT;
-    ty->name = "__unnamed_struct";
-    
     ty->member = struct_member();
+    sc_end_scope();
 
     int offset = 0;
     for(Member* cur = ty->member; cur; cur = cur->next){
@@ -250,6 +263,16 @@ static Type* struct_spec(){
         offset += cur->sym->type->size;
     }
     ty->size = offset;
+
+    if(tok){
+        ty->name = calloc(1, tok->len + 1);
+        strncpy(ty->name, tok->str, tok->len);
+        ty->len = tok->len;
+        ty_register_struct(ty);
+    } else {
+        ty->name = "__unnamed_struct";
+    }
+    return ty;
 }
 
 static Type* type_spec(){
