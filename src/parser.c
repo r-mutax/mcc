@@ -304,6 +304,12 @@ static Node* declaration(){
 
     Type* ty = decl_spec();
 
+    if(ty->kind == TY_STRUCT && tk_consume(";")){
+        Node* node = calloc(1, sizeof(Node));
+        node->kind = ND_CMPDSTMT;
+        return node;
+    }
+
     Node head;
     memset(&head, 0, sizeof(Node));
     Node* cur = &head;

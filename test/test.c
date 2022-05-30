@@ -296,8 +296,8 @@ void test_struct(){
             long ai;
             long k;
         } abdd;
-    } abd, *c;
-    struct TEST_STRUCT k;
+    };
+    struct TEST_STRUCT k, abd, *c;
     
     abd.b = 25;
     abd.abdd.ai = 139;
