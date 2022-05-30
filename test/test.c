@@ -286,6 +286,14 @@ void test_comment(){
     printf("comment test is completed !\n");
 }
 
+void test_literal(){
+    assert(97, 'a', "error : character literal.\n");
+    assert(65, 'A', "error : character literal.\n");
+    assert(94, '^', "error : character literal.\n");
+
+    printf("literal test is completed !\n");
+}
+
 void test_struct(){
 
     struct TEST_STRUCT {
@@ -332,6 +340,7 @@ int main(){
     test_string();
     test_comment();
     test_struct();
+    test_literal();
 
     printf("test completed !\n");
 

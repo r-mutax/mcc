@@ -54,6 +54,18 @@ Token* tk_tokenize(char* p){
             continue;
         }
 
+        if(*p == '\''){
+            char a = *(++p);
+            cur = new_token(TK_NUM, cur, p, 1);
+            cur->val = a;
+
+            while(*p != '\''){
+                p++;
+            }
+            p++;
+            continue;
+        }
+
         if(startswith(p, "==")
             || startswith(p, "!=")
             || startswith(p, "<=")
