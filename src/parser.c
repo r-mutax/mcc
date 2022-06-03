@@ -275,26 +275,145 @@ static Type* struct_spec(){
     return ty;
 }
 
-static Type* type_spec(){
-
-    Type* ty = tk_consume_type();
-
-    if(ty){
-        return ty;
+// check storage class specifiers.
+// auto / register class is ignored in this compiler.
+// if consumption token this function return true and dosen't return false.
+static bool check_storage_class_keyword(StorageClassKind* sck, Token* tok){
+    
+    if(tk_consume_keyword("typedef")){
+        if(*sck != SCK_NONE){
+            error_at(tok->str, "multiple storage classes in declaration specifies.");
+        }
+        *sck = SCK_TYPEDEF;
+        return true;
+    }
+    
+    if(tk_consume_keyword("extern")){
+        if(*sck != SCK_NONE){
+            error_at(tok->str, "multiple storage classes in declaration specifies.");
+        }
+        *sck = SCK_EXTERN;
+        return true;
     }
 
-    if(tk_consume_keyword("struct")){
-        return struct_spec();
+    if(tk_consume_keyword("static")){
+        if(*sck != SCK_NONE){
+            error_at(tok->str, "multiple storage classes in declaration specifies.");
+        }
+        *sck = SCK_STATIC;
+        return true;
     }
 
-    return NULL;
+    // these keyword is recognized but ignored.
+    if(tk_consume_keyword("auto")
+        || tk_consume_keyword("register"))
+    {
+        return true;
+    }
+
+   return false;
+}
+
+static void count_decl_spec(int* type_flg, int flg, Token* tok){
+
+    // error check
+    int target = 0;
+    switch(flg){
+        case K_LONG:
+            // 'long' keyword can use up to 2 times in declaration.
+            // ex) long long int
+            target = *type_flg & (K_LONG << 1);
+            break;
+        default:
+            target = *type_flg & flg;
+            break;
+    }
+
+    if(target){
+        error_at(tok->str, "duplicate type keyword.\n");
+    }
+
+    *type_flg += flg;
 }
 
 static Type* decl_spec(){
-    
-    Type* ty = type_spec();
-    if(ty == NULL){
-        error("expect type.\n");
+
+    // parse type specifies.
+    int type_flg = 0;
+    StorageClassKind sck = SCK_NONE;
+    Type* ty = NULL;
+    while(1){
+        Token* tok = tk_get_token();
+
+        // check storage class keyword.
+        if(check_storage_class_keyword(&sck, tok)){
+            continue;
+        }
+
+        // user type.
+        if(tk_consume_keyword("struct")){
+            if(type_flg)
+                error_at(tok->str, "duplicate type keyword.\n");
+            ty = struct_spec();
+            type_flg += K_USER;
+            continue;
+        }
+
+        // chcek built-in type keyword.
+        if(tk_consume_keyword("void"))
+            count_decl_spec(&type_flg, K_VOID, tok);
+        if(tk_consume_keyword("_Bool"))
+            count_decl_spec(&type_flg, K_BOOL, tok);
+        if(tk_consume_keyword("char"))
+            count_decl_spec(&type_flg, K_CHAR, tok);
+        if(tk_consume_keyword("short"))
+            count_decl_spec(&type_flg, K_SHORT, tok);
+        if(tk_consume_keyword("int"))
+            count_decl_spec(&type_flg, K_INT, tok);
+        if(tk_consume_keyword("long"))
+            count_decl_spec(&type_flg, K_LONG, tok);
+        if(tk_consume_keyword("signed"))
+            count_decl_spec(&type_flg, K_SIGNED, tok);
+        if(tk_consume_keyword("unsigned"))
+            count_decl_spec(&type_flg, K_UNSIGNED, tok);
+        
+        break;
+    }
+
+    if(!ty){
+        switch(type_flg){
+            case K_VOID:
+                ty = ty_get_type("void", 4);
+                break;
+            case K_CHAR:
+            case K_SIGNED + K_CHAR:
+                ty = ty_get_type("char", 4);
+                break;
+            case K_SHORT:
+            case K_SHORT + K_INT:
+            case K_SIGNED + K_SHORT:
+            case K_SIGNED + K_SHORT + K_INT:
+                ty = ty_get_type("short", 5);
+                break;
+            case K_INT:
+            case K_SIGNED:
+            case K_SIGNED + K_INT:
+                ty = ty_get_type("int", 3);
+                break;
+            case K_LONG:
+            case K_LONG + K_INT:
+            case K_LONG + K_LONG:
+            case K_LONG + K_LONG + K_INT:
+            case K_SIGNED + K_LONG:
+            case K_SIGNED + K_LONG + K_INT:
+            case K_SIGNED + K_LONG + K_LONG:
+            case K_SIGNED + K_LONG + K_LONG + K_INT:
+                ty = ty_get_type("long", 4);
+                break;
+            default:
+                error_at(tk_get_token()->str, "Invalid type.\n");
+                break;
+        }
     }
 
     return ty;

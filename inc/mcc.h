@@ -123,6 +123,15 @@ struct Member {
 };
 
 typedef enum {
+    SCK_NONE = 0,
+    SCK_TYPEDEF,
+    SCK_EXTERN,
+    SCK_STATIC,
+    SCK_AUTO,
+    SCK_REGISTER
+} StorageClassKind;
+
+typedef enum {
     TY_INTEGER = 0,
     TY_POINTER,
     TY_ARRAY,
@@ -160,6 +169,18 @@ struct Scope{
     int         stacksize;
     Scope*      child;
     Scope*      parent;
+};
+
+enum {
+    K_VOID      = 1 << 0,
+    K_BOOL      = 1 << 2,
+    K_CHAR      = 1 << 4,
+    K_SHORT     = 1 << 6, 
+    K_INT       = 1 << 8,
+    K_LONG      = 1 << 10,      // up to 2 times can.
+    K_USER      = 1 << 16,
+    K_SIGNED    = 1 << 17,
+    K_UNSIGNED  = 1 << 18
 };
 
 #endif
