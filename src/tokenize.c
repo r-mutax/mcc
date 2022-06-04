@@ -102,6 +102,7 @@ Token* tk_tokenize(char* p){
             || check_keyword("long", &p, &cur)
             || check_keyword("short", &p, &cur)
             || check_keyword("void", &p, &cur)
+            || check_keyword("static", &p, &cur)
             || check_keyword("struct", &p, &cur)){
             continue;
         }
@@ -206,7 +207,13 @@ bool tk_consume_keyword(char* keyword){
 
 bool tk_istype(){
     Type* ty = ty_get_type(token->str, token->len);
-    return (ty != NULL || memcmp(token->str, "struct", token->len) == 0);
+
+    if(ty != NULL
+        || memcmp(token->str, "static", token->len) == 0
+        || memcmp(token->str, "struct", token->len) == 0){
+            return true;
+    }
+    return false;
 }
 
 Type* tk_consume_type(){

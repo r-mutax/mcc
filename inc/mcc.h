@@ -112,6 +112,7 @@ struct Symbol{
     int         len;
     bool        is_func;
     bool        is_globalvar;
+    bool        is_static;
     Type*       type;
     char*       str;
 };

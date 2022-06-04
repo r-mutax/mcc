@@ -61,7 +61,10 @@ Type* ty_get_type(char* type_name, int len){
     for(Scope* sc = sc_get_cur_scope(); sc; sc = sc->parent){
         for(Type* cur = sc->type; cur; cur = cur->next){
             if(cur->len == len && memcmp(cur->name, type_name, len) == 0){
-                return cur;
+                Type* ret = calloc(1, sizeof(Type));
+                memcpy(ret, cur, sizeof(Type));
+                ret->next = NULL;
+                return ret;
             }
         }
     }

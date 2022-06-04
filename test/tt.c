@@ -1,5 +1,5 @@
 int main(){
 
-    int a = 10;
+    static int a;
     return a;
 }

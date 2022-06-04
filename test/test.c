@@ -16,6 +16,11 @@ void assert2(int lhs, int rhs, char* p){
     exit_error(p);
 }
 
+int test_static(){
+    static int a;
+    return a++;
+}
+
 int test_lvar(){
     long abc = 15;
     long b = 23;
@@ -238,6 +243,9 @@ void test_variable(){
     sar[sa] = 5;
     assert(5, sar[sa], "error : short array.\n");
 
+    assert(0, test_static(), "error : test static variable.\n");
+    assert(1, test_static(), "error : test static variable.\n");
+    assert(2, test_static(), "error : test static variable.\n");
 
     printf("variable test is completed !\n");
 }
