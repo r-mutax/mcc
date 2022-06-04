@@ -101,6 +101,7 @@ struct Node {
 struct Program {
     Node*   func_list;
     Symbol* string_list;
+    Symbol* data_list;
 };
 
 // symbol table data definition ----------------------------------
@@ -110,7 +111,7 @@ struct Symbol{
     int         offset;
     int         len;
     bool        is_func;
-    bool        is_grobalvar;
+    bool        is_globalvar;
     Type*       type;
     char*       str;
 };
@@ -146,6 +147,7 @@ struct Type {
     TypeKind    kind;
     Type*       pointer_from;
     Type*       pointer_to;
+    bool        is_static;
     
     Member*     member;
 

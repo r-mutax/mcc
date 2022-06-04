@@ -28,21 +28,31 @@ void gen_program(Program* prog){
     printf(".intel_syntax noprefix\n");
 
     // string constant output
+    printf("  .data\n");
     Symbol* sym = prog->string_list;
     while(sym){
-        printf("  .data\n");
         gen_print_sym(sym);
         printf("  .string \"%s\"\n", sym->str);
         sym = sym->next;
     }
 
-    // data / text section print
+    // data section output
+    Node    tmp;
+    memset(&tmp, 0, sizeof(Node));
+    sym = prog->data_list;
+    while(sym){
+        tmp.kind = ND_DECLARE;
+        tmp.sym = sym;
+        gen_grobal_variable(&tmp);
+        sym = sym->next;
+    }
+
+
+    // text section output
     Node* cur = prog->func_list;
     while(cur){
         if(cur->kind == ND_FUNCTION){
             gen_function(cur);
-        } else {
-            gen_grobal_variable(cur);
         }
         cur = cur->next;
     }
@@ -54,18 +64,25 @@ static void gen_print_sym(Symbol* sym){
 
 static void gen_grobal_variable(Node* node){
 
-    Node* cur = node->body;
-    while(cur){
-        printf("  .data\n");
-
-        gen_print_sym(cur->sym);
-        int size = cur->sym->type->size;
-        if(cur->sym->type->pointer_to){
-            size *= cur->sym->type->array_len;
-        }
-        printf("  .zero %d\n", size);
-        cur = cur->next;
+    gen_print_sym(node->sym);
+    int size = node->sym->type->size;
+    if(node->sym->type->pointer_to){
+        size *= node->sym->type->array_len;
     }
+    printf("  .zero %d\n", size);
+
+    // Node* cur = node->body;
+    // while(cur){
+    //     printf("  .data\n");
+
+    //     gen_print_sym(cur->sym);
+    //     int size = cur->sym->type->size;
+    //     if(cur->sym->type->pointer_to){
+    //         size *= cur->sym->type->array_len;
+    //     }
+    //     printf("  .zero %d\n", size);
+    //     cur = cur->next;
+    // }
 }
 
 static void gen_function(Node* func){

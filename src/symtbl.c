@@ -6,6 +6,8 @@
 
 Symbol*     str_head;
 Symbol*     str_tail;
+Symbol*     data_head;
+Symbol*     data_tail;
 
 static int st_unique_no(){
     static int no = 0;
@@ -35,7 +37,7 @@ void st_declare(Symbol* sym){
         sc_add_funcstack(ty->size);
         sym->offset = sc_get_funcstack();
     } else {
-        sym->is_grobalvar = true;
+        sym->is_globalvar = true;
     }
 
     // chain symbol to current scope.
@@ -73,7 +75,7 @@ Symbol* st_register_literal(Token* tok){
     sym->str = calloc(1, sizeof(char) * (tok->len + 1));
     strncpy(sym->str, tok->str, tok->len);
 
-    // string literal is including the null teminator.
+    // string literal is including the null terminator.
     // so that length is string length + 1.
     sym->type = ty_get_type("char", 4);
     sym->type = ty_array_of(sym->type, tok->len + 1);
@@ -81,7 +83,7 @@ Symbol* st_register_literal(Token* tok){
     sym->name = calloc(1, sizeof(char) * 20);
     sprintf(sym->name, ".LSTR%d", st_unique_no());
 
-    sym->is_grobalvar = true;
+    sym->is_globalvar = true;
 
     if(str_head){
         str_tail->next = sym;
@@ -95,4 +97,19 @@ Symbol* st_register_literal(Token* tok){
 
 Symbol* st_get_string_list(){
     return str_head;
+}
+
+void st_register_data(Symbol* sym){
+    Symbol* register_sym = st_copy_symbol(sym);
+
+    if(data_head){
+        data_tail->next = register_sym;
+        data_tail = register_sym;
+    } else {
+        data_head = data_tail = register_sym;
+    }
+}
+
+Symbol* st_get_data_list(){
+    return data_head;
 }

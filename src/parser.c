@@ -110,14 +110,15 @@ static Program* program(){
     while(!tk_iseof()){
         if(is_function()){
             cur->next = function();
+            cur = cur->next;
         } else {
-            cur->next = declaration();
+            declaration();
         }
-        cur = cur->next;
     }
 
     prog->func_list = head.next;
     prog->string_list = st_get_string_list();
+    prog->data_list = st_get_data_list();
 
     return prog;
 }
@@ -440,11 +441,12 @@ static Node* declaration(){
         }
 
         st_declare(sym);
-        if(sym->is_grobalvar){
-            cur->next = calloc(1, sizeof(Node));
-            cur->next->kind = ND_DECLARE;
-            cur->next->sym = sym;
-            cur = cur->next;
+        if(sym->is_globalvar){
+            st_register_data(sym);
+            // cur->next = calloc(1, sizeof(Node));
+            // cur->next->kind = ND_DECLARE;
+            // cur->next->sym = sym;
+            // cur = cur->next;
         } else {
             if(tk_consume("=")){
                 cur->next = calloc(1, sizeof(Node));
@@ -458,11 +460,14 @@ static Node* declaration(){
     } while(tk_consume(","));
     tk_expect(";");
 
-    Node* node = calloc(1, sizeof(Node));
-    node->kind = ND_CMPDSTMT;
-    node->body = head.next;
+    if(&head.next){
+        Node* node = calloc(1, sizeof(Node));
+        node->kind = ND_CMPDSTMT;
+        node->body = head.next;
+        return node;
+    }
 
-    return node;
+    return NULL;
 }
 
 static Symbol* declare(Type* ty){
@@ -946,7 +951,7 @@ static Node* new_node_sub(Node* lhs, Node* rhs){
 static Node* new_var(Symbol* sym){
 
     Node* node = calloc(1, sizeof(Node));
-    if(sym->is_grobalvar){
+    if(sym->is_globalvar){
         node->kind = ND_GVAR;
     } else {
         node->kind = ND_LVAR;
