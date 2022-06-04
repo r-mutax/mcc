@@ -84,6 +84,21 @@ void test_stmt(){
     }
     assert(2, a, "error : for stmt.\n");
 
+    a = 0;
+    goto label1;
+    a = 10;
+    label1:
+    assert(0, a, "error : goto stmt.\n");
+
+    a = 0;
+    label2:
+    a++;
+    if(a == 10) goto label3;
+    goto label2;
+    label3:
+    assert(10, a, "error : goto forward label.\n");
+    
+
     printf("stmt test is completed !\n");
 }
 

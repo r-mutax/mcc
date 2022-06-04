@@ -86,7 +86,7 @@ Token* tk_tokenize(char* p){
             continue;
         }
 
-        if(strchr("+-*/,()<>;={}&|^[].%", *p)){
+        if(strchr("+-*/,()<>:;={}&|^[].%", *p)){
             cur = new_token(TK_OPERAND, cur, p++, 1);
             continue;
         }
@@ -96,6 +96,7 @@ Token* tk_tokenize(char* p){
             || check_keyword("else", &p, &cur)
             || check_keyword("for", &p, &cur)
             || check_keyword("while", &p, &cur)
+            || check_keyword("goto", &p, &cur)
             || check_keyword("sizeof", &p, &cur)
             || check_keyword("int", &p, &cur)
             || check_keyword("char", &p, &cur)
@@ -253,6 +254,16 @@ Token* tk_consume_string(){
     return tok;
 }
 
+bool    tk_is_label(){
+    bool ret = false;
+    Token* tk_bk = token;
+    if(tk_consume_ident() && tk_consume(":"))
+        ret = true;
+    
+    token = tk_bk;
+    return ret;
+}
+
 // local function ---------------------------------
 static Token* new_token(TokenKind kind, Token* cur, char* str, int len){
     Token* tok = calloc(1, sizeof(Token));
@@ -296,3 +307,4 @@ static bool check_keyword(char* keyword, char** p, Token** tok){
 
     return false;
 }
+

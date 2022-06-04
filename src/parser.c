@@ -551,7 +551,22 @@ static Node* stmt(){
         node->body = stmt();
         node->line = p;
         return node;
+    } else if(tk_consume_keyword("goto")){
+        Token* tok = tk_expect_ident();
+        tk_expect(";");
+        node = new_node(ND_GOTO, NULL, NULL);
+        node->label_name = calloc(1, tok->len + 1);
+        strncpy(node->label_name, tok->str, tok->len);
+        return node;
+    } else if(tk_is_label()){
+        Token* tok = tk_consume_ident();
+        tk_expect(":");
+        node = new_node(ND_LABEL, NULL, NULL);
+        node->label_name = calloc(1, tok->len + 1);
+        strncpy(node->label_name, tok->str, tok->len);
+        return node;
     } else {
+
         node = expr();
         tk_expect(";");
         node->line = p;

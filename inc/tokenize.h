@@ -18,4 +18,5 @@ bool    tk_istype();
 Token*  tk_get_token();
 void    tk_set_token(Token* tok);
 Token*  tk_consume_string();
+bool    tk_is_label();
 #endif

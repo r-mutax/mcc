@@ -3,6 +3,7 @@
 #include "errormsg.h"
 
 // grobal value -----------------------------------
+static Node* cur_function;
 static int label = 0;
 static int while_label = 0;
 static int if_label = 0;
@@ -74,19 +75,6 @@ static void gen_grobal_variable(Node* node){
         size *= node->sym->type->array_len;
     }
     printf("  .zero %d\n", size);
-
-    // Node* cur = node->body;
-    // while(cur){
-    //     printf("  .data\n");
-
-    //     gen_print_sym(cur->sym);
-    //     int size = cur->sym->type->size;
-    //     if(cur->sym->type->pointer_to){
-    //         size *= cur->sym->type->array_len;
-    //     }
-    //     printf("  .zero %d\n", size);
-    //     cur = cur->next;
-    // }
 }
 
 static void gen_function(Node* func){
@@ -94,6 +82,8 @@ static void gen_function(Node* func){
     if(func->is_declare){
         return;
     }
+
+    cur_function = func;
 
     printf("  .global %s\n", func->func_sym->name);
     printf("  .text\n");
@@ -126,6 +116,8 @@ static void gen_function(Node* func){
     gen_compound_stmt(func->body->body);
 
     gen_epilogue();
+
+    cur_function = NULL;
 }
 
 static void gen_compound_stmt(Node* node){
@@ -208,6 +200,12 @@ static void gen_stmt(Node* node){
         }
         case ND_CMPDSTMT:
             gen_compound_stmt(node->body);
+            return;
+        case ND_LABEL:
+            printf(".L%s_%s:\n", cur_function->func_sym->name, node->label_name);
+            return;
+        case ND_GOTO:
+            printf("  jmp .L%s_%s\n", cur_function->func_sym->name, node->label_name);
             return;
         default:
             gen(node);
