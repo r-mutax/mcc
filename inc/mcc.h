@@ -148,7 +148,6 @@ struct Type {
     TypeKind    kind;
     Type*       pointer_from;
     Type*       pointer_to;
-    bool        is_static;
     
     Member*     member;
 

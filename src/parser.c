@@ -70,11 +70,11 @@ static Program* program();
 static Node* function();
 static Node* compound_stmt();
 static Node* declaration();
-static Type* decl_spec();
+static Type* decl_spec(StorageClassKind* sck);
 static Type* type_spec();
 static Type* struct_spec();
 static Type* type_suffix(Type* ty);
-static Symbol* declare(Type* ty);
+static Symbol* declare(Type* ty, StorageClassKind sck);
 static Node* stmt();
 static Node* expr();
 static Node* logicOr();
@@ -128,7 +128,8 @@ static bool is_function(){
     Token* bkup_tok = tk_get_token();
     bool retval = false;
 
-    Type* ty = decl_spec();
+    StorageClassKind sck = SCK_NONE;
+    Type* ty = decl_spec(&sck);
 
     while(tk_consume("*")){
         ;
@@ -148,8 +149,9 @@ static Node* function(){
     Node* func = calloc(1, sizeof(Node));
     func->kind = ND_FUNCTION;
 
-    Type* ty = decl_spec();
-    Symbol* sym = declare(ty);
+    StorageClassKind sck = SCK_NONE;
+    Type* ty = decl_spec(&sck);
+    Symbol* sym = declare(ty, sck);
     st_declare(sym);
 
     sym->is_func = true;
@@ -228,8 +230,9 @@ static Member* struct_member(){
     Member* cur = &head;
     do{
         cur = cur->next = calloc(1, sizeof(Member));
-        Type* ty = decl_spec();
-        cur->sym = declare(ty);
+        StorageClassKind sck = SCK_NONE;
+        Type* ty = decl_spec(&sck);
+        cur->sym = declare(ty, sck);
         tk_expect(";");
     } while(!tk_consume("}"));
 
@@ -337,17 +340,16 @@ static void count_decl_spec(int* type_flg, int flg, Token* tok){
     *type_flg += flg;
 }
 
-static Type* decl_spec(){
+static Type* decl_spec(StorageClassKind* sck){
 
     // parse type specifies.
     int type_flg = 0;
-    StorageClassKind sck = SCK_NONE;
     Type* ty = NULL;
     while(tk_istype()){
         Token* tok = tk_get_token();
 
         // check storage class keyword.
-        if(check_storage_class_keyword(&sck, tok)){
+        if(check_storage_class_keyword(sck, tok)){
             continue;
         }
 
@@ -415,16 +417,13 @@ static Type* decl_spec(){
         }
     }
 
-    if(sck == SCK_STATIC){
-        ty->is_static = true;
-    }
-
     return ty;
 }
 
 static Node* declaration(){
 
-    Type* ty = decl_spec();
+    StorageClassKind sck = SCK_NONE;
+    Type* ty = decl_spec(&sck);
 
     if(ty->kind == TY_STRUCT && tk_consume(";")){
         Node* node = calloc(1, sizeof(Node));
@@ -437,13 +436,13 @@ static Node* declaration(){
     Node* cur = &head;
 
     do {
-        Symbol* sym = declare(ty);
+        Symbol* sym = declare(ty, sck);
         if(sym->type->kind == TY_VOID){
             error("declare variable with void type.\n");
         }
 
         st_declare(sym);
-        if(sym->is_globalvar || sym->type->is_static){
+        if(sym->is_globalvar || sym->is_static){
             st_register_data(sym);
         } else {
             if(tk_consume("=")){
@@ -468,7 +467,7 @@ static Node* declaration(){
     return NULL;
 }
 
-static Symbol* declare(Type* ty){
+static Symbol* declare(Type* ty, StorageClassKind sck){
     while(tk_consume("*")){
         ty = ty_pointer_to(ty);
     }
@@ -477,6 +476,14 @@ static Symbol* declare(Type* ty){
     ty = type_suffix(ty);
 
     Symbol* sym = st_make_symbol(tok, ty);
+    
+    switch(sck){
+        case SCK_STATIC:
+            sym->is_static = true;
+            break;
+        default:
+            break;
+    }
     return sym;
 }
 
@@ -949,7 +956,7 @@ static Node* new_node_sub(Node* lhs, Node* rhs){
 static Node* new_var(Symbol* sym){
 
     Node* node = calloc(1, sizeof(Node));
-    if(sym->is_globalvar || sym->type->is_static){
+    if(sym->is_globalvar || sym->is_static){
         node->kind = ND_GVAR;
     } else {
         node->kind = ND_LVAR;
@@ -1019,7 +1026,6 @@ static Node* new_inc(Node* var){
     sc_start_scope();
     Type* ty = calloc(1, sizeof(Type));
     memcpy(ty, var->type, sizeof(Type));
-    ty->is_static = false;
     Symbol* tmp = st_make_symbol(&tok, ty);
     st_declare(tmp);
 
@@ -1041,7 +1047,6 @@ static Node* new_dec(Node* var){
     sc_start_scope();
     Type* ty = calloc(1, sizeof(Type));
     memcpy(ty, var->type, sizeof(Type));
-    ty->is_static = false;
     Symbol* tmp = st_make_symbol(&tok, ty);
     st_declare(tmp);
 

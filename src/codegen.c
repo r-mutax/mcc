@@ -59,7 +59,7 @@ void gen_program(Program* prog){
 }
 
 static void gen_print_sym(Symbol* sym){
-    if(sym->type->is_static){
+    if(sym->is_static){
         printf(".L%s:\n", sym->name);
     } else {
         printf("%s:\n", sym->name);
@@ -437,7 +437,7 @@ static void gen_lval(Node* node){
             printf("  push rax\n");
             return;
         case ND_GVAR:
-            if(node->sym->type->is_static){
+            if(node->sym->is_static){
                 printf("  mov rax, OFFSET FLAT:.L%s\n", node->sym->name);
             } else {
                 printf("  mov rax, OFFSET FLAT:%s\n", node->sym->name);
