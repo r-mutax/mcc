@@ -98,6 +98,20 @@ void test_stmt(){
     label3:
     assert(10, a, "error : goto forward label.\n");
     
+    int s = 15;
+    switch(s){
+        case 1:
+            s = 25;
+        case 15:
+            s = s + s;
+        case 20:
+            s = s + 12;
+            goto slabel;
+        case 25:
+            s = s * 4;
+    }
+    slabel:
+    assert(42, s, "error : switch-case stmt.\n");
 
     printf("stmt test is completed !\n");
 }

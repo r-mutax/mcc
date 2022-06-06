@@ -67,7 +67,9 @@ typedef enum {
     ND_OR,
     ND_MEMBER,
     ND_LABEL,
-    ND_GOTO
+    ND_GOTO,
+    ND_SWITCH,
+    ND_CASE
 } NodeKind;
 
 struct Node {
@@ -87,6 +89,7 @@ struct Node {
     Node*       else_body;
     Symbol*     sym;
     char*       label_name;
+    Node*       case_label;
 
     Node*       arg;
 

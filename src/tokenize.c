@@ -97,6 +97,8 @@ Token* tk_tokenize(char* p){
             || check_keyword("for", &p, &cur)
             || check_keyword("while", &p, &cur)
             || check_keyword("goto", &p, &cur)
+            || check_keyword("switch", &p, &cur)
+            || check_keyword("case", &p, &cur)
             || check_keyword("sizeof", &p, &cur)
             || check_keyword("int", &p, &cur)
             || check_keyword("char", &p, &cur)
@@ -131,6 +133,8 @@ Token* tk_tokenize(char* p){
             cur->len = p - q;
             continue;
         }
+
+        error("%s", *p);
     }
 
     new_token(TK_EOF, cur, p, 0);
@@ -210,8 +214,8 @@ bool tk_istype(){
     Type* ty = ty_get_type(token->str, token->len);
 
     if(ty != NULL
-        || memcmp(token->str, "static", token->len) == 0
-        || memcmp(token->str, "struct", token->len) == 0){
+        || memcmp(token->str, "static", 6) == 0
+        || memcmp(token->str, "struct", 6) == 0){
             return true;
     }
     return false;

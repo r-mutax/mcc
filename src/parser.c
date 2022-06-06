@@ -16,6 +16,7 @@
             | 'return' expr ';'
             | 'if' '(' expr ')' stmt 
             | 'while' '(' expr ')' ( stmt )
+            | 'switch' '(' expr ')' stmt
     declaration = decl_spec* declarator ";"
     decl_spec = type_spec
     type_spec = "long" | "int" | "char" | 'short' | struct_spec
@@ -29,7 +30,7 @@
                         | '*=' assign
                         | '/=' assign
                         | '%=' assign )?
-    logicOR = logicAnd ('||' logicAnd)*
+    logicOr = logicAnd ('||' logicAnd)*
     logicAnd = bitOr ('&&' bitOr)*
     bitOr = bitXor ( '|' bitXor )*
     bitXor = bitAnd ( '^' bitAnd )*
@@ -66,6 +67,8 @@ static Node* new_inc(Node* var);
 static Node* new_dec(Node* var);
 static Node* new_string_literal(Token* tok);
 static int new_unique_no();
+static Node* copy_node(Node* node);
+static Node* find_case_label(Node* body);
 static Program* program();
 static Node* function();
 static Node* compound_stmt();
@@ -499,6 +502,30 @@ static Type* type_suffix(Type* ty){
     return ty;
 }
 
+static Node* find_case_label(Node* body){
+    Node* cur = body;
+    Node case_head;
+    Node* cur_case = &case_head;
+    while(cur){
+        switch(cur->kind){
+            case ND_CASE:
+                if(cur->lhs->kind != ND_NUM)
+                    error_at(cur->line, "case label is not num.\n");
+                cur_case = cur_case->next = copy_node(cur->lhs);
+                break;
+            case ND_CMPDSTMT:
+                cur_case->next = find_case_label(cur->body);
+                while(cur_case->next){
+                    cur_case = cur_case->next;
+                }
+                break;
+        }
+        cur = cur->next;
+    }
+
+    return case_head.next;
+}
+
 static Node* stmt(){
 
     char* p = tk_getline();
@@ -550,6 +577,20 @@ static Node* stmt(){
 
         node->body = stmt();
         node->line = p;
+        return node;
+    } else if(tk_consume_keyword("switch")){
+        node = new_node(ND_SWITCH, NULL, NULL);
+        
+        tk_expect("(");
+        node->cond = expr();
+        tk_expect(")");
+        node->body = stmt();
+        node->case_label = find_case_label(node->body);
+        return node;
+    } else if(tk_consume_keyword("case")){
+        node = new_node(ND_CASE, logicOr(), NULL);
+        node->line = tk_get_token()->str;
+        tk_expect(":");
         return node;
     } else if(tk_consume_keyword("goto")){
         Token* tok = tk_expect_ident();
@@ -1073,4 +1114,10 @@ static Node* new_dec(Node* var){
     sc_end_scope();
 
     return node;
+}
+
+static Node* copy_node(Node* node){
+    Node* ret = calloc(1, sizeof(Node));
+    memcpy(ret, node, sizeof(Node));
+    ret->next = NULL;
 }

@@ -4,10 +4,9 @@
 
 // grobal value -----------------------------------
 static Node* cur_function;
-static int label = 0;
-static int while_label = 0;
-static int if_label = 0;
-static int for_label = 0;
+static int g_label = 0;
+static int g_label_stack[1000];
+static int g_stack_idx = -1;
 static const char *argreg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
 static const char *argreg16[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
 static const char *argreg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
@@ -145,7 +144,7 @@ static void gen_stmt(Node* node){
             return;
         case ND_WHILE:
             {
-                int label = while_label++;
+                int label = g_label++;
                 printf(".LBegin%d:\n", label);
                 gen(node->cond);
                 printf("  pop rax\n");
@@ -154,12 +153,11 @@ static void gen_stmt(Node* node){
                 gen_stmt(node->body);
                 printf("  jmp .LBegin%d\n", label);
                 printf(".LEnd%d:\n", label);
-                while_label++;
                 return;                
             }
         case ND_FOR:
             {
-                int label = for_label++;
+                int label = g_label++;
                 gen(node->init);
                 printf("  pop rax\n");
                 printf(".LBeginFor%d:\n", label);
@@ -176,7 +174,7 @@ static void gen_stmt(Node* node){
             }
         case ND_IF:
         {
-            int label = if_label++;
+            int label = g_label++;
             gen(node->cond);
             printf("  pop rax\n");
             printf("  cmp rax, 0\n");
@@ -207,6 +205,25 @@ static void gen_stmt(Node* node){
         case ND_GOTO:
             printf("  jmp .L%s_%s\n", cur_function->func_sym->name, node->label_name);
             return;
+        case ND_CASE:
+            printf(".LCase%d_%d:\n", g_label_stack[g_stack_idx], node->lhs->val);
+            return;
+        case ND_SWITCH:
+        {
+            int label = g_label++;
+            g_label_stack[++g_stack_idx] = label;
+            gen(node->cond);
+            printf("  pop rax\n");
+            Node* cur_case = node->case_label;
+            while(cur_case){
+                printf("  cmp rax, %d\n", cur_case->val);
+                printf("  je .LCase%d_%d\n", label, cur_case->val);
+                cur_case = cur_case->next;
+            }
+            gen_compound_stmt(node->body);
+            g_stack_idx--;
+            return;
+        }
         default:
             gen(node);
             printf("  pop rax\n");
@@ -300,7 +317,7 @@ static void gen(Node* node){
             return;
         case ND_AND:
         {
-            int c = label++;
+            int c = g_label++;
             gen(node->lhs);
             printf("  pop rax\n");
             printf("  cmp rax, 0\n");
@@ -319,7 +336,7 @@ static void gen(Node* node){
         }
         case ND_OR:
         {
-            int c = label++;
+            int c = g_label++;
             gen(node->lhs);
             printf("  pop rax\n");
             printf("  cmp rax, 0\n");
