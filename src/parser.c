@@ -592,6 +592,10 @@ static Node* stmt(){
         node->line = tk_get_token()->str;
         tk_expect(":");
         return node;
+    } else if(tk_consume_keyword("break")){
+        tk_expect(";");
+        node = new_node(ND_BREAK, NULL, NULL);
+        return node;
     } else if(tk_consume_keyword("goto")){
         Token* tok = tk_expect_ident();
         tk_expect(";");

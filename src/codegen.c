@@ -145,31 +145,35 @@ static void gen_stmt(Node* node){
         case ND_WHILE:
             {
                 int label = g_label++;
+                g_label_stack[++g_stack_idx] = label;
                 printf(".LBegin%d:\n", label);
                 gen(node->cond);
                 printf("  pop rax\n");
                 printf("  cmp rax, 0\n");
-                printf("  je .LEnd%d\n", label);
+                printf("  je .LEnd_%d\n", label);
                 gen_stmt(node->body);
                 printf("  jmp .LBegin%d\n", label);
-                printf(".LEnd%d:\n", label);
+                printf(".LEnd_%d:\n", label);
+                g_stack_idx--;
                 return;                
             }
         case ND_FOR:
             {
                 int label = g_label++;
+                g_label_stack[++g_stack_idx] = label;
                 gen(node->init);
                 printf("  pop rax\n");
                 printf(".LBeginFor%d:\n", label);
                 gen(node->cond);
                 printf("  pop rax\n");
                 printf("  cmp rax, 0\n");
-                printf("  je .LEndFor%d\n", label);
+                printf("  je .LEnd_%d\n", label);
                 gen_stmt(node->body);
                 gen(node->iter);
                 printf("  pop rax\n");
                 printf("  jmp .LBeginFor%d\n", label);
-                printf(".LEndFor%d:\n", label);
+                printf(".LEnd_%d:\n", label);
+                g_stack_idx--;
                 return;
             }
         case ND_IF:
@@ -206,7 +210,16 @@ static void gen_stmt(Node* node){
             printf("  jmp .L%s_%s\n", cur_function->func_sym->name, node->label_name);
             return;
         case ND_CASE:
+            if(g_stack_idx == -1){
+                error("case label not with in switch statement.\n");
+            }
             printf(".LCase%d_%d:\n", g_label_stack[g_stack_idx], node->lhs->val);
+            return;
+        case ND_BREAK:
+            if(g_stack_idx == -1){
+                error("can't use break in this place.\n");
+            }
+            printf("  jmp .LEnd_%d\n", g_label_stack[g_stack_idx]);
             return;
         case ND_SWITCH:
         {
@@ -221,6 +234,7 @@ static void gen_stmt(Node* node){
                 cur_case = cur_case->next;
             }
             gen_compound_stmt(node->body);
+            printf(".LEnd_%d:\n", label);
             g_stack_idx--;
             return;
         }

@@ -102,16 +102,31 @@ void test_stmt(){
     switch(s){
         case 1:
             s = 25;
+            break;
         case 15:
             s = s + s;
+            break;
         case 20:
             s = s + 12;
-            goto slabel;
+            break;
         case 25:
             s = s * 4;
+            break;
     }
-    slabel:
-    assert(42, s, "error : switch-case stmt.\n");
+    assert(30, s, "error : switch-case stmt.\n");
+
+    int cnt = 0;
+    while(1){
+        cnt++;
+        if(cnt > 10) assert(1, 0, "error : break stmt in while loop.\n");
+        break;
+    }
+
+    for(cnt = 0; cnt < 10; cnt++){
+        break;
+    }
+    assert(cnt, 0, "error : break stmt in for loop.\n");
+
 
     printf("stmt test is completed !\n");
 }

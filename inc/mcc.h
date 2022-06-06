@@ -69,7 +69,8 @@ typedef enum {
     ND_LABEL,
     ND_GOTO,
     ND_SWITCH,
-    ND_CASE
+    ND_CASE,
+    ND_BREAK
 } NodeKind;
 
 struct Node {

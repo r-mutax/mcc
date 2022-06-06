@@ -99,6 +99,7 @@ Token* tk_tokenize(char* p){
             || check_keyword("goto", &p, &cur)
             || check_keyword("switch", &p, &cur)
             || check_keyword("case", &p, &cur)
+            || check_keyword("break", &p, &cur)
             || check_keyword("sizeof", &p, &cur)
             || check_keyword("int", &p, &cur)
             || check_keyword("char", &p, &cur)
