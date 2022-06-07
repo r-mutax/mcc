@@ -233,11 +233,18 @@ static void gen_stmt(Node* node){
                 printf("  je .LCase%d_%d\n", label, cur_case->val);
                 cur_case = cur_case->next;
             }
+            if(node->default_label)
+                printf("  jmp .LDefault_%d\n", label);
+
+            printf("  jmp .LEnd_%d\n", label);
             gen_compound_stmt(node->body);
             printf(".LEnd_%d:\n", label);
             g_stack_idx--;
             return;
         }
+        case ND_DEFAULT:
+            printf(".LDefault_%d:\n", g_label_stack[g_stack_idx]);
+            return;
         default:
             gen(node);
             printf("  pop rax\n");

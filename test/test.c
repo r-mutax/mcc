@@ -127,6 +127,31 @@ void test_stmt(){
     }
     assert(cnt, 0, "error : break stmt in for loop.\n");
 
+    a = 10;
+    switch(3){
+        case 1:
+            break;
+        default:
+            a = 20;
+            break;
+        case 2:
+            break;
+    }
+    assert(a, 20, "error : default label.\n");
+
+    a = 10;
+    switch(3){
+        case 1:
+            a = 20;
+            break;
+        default:
+            a = 25;
+            break;
+        case 3:
+            a = 10;
+            break;
+    }
+    assert(a, 10, "error : no default label.\n");
 
     printf("stmt test is completed !\n");
 }

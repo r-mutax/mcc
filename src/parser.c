@@ -68,7 +68,7 @@ static Node* new_dec(Node* var);
 static Node* new_string_literal(Token* tok);
 static int new_unique_no();
 static Node* copy_node(Node* node);
-static Node* find_case_label(Node* body);
+static Node* find_case_label(Node* body, Node** default_label);
 static Program* program();
 static Node* function();
 static Node* compound_stmt();
@@ -502,7 +502,7 @@ static Type* type_suffix(Type* ty){
     return ty;
 }
 
-static Node* find_case_label(Node* body){
+static Node* find_case_label(Node* body, Node** default_label){
     Node* cur = body;
     Node case_head;
     Node* cur_case = &case_head;
@@ -511,13 +511,19 @@ static Node* find_case_label(Node* body){
             case ND_CASE:
                 if(cur->lhs->kind != ND_NUM)
                     error_at(cur->line, "case label is not num.\n");
-                cur_case = cur_case->next = copy_node(cur->lhs);
+                cur_case = cur_case->next = copy_node(cur);
+                cur_case->val = cur->lhs->val;
                 break;
             case ND_CMPDSTMT:
-                cur_case->next = find_case_label(cur->body);
+                cur_case->next = find_case_label(cur->body, default_label);
                 while(cur_case->next){
                     cur_case = cur_case->next;
                 }
+                break;
+            case ND_DEFAULT:
+                if(*default_label)
+                    error_at(cur->line, "default label depulicate.\n");
+                *default_label = new_node(ND_DEFAULT, NULL, NULL);
                 break;
         }
         cur = cur->next;
@@ -585,11 +591,15 @@ static Node* stmt(){
         node->cond = expr();
         tk_expect(")");
         node->body = stmt();
-        node->case_label = find_case_label(node->body);
+        node->case_label = find_case_label(node->body, &node->default_label);
         return node;
     } else if(tk_consume_keyword("case")){
         node = new_node(ND_CASE, logicOr(), NULL);
         node->line = tk_get_token()->str;
+        tk_expect(":");
+        return node;
+    } else if(tk_consume_keyword("default")){
+        node = new_node(ND_DEFAULT, NULL, NULL);
         tk_expect(":");
         return node;
     } else if(tk_consume_keyword("break")){

@@ -70,7 +70,8 @@ typedef enum {
     ND_GOTO,
     ND_SWITCH,
     ND_CASE,
-    ND_BREAK
+    ND_BREAK,
+    ND_DEFAULT
 } NodeKind;
 
 struct Node {
@@ -91,6 +92,7 @@ struct Node {
     Symbol*     sym;
     char*       label_name;
     Node*       case_label;
+    Node*       default_label;
 
     Node*       arg;
 
