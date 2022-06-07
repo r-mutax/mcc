@@ -7,7 +7,28 @@ This project my learning project that C Language and low-layer programing.This p
 
 And last, I thanks a lot to @rui314 author C Compiler book.
 
-# links to reference
+# Build
+build mcc.
+``` Shell
+make
+```
+
+clean modules.
+``` Shell
+make clean
+```
+# Usage
+now mcc output only `.asm` file.
+so when compile C-file, you need two step.
+1. compile C-file to .asm file.
+2. assemble .asm file with `cc` command or another assembler.
+``` Shell
+mcc source.c > out.asm
+cc -o a.out out.asm
+```
+
+
+# Links to reference
 [C Compiler Book](https://www.sigbus.info/compilerbook)
 
 [ISO/IEC 9899:TC3](https://port70.net/~nsz/c/c99/n1256.html)
