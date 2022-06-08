@@ -2,6 +2,7 @@
 #include "tokenize.h"
 #include "node.h"
 #include "codegen.h"
+#include "semantics.h"
 #include "errormsg.h"
 
 char* read_file(char* path){
@@ -39,6 +40,7 @@ int main(int argc, char **argv){
 
 
     Program* program = parser();
+    semantics_check(program);
     gen_program(program);
 
     return 0;
