@@ -502,6 +502,67 @@ static Type* type_suffix(Type* ty){
     return ty;
 }
 
+static Node* exchange_constant_expr(Node* expr){
+
+    if(expr->kind == ND_NUM){
+        return expr;
+    }
+
+    expr->lhs = exchange_constant_expr(expr->lhs);
+    expr->rhs = exchange_constant_expr(expr->rhs);
+    
+    int retval = 0;
+    int lhs = expr->lhs->val;
+    int rhs = expr->rhs->val;
+    switch(expr->kind){
+        case ND_ADD:
+            retval = lhs + rhs;
+            break;
+        case ND_SUB:
+            retval = lhs - rhs;
+            break;
+        case ND_MUL:
+            retval = lhs * rhs;
+            break;
+        case ND_DIV:
+            retval = lhs / rhs;
+            break;
+        case ND_MOD:
+            retval = lhs % rhs;
+            break;
+        case ND_EQ:
+            retval = lhs == rhs;
+            break;
+        case ND_NE:
+            retval = lhs != rhs;
+            break;
+        case ND_LT:
+            retval = lhs < rhs;
+            break;
+        case ND_LE:
+            retval = lhs <= rhs;
+            break;
+        case ND_BIT_AND:
+            retval = lhs & rhs;
+            break;
+        case ND_BIT_OR:
+            retval = lhs | rhs;
+            break;
+        case ND_BIT_XOR:
+            retval = lhs ^ rhs;
+            break;
+        case ND_AND:
+            retval = lhs && rhs;
+            break;
+        case ND_OR:
+            retval = lhs || rhs;
+            break;
+        default:
+            error("case label can use only constant-expr.\n");
+    }
+    return new_node_num(retval);
+}
+
 static Node* find_case_label(Node* body, Node** default_label){
     Node* cur = body;
     Node case_head;
@@ -509,9 +570,7 @@ static Node* find_case_label(Node* body, Node** default_label){
     while(cur){
         switch(cur->kind){
             case ND_CASE:
-                if(cur->lhs->kind != ND_NUM)
-                    error_at(cur->line, "case label is not num.\n");
-                cur_case = cur_case->next = copy_node(cur);
+                cur_case = cur_case->next = cur->lhs = exchange_constant_expr(cur->lhs);
                 cur_case->val = cur->lhs->val;
                 break;
             case ND_CMPDSTMT:

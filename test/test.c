@@ -103,7 +103,7 @@ void test_stmt(){
         case 1:
             s = 25;
             break;
-        case 15:
+        case 225 / 5 / 9 * 3:
             s = s + s;
             break;
         case 20:
@@ -129,7 +129,7 @@ void test_stmt(){
 
     a = 10;
     switch(3){
-        case 1:
+        case 3 + 3 + 4 + 5 * 2:
             break;
         default:
             a = 20;
@@ -147,7 +147,7 @@ void test_stmt(){
         default:
             a = 25;
             break;
-        case 3:
+        case 1 + 2:
             a = 10;
             break;
     }
