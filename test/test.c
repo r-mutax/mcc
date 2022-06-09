@@ -234,7 +234,25 @@ void test_expr(){
 
     printf("expr test is completed !\n");
 }
+void test_enum(){
 
+    enum ABC_ENUM{
+        ENUM1 = 0,
+        ENUM2,
+        ENUM3 = 5, 
+        ENUM4
+    };
+
+    enum ABC_ENUM a = ENUM3;
+
+    assert(ENUM1, 0, "error : enum test1.\n");
+    assert(ENUM2, 1, "error : enum test2.\n");
+    assert(ENUM3, 5, "error : enum test3.\n");
+    assert(ENUM4, 6, "error : enum test4.\n");
+    assert(a, 5, "error : enum test.\n");
+
+    printf("enum test is completed !\n");
+}
 void test_variable(){
 
     int a;
@@ -418,6 +436,7 @@ int main(){
     test_comment();
     test_struct();
     test_literal();
+    test_enum();
 
     printf("test completed !\n");
 

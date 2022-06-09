@@ -33,11 +33,13 @@ void st_declare(Symbol* sym){
 
     Type* ty = sym->type;
     // add stack size.
-    if(!sc_is_grobal()){
-        sc_add_funcstack(ty->size);
-        sym->offset = sc_get_funcstack();
-    } else {
-        sym->is_globalvar = true;
+    if(!sym->is_enum_symbol){
+        if(!sc_is_grobal()){
+            sc_add_funcstack(ty->size);
+            sym->offset = sc_get_funcstack();
+        } else {
+            sym->is_globalvar = true;
+        }
     }
 
     // chain symbol to current scope.

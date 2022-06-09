@@ -52,6 +52,20 @@ Type* ty_find_struct(char* struct_name, int len){
 
 }
 
+Type* ty_find_enum(char* enum_name, int len){
+    
+    for(Scope* sc = sc_get_cur_scope(); sc; sc = sc->parent){
+        for(Type* cur = sc->type; cur; cur = cur->next){
+            // match cur typename and cur is 'enum' type.
+            if(cur->len == len
+                && memcmp(cur->name, enum_name, len) == 0
+                && cur->kind == TY_ENUM){
+                return cur;
+            }
+        }
+    }
+}
+
 void ty_register_struct(Type* struct_type){
     sc_add_type(struct_type);
 }
@@ -120,6 +134,10 @@ void ty_add_type(Node* node){
         case ND_DIV:
         case ND_MOD:
         case ND_ASSIGN:
+            if((node->lhs->type->kind == TY_ENUM)
+            && (node->lhs->type != node->rhs->type)){
+                error("assign not enum value to enum.");
+            }
             node->type = node->lhs->type;
             break;
         case ND_EQ:

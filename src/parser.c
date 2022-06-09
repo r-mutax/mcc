@@ -67,6 +67,7 @@ static Node* new_inc(Node* var);
 static Node* new_dec(Node* var);
 static Node* new_string_literal(Token* tok);
 static int new_unique_no();
+static Node* exchange_constant_expr(Node* expr);
 static Node* copy_node(Node* node);
 static Node* find_case_label(Node* body, Node** default_label);
 static Program* program();
@@ -282,6 +283,60 @@ static Type* struct_spec(){
     return ty;
 }
 
+static Type* enum_spec(){
+    Token* tok = tk_consume_ident();
+
+    /*
+        enum not-registerd-ident '{' enumelate-list '}'
+        enum registerd-ident
+        enum '{' enumelater-list '}'
+    */
+
+    if(tok){
+        Type* ty = ty_find_enum(tok->str, tok->len);
+        if(ty){
+            return ty;
+        }
+    }
+
+    if(!tk_consume("{"))
+        error_at(tk_get_token()->str, "expect enumeration declare.\n");
+
+    Type* ty = calloc(1, sizeof(Type));
+    ty->kind = TY_ENUM;
+    ty->size = 8;
+    if(tok){
+        ty->name = calloc(1, tok->len + 1);
+        strncpy(ty->name, tok->str, tok->len);
+        ty->len = tok->len;
+        ty_register_struct(ty);
+    } else {
+        ty->name = "__unnamed_enum";
+    }
+
+    int val = -1;
+    do {
+        Token* ident = tk_expect_ident();
+        if(!ident){
+            break;
+        }
+        Symbol* sym = st_make_symbol(ident, ty);
+        if(tk_consume("=")){
+            Node* node = logicOr();
+            node = exchange_constant_expr(node);
+            val = node->val;
+        } else {
+            val++;
+        }
+        sym->enum_val = val;
+        sym->is_enum_symbol = true;
+        st_declare(sym);
+    } while(tk_consume(","));
+    tk_expect("}");
+
+    return ty;
+}
+
 // check storage class specifiers.
 // auto / register class is ignored in this compiler.
 // if consumption token this function return true and dosen't return false.
@@ -365,6 +420,15 @@ static Type* decl_spec(StorageClassKind* sck){
             continue;
         }
 
+        // enumeration.
+        if(tk_consume_keyword("enum")){
+            if(type_flg)
+                error_at(tok->str, "duplicate type keyword.\n");
+            ty = enum_spec();
+            type_flg += K_USER;
+            continue;
+        }
+
         // chcek built-in type keyword.
         if(tk_consume_keyword("void"))
             count_decl_spec(&type_flg, K_VOID, tok);
@@ -429,6 +493,12 @@ static Node* declaration(){
     Type* ty = decl_spec(&sck);
 
     if(ty->kind == TY_STRUCT && tk_consume(";")){
+        Node* node = calloc(1, sizeof(Node));
+        node->kind = ND_CMPDSTMT;
+        return node;
+    }
+
+    if(ty->kind == TY_ENUM && tk_consume(";")){
         Node* node = calloc(1, sizeof(Node));
         node->kind = ND_CMPDSTMT;
         return node;
@@ -981,7 +1051,14 @@ static Node* primary(){
                 error_at(tok->str, "Not declared.\n");
             }
 
-            Node* node = new_var(sym);
+            Node* node;
+            if(sym->is_enum_symbol){
+                node = new_node_num(sym->enum_val);
+                node->type = sym->type;
+            } else {
+                node = new_var(sym);
+            }
+            
             return node;
         }
     }

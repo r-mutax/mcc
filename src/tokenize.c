@@ -108,6 +108,7 @@ Token* tk_tokenize(char* p){
             || check_keyword("short", &p, &cur)
             || check_keyword("void", &p, &cur)
             || check_keyword("static", &p, &cur)
+            || check_keyword("enum", &p, &cur)
             || check_keyword("struct", &p, &cur)){
             continue;
         }
@@ -217,6 +218,7 @@ bool tk_istype(){
 
     if(ty != NULL
         || memcmp(token->str, "static", 6) == 0
+        || memcmp(token->str, "enum", 4) == 0
         || memcmp(token->str, "struct", 6) == 0){
             return true;
     }

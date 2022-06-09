@@ -1,15 +1,16 @@
 int main(){
 
-    int a = 12;
-    switch(a){
-        case 1:
-        case 2:
-            a = 13;
-            goto label;
-        case 12:
-            a = 15;
-    }
-    label:
+    enum ABC_ENUM{
+        ENUM1 = 0,
+        ENUM2,
+        ENUM3 = 5, 
+        ENUM4
+    };
+
+    enum ABC_ENUM a = ENUM3, c;
+
+    c = a;
+
 
     return a;
 }

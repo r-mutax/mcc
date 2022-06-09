@@ -122,6 +122,8 @@ struct Symbol{
     bool        is_func;
     bool        is_globalvar;
     bool        is_static;
+    bool        is_enum_symbol;
+    int         enum_val;
     Type*       type;
     char*       str;
 };
@@ -147,7 +149,8 @@ typedef enum {
     TY_POINTER,
     TY_ARRAY,
     TY_VOID,
-    TY_STRUCT
+    TY_STRUCT,
+    TY_ENUM
 } TypeKind;
 
 struct Type {
