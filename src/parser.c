@@ -30,6 +30,7 @@
                         | '*=' assign
                         | '/=' assign
                         | '%=' assign )?
+    cond_expr = logicOr '?' expr ':' cond_expr
     logicOr = logicAnd ('||' logicAnd)*
     logicAnd = bitOr ('&&' bitOr)*
     bitOr = bitXor ( '|' bitXor )*
@@ -81,6 +82,7 @@ static Type* type_suffix(Type* ty);
 static Symbol* declare(Type* ty, StorageClassKind sck);
 static Node* stmt();
 static Node* expr();
+static Node* cond_expr();
 static Node* logicOr();
 static Node* logicAnd();
 static Node* bitOr();
@@ -322,7 +324,7 @@ static Type* enum_spec(){
         }
         Symbol* sym = st_make_symbol(ident, ty);
         if(tk_consume("=")){
-            Node* node = logicOr();
+            Node* node = cond_expr();
             node = exchange_constant_expr(node);
             val = node->val;
         } else {
@@ -627,6 +629,13 @@ static Node* exchange_constant_expr(Node* expr){
         case ND_OR:
             retval = lhs || rhs;
             break;
+        case ND_COND_EXPR:
+        {
+            expr->cond = exchange_constant_expr(expr->cond);
+            int cond = expr->cond->val;
+            retval = cond ? lhs : rhs;
+            break;
+        }
         default:
             error("case label can use only constant-expr.\n");
     }
@@ -723,7 +732,7 @@ static Node* stmt(){
         node->case_label = find_case_label(node->body, &node->default_label);
         return node;
     } else if(tk_consume_keyword("case")){
-        node = new_node(ND_CASE, logicOr(), NULL);
+        node = new_node(ND_CASE, cond_expr(), NULL);
         node->line = tk_get_token()->str;
         tk_expect(":");
         return node;
@@ -772,7 +781,7 @@ static Node* expr(){
 }
 
 static Node* assign(){
-    Node* node = logicOr();
+    Node* node = cond_expr();
 
     if(tk_consume("=")){
         node = new_node(ND_ASSIGN, node, assign());
@@ -787,6 +796,21 @@ static Node* assign(){
     } else if(tk_consume("%=")){
         node = new_node(ND_ASSIGN, node, new_node_mod(node, assign()));
     }
+    return node;
+}
+
+static Node* cond_expr(){
+    Node* node = logicOr();
+
+    if(tk_consume("?")){
+        Node* cnode = new_node(ND_COND_EXPR, NULL, NULL);
+        cnode->cond = node;
+        cnode->lhs = expr();
+        tk_expect(":");
+        cnode->rhs = cond_expr();
+        node = cnode;
+    }
+
     return node;
 }
 

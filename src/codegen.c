@@ -374,6 +374,20 @@ static void gen(Node* node){
             printf("  push rax\n");
             return;
         }
+        case ND_COND_EXPR:
+        {
+            int label = g_label++;
+            gen(node->cond);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+            printf("  je .L.false%d\n", label);
+            gen(node->lhs);
+            printf("  jmp .L.End%d\n", label);
+            printf(".L.false%d:\n", label);
+            gen(node->rhs);
+            printf(".L.End%d:\n", label);
+            return;
+        }
     }
 
     if(node->kind == ND_NUM){

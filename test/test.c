@@ -153,6 +153,17 @@ void test_stmt(){
     }
     assert(a, 10, "error : no default label.\n");
 
+    a = 20;
+    switch(2){
+        case 1 ? 2 : 0:
+            a = 30;
+            break;
+        default:
+            a = 25;
+            break;
+    }
+    assert(a, 30, "error : case label value is condition expression.\n");
+
     printf("stmt test is completed !\n");
 }
 
@@ -231,6 +242,9 @@ void test_expr(){
     assert(0, 0 || 0, "error : logical OR , both value is false.\n");
 
     assert(0, 0 || 1 && 0, "error : operater priority, logical OR and logical AND.\n");
+
+    assert(5, 1 ? 5 : 0, "error : conditon expression(true pattern).\n");
+    assert(5, 0 ? 3 : 5, "error : conditon expression(false pattern).\n");
 
     printf("expr test is completed !\n");
 }

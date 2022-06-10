@@ -65,6 +65,7 @@ typedef enum {
     ND_BIT_XOR,
     ND_AND,
     ND_OR,
+    ND_COND_EXPR,
     ND_MEMBER,
     ND_LABEL,
     ND_GOTO,

@@ -86,7 +86,7 @@ Token* tk_tokenize(char* p){
             continue;
         }
 
-        if(strchr("+-*/,()<>:;={}&|^[].%", *p)){
+        if(strchr("+-*/,()<>:;={}&|^[].?%", *p)){
             cur = new_token(TK_OPERAND, cur, p++, 1);
             continue;
         }
