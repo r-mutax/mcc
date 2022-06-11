@@ -440,6 +440,38 @@ void test_struct(){
     printf("struct test is completed !\n");    
 }
 
+int test_typedef(){
+
+    typedef struct ABCD{
+        int a;
+        int b;
+        char c;
+    } ABC;
+
+    typedef ABC AKC;
+    AKC ak;
+    ABC a, *b;
+    a.a = 15;
+    a.b = 12;
+    a.c = 3;
+
+    ak.a = 14;
+    b = &a;
+
+    assert(15, a.a, "error : typedef struct.\n");
+    assert(12, a.b, "error : typedef struct.\n");
+    assert(3, a.c, "error : typedef struct.\n");
+
+    assert(15, b->a, "error : typedef struct pointer.\n");
+    assert(12, b->b, "error : typedef struct pointer.\n");
+    assert(3, b->c, "error : typedef struct pointer.\n");
+
+    assert(14, ak.a, "error : typedef typedef.\n");
+
+
+    printf("typedef test is completed.\n");    
+}
+
 int main(){   
     test_expr();
     test_stmt();
@@ -451,6 +483,7 @@ int main(){
     test_struct();
     test_literal();
     test_enum();
+    test_typedef();
 
     printf("test completed !\n");
 

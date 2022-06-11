@@ -162,6 +162,8 @@ struct Type {
     TypeKind    kind;
     Type*       pointer_from;
     Type*       pointer_to;
+    bool        is_typedef;
+    Type*       base_type;
     
     Member*     member;
 

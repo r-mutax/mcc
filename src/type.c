@@ -21,6 +21,17 @@ Type* ty_register_type(char* type_name, int type_size, TypeKind type_kind){
     ty->kind = type_kind;
 
     sc_add_type(ty);
+
+    return ty;
+}
+
+Type* ty_register_newtype(Symbol* new_name, Type* type){
+
+    Type* ty = ty_register_type(new_name->name, type->size, type->kind);
+
+    ty->is_typedef = true;
+    ty->base_type = type;
+    return ty;
 }
 
 // In mcc Compiler type system,
@@ -76,7 +87,11 @@ Type* ty_get_type(char* type_name, int len){
         for(Type* cur = sc->type; cur; cur = cur->next){
             if(cur->len == len && memcmp(cur->name, type_name, len) == 0){
                 Type* ret = calloc(1, sizeof(Type));
-                memcpy(ret, cur, sizeof(Type));
+                if(cur->is_typedef){
+                    memcpy(ret, cur->base_type, sizeof(Type));
+                } else {
+                    memcpy(ret, cur, sizeof(Type));
+                }
                 ret->next = NULL;
                 return ret;
             }
