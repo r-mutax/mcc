@@ -421,16 +421,27 @@ static Type* decl_spec(StorageClassKind* sck){
 
         // user type.
         if(tk_consume_keyword("struct")){
-            if(type_flg)
+            if(ty || type_flg)
                 error_at(tok->str, "duplicate type keyword.\n");
             ty = struct_spec();
             type_flg += K_USER;
             continue;
         }
 
+        // user type2 (which is registerd with typedef).
+        Type* buf = tk_consume_type();
+        if(buf){
+            if(ty || type_flg)
+                error_at(tok->str, "duplicate type keyword.\n");
+            ty = buf;
+            type_flg += K_USER;
+            continue;
+        }
+
+
         // enumeration.
         if(tk_consume_keyword("enum")){
-            if(type_flg)
+            if(ty || type_flg)
                 error_at(tok->str, "duplicate type keyword.\n");
             ty = enum_spec();
             type_flg += K_USER;
@@ -523,6 +534,11 @@ static Node* declaration(){
         }
         if(sym->is_static){
             sym->func_name = cur_func->func_sym->name;
+        }
+
+        if(sck == SCK_TYPEDEF){
+            ty_register_newtype(sym, ty);
+            continue;
         }
 
         st_declare(sym);
