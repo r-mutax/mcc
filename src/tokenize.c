@@ -21,6 +21,17 @@ Token* tk_tokenize(char* p){
 
     while(*p){
 
+        if(startswith(p, "\r\n")){
+            cur = new_token(TK_NEWLINE, cur, p, 2);
+            p += 2;
+            continue;
+        }
+
+        if(*p == '\r' || *p == '\n'){
+            cur = new_token(TK_NEWLINE, cur, p++, 1);
+            continue;
+        }
+
         // skip space, new line carrige return and so on.
         if(isspace(*p)){
             p++;

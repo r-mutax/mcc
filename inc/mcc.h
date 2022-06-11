@@ -23,6 +23,7 @@ typedef enum {
     TK_IDENT,
     TK_KEYWORD,
     TK_STRING_CONST,
+    TK_NEWLINE,
     TK_EOF
 } TokenKind;
 
