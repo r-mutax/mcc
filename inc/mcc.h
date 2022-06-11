@@ -118,6 +118,7 @@ struct Program {
 struct Symbol{
     Symbol*     next;
     char*       name;
+    char*       func_name;
     int         offset;
     int         len;
     bool        is_func;

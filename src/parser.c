@@ -98,6 +98,8 @@ static Node* primary();
 static Node* unary();
 static bool is_function();
 
+static Node* cur_func;
+
 // -----------------------------------------------
 Program* parser(){
 
@@ -163,6 +165,8 @@ static Node* function(){
     sym->is_func = true;
     func->func_sym = sym;
 
+    cur_func = func;
+
     sc_start_scope();
 
     tk_expect("(");
@@ -202,6 +206,8 @@ static Node* function(){
         func->is_declare = true;
         tk_expect(";");
     }
+
+    cur_func = NULL;
 
     return func;
 }
@@ -514,6 +520,9 @@ static Node* declaration(){
         Symbol* sym = declare(ty, sck);
         if(sym->type->kind == TY_VOID){
             error("declare variable with void type.\n");
+        }
+        if(sym->is_static){
+            sym->func_name = cur_func->func_sym->name;
         }
 
         st_declare(sym);
