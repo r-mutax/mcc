@@ -3,6 +3,7 @@
 #include "node.h"
 #include "codegen.h"
 #include "semantics.h"
+#include "preprocessor.h"
 #include "errormsg.h"
 
 char* read_file(char* path){
@@ -36,8 +37,8 @@ int main(int argc, char **argv){
 
     char* p = read_file(argv[1]);
     error_init(p, argv[1]);
-    tk_tokenize(p);
-
+    Token* tok = tk_tokenize(p);
+    preprocess(tok);
 
     Program* program = parser();
     semantics_check(program);
