@@ -149,7 +149,7 @@ Token* tk_tokenize(char* p){
             continue;
         }
 
-        error("%s", *p);
+        error("find cannot tokenize words.\n");
     }
 
     new_token(TK_EOF, cur, p, 0);
