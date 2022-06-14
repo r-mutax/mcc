@@ -55,6 +55,7 @@ typedef enum {
     ND_RETURN,
     ND_IF,
     ND_WHILE,
+    ND_DOWHILE,
     ND_CMPDSTMT,
     ND_FOR,
     ND_CALL,

@@ -769,6 +769,15 @@ static Node* stmt(){
         tk_expect(";");
         node = new_node(ND_BREAK, NULL, NULL);
         return node;
+    } else if(tk_consume_keyword("do")){
+        node = new_node(ND_DOWHILE, NULL, NULL);
+        node->body = stmt();
+        tk_expect_keyword("while");
+        tk_expect("(");
+        node->cond = expr();
+        tk_expect(")");
+        tk_expect(";");
+        return node;
     } else if(tk_consume_keyword("goto")){
         Token* tok = tk_expect_ident();
         tk_expect(";");
