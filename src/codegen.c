@@ -204,6 +204,20 @@ static void gen_stmt(Node* node){
             printf(".LIfEnd%d:\n", label);
             return;
         }
+        case ND_DOWHILE:
+        {
+            int label = g_label++;
+            g_label_stack[++g_stack_idx] = label;
+            printf(".LBegin%d:\n", label);
+            gen_stmt(node->body);
+            gen(node->cond);
+            printf("  pop rax\n");
+            printf("  cmp rax, 0\n");
+            printf("  jne .LBegin%d\n", label);
+            printf(".LEnd_%d:\n",label);
+            g_stack_idx--;
+            return;
+        }
         case ND_CMPDSTMT:
             gen_compound_stmt(node->body);
             return;

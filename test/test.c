@@ -164,6 +164,20 @@ void test_stmt(){
     }
     assert(a, 30, "error : case label value is condition expression.\n");
 
+    a = 0;
+    do{
+        a += 35;
+    } while(0);
+    assert(a, 35, "error : do-while statement.\n");
+
+    a = 0;
+    do {
+        a += 1;
+        if(a == 3) break;
+    } while(a < 5);
+     assert(a, 3, "error : break statement in do-while statement.\n");
+   
+
     printf("stmt test is completed !\n");
 }
 

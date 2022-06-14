@@ -107,6 +107,7 @@ Token* tk_tokenize(char* p){
             || check_keyword("else", &p, &cur)
             || check_keyword("for", &p, &cur)
             || check_keyword("while", &p, &cur)
+            || check_keyword("do", &p, &cur)
             || check_keyword("goto", &p, &cur)
             || check_keyword("switch", &p, &cur)
             || check_keyword("case", &p, &cur)
@@ -223,6 +224,16 @@ bool tk_consume_keyword(char* keyword){
     }
     token = token->next;
     return true;
+}
+
+void tk_expect_keyword(char* keyword){
+    if(token->kind != TK_KEYWORD
+        || token->len != strlen(keyword)
+        || memcmp(keyword, token->str, token->len)){
+        error_at(token->str, "Expect keyword, but get another token.\n");
+    }
+    token = token->next;
+    return;
 }
 
 bool tk_istype(){

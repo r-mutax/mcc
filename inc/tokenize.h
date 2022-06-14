@@ -14,6 +14,7 @@ Type*   tk_consume_type();
 Type*   tk_expect_type();
 char*   tk_getline();
 bool    tk_consume_keyword(char* keyword);
+void    tk_expect_keyword(char* keyword);
 bool    tk_istype();
 Token*  tk_get_token();
 void    tk_set_token(Token* tok);
