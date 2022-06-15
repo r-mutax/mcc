@@ -178,15 +178,15 @@ void test_stmt(){
     } while(a < 5);
     assert(a, 3, "error : break statement in do-while statement.\n");
     
-    // a = 0;
-    // b = 0;
-    // for(i = 0; i < 3; i++){
-    //     a++;
-    //     continue;
-    //     b++;
+    a = 0;
+    b = 0;
+    for(i = 0; i < 3; i++){
+        a++;
+        continue;
+        b++;
 
-    // }
-    // assert(b, 0, "error : continue statement in for statement.\n");
+    }
+    assert(b, 0, "error : continue statement in for statement.\n");
    
     a = 0;
     b = 0;
