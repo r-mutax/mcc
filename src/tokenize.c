@@ -109,6 +109,7 @@ Token* tk_tokenize(char* p){
             || check_keyword("while", &p, &cur)
             || check_keyword("do", &p, &cur)
             || check_keyword("goto", &p, &cur)
+            || check_keyword("continue", &p, &cur)
             || check_keyword("switch", &p, &cur)
             || check_keyword("case", &p, &cur)
             || check_keyword("default", &p, &cur)

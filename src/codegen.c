@@ -150,13 +150,14 @@ static void gen_stmt(Node* node){
             {
                 int label = g_label++;
                 g_label_stack[++g_stack_idx] = label;
-                printf(".LBegin%d:\n", label);
+                printf(".LBegin_%d:\n", label);
+                printf(".LLoop_%d:\n", label);
                 gen(node->cond);
                 printf("  pop rax\n");
                 printf("  cmp rax, 0\n");
                 printf("  je .LEnd_%d\n", label);
                 gen_stmt(node->body);
-                printf("  jmp .LBegin%d\n", label);
+                printf("  jmp .LBegin_%d\n", label);
                 printf(".LEnd_%d:\n", label);
                 g_stack_idx--;
                 return;                
@@ -167,15 +168,16 @@ static void gen_stmt(Node* node){
                 g_label_stack[++g_stack_idx] = label;
                 gen(node->init);
                 printf("  pop rax\n");
-                printf(".LBeginFor%d:\n", label);
+                printf(".LBegin_%d:\n", label);
                 gen(node->cond);
                 printf("  pop rax\n");
                 printf("  cmp rax, 0\n");
                 printf("  je .LEnd_%d\n", label);
                 gen_stmt(node->body);
+                printf(".LLoop_%d:\n", label);
                 gen(node->iter);
                 printf("  pop rax\n");
-                printf("  jmp .LBeginFor%d\n", label);
+                printf("  jmp .LBegin_%d\n", label);
                 printf(".LEnd_%d:\n", label);
                 g_stack_idx--;
                 return;
@@ -208,12 +210,13 @@ static void gen_stmt(Node* node){
         {
             int label = g_label++;
             g_label_stack[++g_stack_idx] = label;
-            printf(".LBegin%d:\n", label);
+            printf(".LBegin_%d:\n", label);
             gen_stmt(node->body);
+            printf(".LLoop_%d:\n", label);
             gen(node->cond);
             printf("  pop rax\n");
             printf("  cmp rax, 0\n");
-            printf("  jne .LBegin%d\n", label);
+            printf("  jne .LBegin_%d\n", label);
             printf(".LEnd_%d:\n",label);
             g_stack_idx--;
             return;
@@ -226,6 +229,12 @@ static void gen_stmt(Node* node){
             return;
         case ND_GOTO:
             printf("  jmp .L%s_%s\n", cur_function->func_sym->name, node->label_name);
+            return;
+        case ND_CONTINUE:
+            if(g_stack_idx == -1){
+                error("can't use continue in this place.\n");
+            }
+            printf("  jmp .LLoop_%d\n", g_label_stack[g_stack_idx]);
             return;
         case ND_CASE:
             if(g_stack_idx == -1){

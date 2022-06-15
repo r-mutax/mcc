@@ -50,6 +50,7 @@ void test_stmt(){
 
     int a = 0;
     int i = 0;
+    int b = 0;
     while(a < 3) a = a + 1;
     assert(3, a, "error : while.\n");
 
@@ -175,8 +176,36 @@ void test_stmt(){
         a += 1;
         if(a == 3) break;
     } while(a < 5);
-     assert(a, 3, "error : break statement in do-while statement.\n");
+    assert(a, 3, "error : break statement in do-while statement.\n");
+    
+    // a = 0;
+    // b = 0;
+    // for(i = 0; i < 3; i++){
+    //     a++;
+    //     continue;
+    //     b++;
+
+    // }
+    // assert(b, 0, "error : continue statement in for statement.\n");
    
+    a = 0;
+    b = 0;
+    while(a < 3){
+        a++;
+        continue;
+        b++;
+    }
+    assert(b, 0, "error : continue statement in while statement.\n");
+
+    a = 0;
+    b = 0;
+    do {
+        a++;
+        continue;
+        b++;
+    } while(a < 3);
+    assert(b, 0, "error : continue statement in do-while statement.\n");
+
 
     printf("stmt test is completed !\n");
 }
