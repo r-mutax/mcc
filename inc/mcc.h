@@ -74,6 +74,7 @@ typedef enum {
     ND_SWITCH,
     ND_CASE,
     ND_BREAK,
+    ND_CONTINUE,
     ND_DEFAULT
 } NodeKind;
 

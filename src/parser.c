@@ -17,6 +17,12 @@
             | 'if' '(' expr ')' stmt 
             | 'while' '(' expr ')' ( stmt )
             | 'switch' '(' expr ')' stmt
+            | 'continue' ';'
+            | 'do' stmt 'while' '(' expr ')' ';'
+            | 'goto' ident ';'
+            | 'case' constant_expr ':'
+            | 'break' ';'
+            | 'continue' ';'
     declaration = decl_spec* declarator ";"
     decl_spec = type_spec
     type_spec = "long" | "int" | "char" | 'short' | struct_spec
@@ -776,6 +782,10 @@ static Node* stmt(){
         tk_expect("(");
         node->cond = expr();
         tk_expect(")");
+        tk_expect(";");
+        return node;
+    } else if(tk_consume_keyword("continue")){
+        node = new_node(ND_CONTINUE, NULL, NULL);
         tk_expect(";");
         return node;
     } else if(tk_consume_keyword("goto")){
