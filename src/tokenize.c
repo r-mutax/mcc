@@ -2,8 +2,10 @@
 #include "tokenize.h"
 #include "type.h"
 #include "errormsg.h"
+#include "file.h"
 
 Token* token;
+SrcFile* cur_file;
 
 // local function forward definition. ------------
 static Token* new_token(TokenKind kind, Token* cur, char* str, int len);
@@ -13,6 +15,18 @@ static bool is_ident2(char p);
 static bool is_keyword(char* lhs, char* rhs);
 static bool check_keyword(char* keyword, char** p, Token** tok);
 // -----------------------------------------------
+Token* tk_tokenize_file(char* path){
+
+    SrcFile* srcfile = calloc(1, sizeof(SrcFile));
+    srcfile->input_data = read_file(path);
+    srcfile->path = calloc(1, strlen(path) + 1);
+    strcpy(srcfile->path, path);
+
+    cur_file = srcfile;
+
+    return tk_tokenize(srcfile->input_data);
+}
+
 Token* tk_tokenize(char* p){
 
     Token head;
