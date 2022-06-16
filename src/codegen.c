@@ -18,7 +18,7 @@ static void gen_stmt(Node* node);
 static void gen_function(Node* func);
 static void gen_grobal_variable(Node* node);
 static void gen_compound_stmt(Node* node);
-static void gen_printline(char* p);
+static void gen_printline(Token* p);
 static void gen_print_sym(Symbol* sym);
 static void gen_epilogue(void);
 static void gen(Node* node);
@@ -482,18 +482,18 @@ static void gen(Node* node){
     return;
 }
 
-static void gen_printline(char* p){
+static void gen_printline(Token* tok){
 
-    if(p == NULL) return;
+    if(tok == NULL) return;
 
-    char* semi = strchr(p, ';');
-    char* nl = strchr(p, '\n') - 1;
+    char* semi = strchr(tok->str, ';');
+    char* nl = strchr(tok->str, '\n') - 1;
 
     char* pos = semi < nl ? semi : nl;
 
-    char* line = calloc(pos - p + 1, sizeof(char));
+    char* line = calloc(pos - tok->str + 1, sizeof(char));
 
-    strncpy(line, p, pos - p + 1);
+    strncpy(line, tok->str, pos - tok->str + 1);
     printf("# %s\n", line);
     free(line);
 }

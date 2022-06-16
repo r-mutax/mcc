@@ -109,7 +109,7 @@ struct Node {
 
     Node*       arg;
 
-    char*       line;
+    Token*      line;
 
     // function definition.
     Symbol*     func_sym;

@@ -317,6 +317,7 @@ static Token* new_token(TokenKind kind, Token* cur, char* str, int len){
     tok->kind = kind;
     tok->str = str;
     tok->len = len;
+    tok->src = cur_file;
     cur->next = tok;
     return tok;
 }
