@@ -266,7 +266,7 @@ static Type* struct_spec(){
             // registerd struct.
             Type* ty = ty_find_struct(tok->str, tok->len);
 
-            if(!ty) error_at(tok->str, "implicit type.");
+            if(!ty) error_at(tok, "implicit type.");
             return ty;
         }
     }
@@ -314,7 +314,7 @@ static Type* enum_spec(){
     }
 
     if(!tk_consume("{"))
-        error_at(tk_get_token()->str, "expect enumeration declare.\n");
+        error_at(tk_get_token(), "expect enumeration declare.\n");
 
     Type* ty = calloc(1, sizeof(Type));
     ty->kind = TY_ENUM;
@@ -358,7 +358,7 @@ static bool check_storage_class_keyword(StorageClassKind* sck, Token* tok){
     
     if(tk_consume_keyword("typedef")){
         if(*sck != SCK_NONE){
-            error_at(tok->str, "multiple storage classes in declaration specifies.");
+            error_at(tok, "multiple storage classes in declaration specifies.");
         }
         *sck = SCK_TYPEDEF;
         return true;
@@ -366,7 +366,7 @@ static bool check_storage_class_keyword(StorageClassKind* sck, Token* tok){
     
     if(tk_consume_keyword("extern")){
         if(*sck != SCK_NONE){
-            error_at(tok->str, "multiple storage classes in declaration specifies.");
+            error_at(tok, "multiple storage classes in declaration specifies.");
         }
         *sck = SCK_EXTERN;
         return true;
@@ -374,7 +374,7 @@ static bool check_storage_class_keyword(StorageClassKind* sck, Token* tok){
 
     if(tk_consume_keyword("static")){
         if(*sck != SCK_NONE){
-            error_at(tok->str, "multiple storage classes in declaration specifies.");
+            error_at(tok, "multiple storage classes in declaration specifies.");
         }
         *sck = SCK_STATIC;
         return true;
@@ -406,7 +406,7 @@ static void count_decl_spec(int* type_flg, int flg, Token* tok){
     }
 
     if(target){
-        error_at(tok->str, "duplicate type keyword.\n");
+        error_at(tok, "duplicate type keyword.\n");
     }
 
     *type_flg += flg;
@@ -428,7 +428,7 @@ static Type* decl_spec(StorageClassKind* sck){
         // user type.
         if(tk_consume_keyword("struct")){
             if(ty || type_flg)
-                error_at(tok->str, "duplicate type keyword.\n");
+                error_at(tok, "duplicate type keyword.\n");
             ty = struct_spec();
             type_flg += K_USER;
             continue;
@@ -438,7 +438,7 @@ static Type* decl_spec(StorageClassKind* sck){
         Type* buf = tk_consume_type();
         if(buf){
             if(ty || type_flg)
-                error_at(tok->str, "duplicate type keyword.\n");
+                error_at(tok, "duplicate type keyword.\n");
             ty = buf;
             type_flg += K_USER;
             continue;
@@ -448,7 +448,7 @@ static Type* decl_spec(StorageClassKind* sck){
         // enumeration.
         if(tk_consume_keyword("enum")){
             if(ty || type_flg)
-                error_at(tok->str, "duplicate type keyword.\n");
+                error_at(tok, "duplicate type keyword.\n");
             ty = enum_spec();
             type_flg += K_USER;
             continue;
@@ -504,7 +504,7 @@ static Type* decl_spec(StorageClassKind* sck){
                 ty = ty_get_type("long", 4);
                 break;
             default:
-                error_at(tk_get_token()->str, "Invalid type.\n");
+                error_at(tk_get_token(), "Invalid type.\n");
                 break;
         }
     }
@@ -703,11 +703,11 @@ static Node* find_case_label(Node* body, Node** default_label){
 
 static Node* stmt(){
 
-    char* p = tk_getline();
+    Token* tok = tk_get_token();
 
     Node* cmpdstmt = compound_stmt();
     if(cmpdstmt){
-        cmpdstmt->line = p;
+        cmpdstmt->line = tok;
         return cmpdstmt;
     }
 
@@ -715,7 +715,7 @@ static Node* stmt(){
     if(tk_consume_keyword("return")){
         node = new_node(ND_RETURN, expr(), NULL);
         tk_expect(";");
-        node->line = p;
+        node->line = tok;
         return node;
     } else if(tk_consume_keyword("if")) {
         node = new_node(ND_IF, NULL, NULL);
@@ -728,7 +728,7 @@ static Node* stmt(){
             node->else_body = stmt();
         }
 
-        node->line = p;
+        node->line = tok;
         return node;
     } else if(tk_consume_keyword("while")) {
         node = new_node(ND_WHILE, NULL, NULL);
@@ -737,7 +737,7 @@ static Node* stmt(){
         node->cond = expr();
         tk_expect(")");
         node->body = stmt();
-        node->line = p;
+        node->line = tok;
         return node;
     } else if(tk_consume_keyword("for")) {
         node = new_node(ND_FOR, NULL, NULL);
@@ -751,7 +751,7 @@ static Node* stmt(){
         tk_expect(")");
 
         node->body = stmt();
-        node->line = p;
+        node->line = tok;
         return node;
     } else if(tk_consume_keyword("switch")){
         node = new_node(ND_SWITCH, NULL, NULL);
@@ -764,7 +764,7 @@ static Node* stmt(){
         return node;
     } else if(tk_consume_keyword("case")){
         node = new_node(ND_CASE, cond_expr(), NULL);
-        node->line = tk_get_token()->str;
+        node->line = tk_get_token();
         tk_expect(":");
         return node;
     } else if(tk_consume_keyword("default")){
@@ -806,7 +806,7 @@ static Node* stmt(){
 
         node = expr();
         tk_expect(";");
-        node->line = p;
+        node->line = tok;
         return node;
     }
 
@@ -1039,7 +1039,7 @@ static Node* postfix(){
             Token* tok = tk_expect_ident();
             Symbol* sym = ty_get_member(node->lhs->type, tok);
             if(sym == NULL){
-                error_at(tok->str, "Not a member.\n");
+                error_at(tok, "Not a member.\n");
             }
             node->type = sym->type;
             node->offset = sym->offset;
@@ -1053,7 +1053,7 @@ static Node* postfix(){
             Token* tok = tk_expect_ident();
             Symbol* sym = ty_get_member(node->lhs->type, tok);
             if(sym == NULL){
-                error_at(tok->str, "Not a member.\n");
+                error_at(tok, "Not a member.\n");
             }
             node->type = sym->type;
             node->offset = sym->offset;
@@ -1116,7 +1116,7 @@ static Node* primary(){
             }
         } else {
             if(sym == NULL){
-                error_at(tok->str, "Not declared.\n");
+                error_at(tok, "Not declared.\n");
             }
 
             Node* node;

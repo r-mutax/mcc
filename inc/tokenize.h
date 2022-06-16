@@ -3,6 +3,7 @@
 #include "mcc.h"
 
 // function definition ----------------------------
+Token*  tk_tokenize_file(char* path);
 Token*  tk_tokenize(char* p);
 bool    tk_iseof();
 void    tk_expect(char* p);

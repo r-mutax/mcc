@@ -2,8 +2,10 @@
 #include "tokenize.h"
 #include "type.h"
 #include "errormsg.h"
+#include "file.h"
 
 Token* token;
+SrcFile* cur_file;
 
 // local function forward definition. ------------
 static Token* new_token(TokenKind kind, Token* cur, char* str, int len);
@@ -13,6 +15,18 @@ static bool is_ident2(char p);
 static bool is_keyword(char* lhs, char* rhs);
 static bool check_keyword(char* keyword, char** p, Token** tok);
 // -----------------------------------------------
+Token* tk_tokenize_file(char* path){
+
+    SrcFile* srcfile = calloc(1, sizeof(SrcFile));
+    srcfile->input_data = read_file(path);
+    srcfile->path = calloc(1, strlen(path) + 1);
+    strcpy(srcfile->path, path);
+
+    cur_file = srcfile;
+
+    return tk_tokenize(srcfile->input_data);
+}
+
 Token* tk_tokenize(char* p){
 
     Token head;
@@ -49,7 +63,7 @@ Token* tk_tokenize(char* p){
         if(strncmp(p, "/*", 2) == 0){
             char *q = strstr(p + 2, "*/");
             if(q == 0){
-                error_at(p, "error : Not close block comment.\n");
+                error("error : Not close block comment.\n");
             }
             p = q + 2;
             continue;
@@ -170,14 +184,14 @@ void tk_expect(char* p){
     {
         char msg[256];
         sprintf(msg, "expect %s, but get %s\n", p, token->str);
-        error_at(token->str, msg);
+        error_at(token, msg);
     }
     token = token->next;
 }
 
 int tk_expect_num(){
     if(token->kind != TK_NUM){
-        error_at(token->str, "expect number.\n");
+        error_at(token, "expect number.\n");
     }
     int ret = token->val;
     token = token->next;
@@ -205,7 +219,7 @@ Token* tk_consume_ident(){
 
 Token*  tk_expect_ident(){
     if(token->kind != TK_IDENT){
-        error_at(token->str, "Expect Identifier, but get another token.\n");
+        error_at(token, "Expect Identifier, but get another token.\n");
     }
 
     Token* tok = token;
@@ -231,7 +245,7 @@ void tk_expect_keyword(char* keyword){
     if(token->kind != TK_KEYWORD
         || token->len != strlen(keyword)
         || memcmp(keyword, token->str, token->len)){
-        error_at(token->str, "Expect keyword, but get another token.\n");
+        error_at(token, "Expect keyword, but get another token.\n");
     }
     token = token->next;
     return;
@@ -261,7 +275,7 @@ Type* tk_consume_type(){
 Type* tk_expect_type(){
     Type* ty = ty_get_type(token->str, token->len);
     if(ty == NULL){
-        error_at(token->str, "Expect type.\n");
+        error_at(token, "Expect type.\n");
     }
     
     token = token->next;
@@ -303,6 +317,7 @@ static Token* new_token(TokenKind kind, Token* cur, char* str, int len){
     tok->kind = kind;
     tok->str = str;
     tok->len = len;
+    tok->src = cur_file;
     cur->next = tok;
     return tok;
 }

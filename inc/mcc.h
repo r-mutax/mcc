@@ -15,6 +15,14 @@ typedef struct Program Program;
 typedef struct Function Function;
 typedef struct Symbol Symbol;
 typedef struct Member Member;
+typedef struct SrcFile SrcFile;
+
+// sorce file definition --------------------------
+struct SrcFile{
+    char* path;
+    char* input_data;
+    SrcFile* next;
+};
 
 // token data definition --------------------------
 typedef enum {
@@ -33,6 +41,7 @@ struct Token {
     int         val;
     char*       str;
     int         len;
+    SrcFile*    src;
 };
 
 // parser data definition ----------------------------------
@@ -100,7 +109,7 @@ struct Node {
 
     Node*       arg;
 
-    char*       line;
+    Token*      line;
 
     // function definition.
     Symbol*     func_sym;

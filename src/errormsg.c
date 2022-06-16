@@ -1,12 +1,6 @@
 #include "mcc.h"
 
-static char* user_input;
 char* filename;
-
-void error_init(char* input, char* fname){
-    user_input = input;
-    filename = fname;
-}
 
 void error(char *fmt, ...) {
   va_list ap;
@@ -16,9 +10,11 @@ void error(char *fmt, ...) {
   exit(1);
 }
 
-void error_at(char* loc, char *msg){
+void error_at(Token* tok, char *msg){
 
+    char* loc = tok->str;
     char* line = loc;
+    char* user_input = tok->src->input_data;
     while(user_input < line && line[-1] != '\n')
         line--;
 
