@@ -3,6 +3,6 @@
 
 #include "mcc.h"
 
-void preprocess(Token* tok);
+Token* preprocess(Token* tok);
 
 #endif
