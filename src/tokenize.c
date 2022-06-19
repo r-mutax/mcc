@@ -2,6 +2,7 @@
 #include "tokenize.h"
 #include "type.h"
 #include "errormsg.h"
+#include "preprocessor.h"
 #include "file.h"
 
 Token* token;
@@ -14,6 +15,7 @@ static bool is_ident1(char p);
 static bool is_ident2(char p);
 static bool is_keyword(char* lhs, char* rhs);
 static bool check_keyword(char* keyword, char** p, Token** tok);
+static bool check_preprocess(char* directive, char** p, Token** tok);
 // -----------------------------------------------
 Token* tk_tokenize_file(char* path){
 
@@ -24,7 +26,10 @@ Token* tk_tokenize_file(char* path){
 
     cur_file = srcfile;
 
-    return tk_tokenize(srcfile->input_data);
+    Token* tok = tk_tokenize(srcfile->input_data);
+    tok = preprocess(tok);
+
+    return tok;
 }
 
 Token* tk_tokenize(char* p){
@@ -113,6 +118,10 @@ Token* tk_tokenize(char* p){
 
         if(strchr("+-*/,()<>:;={}&|^[].?%", *p)){
             cur = new_token(TK_OPERAND, cur, p++, 1);
+            continue;
+        }
+
+        if(check_preprocess("#include", &p, &cur)){
             continue;
         }
 
@@ -349,6 +358,18 @@ static bool check_keyword(char* keyword, char** p, Token** tok){
     if (is_keyword(*p, keyword)){
         int len = strlen(keyword);
         *tok = new_token(TK_KEYWORD, *tok, *p, len);
+        *p += len;
+        return true;
+    }
+
+    return false;
+}
+
+static bool check_preprocess(char* directive, char** p, Token** tok){
+
+    if (is_keyword(*p, directive)){
+        int len = strlen(directive);
+        *tok = new_token(TK_PREPROCESS, *tok, *p, len);
         *p += len;
         return true;
     }

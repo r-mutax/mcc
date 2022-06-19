@@ -16,6 +16,13 @@ typedef struct Function Function;
 typedef struct Symbol Symbol;
 typedef struct Member Member;
 typedef struct SrcFile SrcFile;
+typedef struct IncDir IncDir;
+
+// directory definition ---------------------------
+struct IncDir {
+    char* path;
+    IncDir* next;
+};
 
 // sorce file definition --------------------------
 struct SrcFile{
@@ -32,6 +39,7 @@ typedef enum {
     TK_KEYWORD,
     TK_STRING_CONST,
     TK_NEWLINE,
+    TK_PREPROCESS,
     TK_EOF
 } TokenKind;
 

@@ -1,7 +1,4 @@
-int exit_error(char p);
-int printf(char* p);
-int foo();
-int print_int(int a);
+#include "test.h"
 
 long g_x;
 
