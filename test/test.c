@@ -203,6 +203,8 @@ void test_stmt(){
     } while(a < 3);
     assert(b, 0, "error : continue statement in do-while statement.\n");
 
+    // void statement test
+    ;;;;;;
 
     printf("stmt test is completed !\n");
 }
