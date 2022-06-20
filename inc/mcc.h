@@ -92,7 +92,8 @@ typedef enum {
     ND_CASE,
     ND_BREAK,
     ND_CONTINUE,
-    ND_DEFAULT
+    ND_DEFAULT,
+    ND_VOID_STMT
 } NodeKind;
 
 struct Node {

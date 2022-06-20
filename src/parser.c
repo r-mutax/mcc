@@ -802,6 +802,8 @@ static Node* stmt(){
         node->label_name = calloc(1, tok->len + 1);
         strncpy(node->label_name, tok->str, tok->len);
         return node;
+    } else if(tk_consume(";")){
+        return new_node(ND_VOID_STMT, NULL, NULL);
     } else {
 
         node = expr();

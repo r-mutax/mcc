@@ -272,6 +272,8 @@ static void gen_stmt(Node* node){
         case ND_DEFAULT:
             printf(".LDefault_%d:\n", g_label_stack[g_stack_idx]);
             return;
+        case ND_VOID_STMT:
+            return;
         default:
             gen(node);
             printf("  pop rax\n");
