@@ -486,18 +486,18 @@ static void gen(Node* node){
 
 static void gen_printline(Token* tok){
 
-    if(tok == NULL) return;
+    // if(tok == NULL) return;
 
-    char* semi = strchr(tok->str, ';');
-    char* nl = strchr(tok->str, '\n') - 1;
+    // char* semi = strchr(tok->str, ';');
+    // char* nl = strchr(tok->str, '\n') - 1;
 
-    char* pos = semi < nl ? semi : nl;
+    // char* pos = semi < nl ? semi : nl;
 
-    char* line = calloc(pos - tok->str + 1, sizeof(char));
+    // char* line = calloc(pos - tok->str + 1, sizeof(char));
 
-    strncpy(line, tok->str, pos - tok->str + 1);
-    printf("# %s\n", line);
-    free(line);
+    // strncpy(line, tok->str, pos - tok->str + 1);
+    // printf("# %s\n", line);
+    // free(line);
 }
 
 static void gen_epilogue(void){

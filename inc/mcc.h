@@ -17,6 +17,14 @@ typedef struct Symbol Symbol;
 typedef struct Member Member;
 typedef struct SrcFile SrcFile;
 typedef struct IncDir IncDir;
+typedef struct Macro Macro;
+
+// Macro definition -------------------------------
+struct Macro{
+    Token* def;
+    Token* val;
+    Macro* next;
+};
 
 // directory definition ---------------------------
 struct IncDir {

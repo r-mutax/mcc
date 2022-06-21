@@ -121,7 +121,9 @@ Token* tk_tokenize(char* p){
             continue;
         }
 
-        if(check_preprocess("#include", &p, &cur)){
+        if(check_preprocess("#include", &p, &cur)
+            || check_preprocess("#define", &p, &cur)){
+
             continue;
         }
 
@@ -321,10 +323,16 @@ bool    tk_is_label(){
 }
 
 // local function ---------------------------------
+static char* strndup(char* str, size_t n){
+    char* p = calloc(1, n);
+    memcpy(p, str, n);
+    return p;
+}
+
 static Token* new_token(TokenKind kind, Token* cur, char* str, int len){
     Token* tok = calloc(1, sizeof(Token));
     tok->kind = kind;
-    tok->str = str;
+    tok->str = strndup(str, len);
     tok->len = len;
     tok->src = cur_file;
     cur->next = tok;
