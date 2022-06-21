@@ -4,6 +4,7 @@
 #include "errormsg.h"
 #include "preprocessor.h"
 #include "file.h"
+#include "utility.h"
 
 Token* token;
 SrcFile* cur_file;
@@ -21,8 +22,7 @@ Token* tk_tokenize_file(char* path){
 
     SrcFile* srcfile = calloc(1, sizeof(SrcFile));
     srcfile->input_data = read_file(path);
-    srcfile->path = calloc(1, strlen(path) + 1);
-    strcpy(srcfile->path, path);
+    srcfile->path = strdup(path);
 
     cur_file = srcfile;
 
@@ -323,12 +323,6 @@ bool    tk_is_label(){
 }
 
 // local function ---------------------------------
-static char* strndup(char* str, size_t n){
-    char* p = calloc(1, n);
-    memcpy(p, str, n);
-    return p;
-}
-
 static Token* new_token(TokenKind kind, Token* cur, char* str, int len){
     Token* tok = calloc(1, sizeof(Token));
     tok->kind = kind;

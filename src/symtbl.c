@@ -2,6 +2,7 @@
 #include "symtbl.h"
 #include "type.h"
 #include "scope.h"
+#include "utility.h"
 
 
 Symbol*     str_head;
@@ -21,8 +22,7 @@ void st_init(){
 Symbol* st_make_symbol(Token* tok, Type* ty){
     Symbol* sym = calloc(1, sizeof(Symbol));
 
-    sym->name = calloc(1, sizeof(char) * (tok->len + 1));
-    strncpy(sym->name, tok->str, tok->len);
+    sym->name = strndup(tok->str, tok->len);
     sym->len = tok->len;
     sym->type = ty;
 
@@ -74,8 +74,7 @@ Symbol* st_copy_symbol(Symbol* sym){
 Symbol* st_register_literal(Token* tok){
     Symbol* sym = calloc(1, sizeof(Symbol));
 
-    sym->str = calloc(1, sizeof(char) * (tok->len + 1));
-    strncpy(sym->str, tok->str, tok->len);
+    sym->str = strndup(tok->str, tok->len);
 
     // string literal is including the null terminator.
     // so that length is string length + 1.

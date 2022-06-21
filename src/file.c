@@ -1,11 +1,11 @@
 #include "mcc.h"
 #include "file.h"
 #include "errormsg.h"
+#include "utility.h"
 
 IncDir* inc_dir_dict;
 
 static bool is_exist_path(char* path);
-static char* strdup(char* str);
 
 char* read_file(char* path){
     
@@ -68,11 +68,4 @@ static bool is_exist_path(char* path){
     fclose(fp);
     
     return true;
-}
-
-static char* strdup(char* str){
-    int len = strlen(str);
-    char* p = calloc(1, len);
-    strcpy(p, str);
-    return p;
 }
