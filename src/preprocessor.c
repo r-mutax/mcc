@@ -8,7 +8,11 @@ static bool equal_token(char* directive, Token* tok);
 static Token* read_include(Token* tok);
 static Token* get_end_token(Token* inc);
 static bool equal_token(char* directive, Token* tok);
+static void add_macro(Token* def, Token* val);
+static Token* make_copy_token(Token* src);
+static Macro* find_macro(Token* tok);
 
+static Macro* macro;
 
 Token* preprocess(Token* tok){
 
@@ -21,7 +25,6 @@ Token* preprocess(Token* tok){
 
         if(target->kind == TK_PREPROCESS){
             // preprocessor directive
-
             if(equal_token("#include", target)){
                 Token* path = target->next;
                 Token* inc = read_include(target->next);
@@ -30,6 +33,20 @@ Token* preprocess(Token* tok){
                 Token* tail = get_end_token(inc);
                 tail->next = path->next->next;
                 cur = path->next;
+            } else if(equal_token("#define", target)){
+                Token* def = target->next;
+                Token* val = def->next;
+                add_macro(def, val);
+
+                cur->next = val->next;
+            }
+        } else {
+            Macro* mac = find_macro(target);
+            if(mac){
+                Token* new_token = make_copy_token(mac->val);
+
+                new_token->next = target->next;
+                cur->next = new_token;
             }
         }
 
@@ -106,4 +123,33 @@ static Token* get_end_token(Token* inc){
     }
 
     return bef;
+}
+
+static void add_macro(Token* def, Token* val){
+    Macro* mac = calloc(1, sizeof(Macro));
+
+    mac->def = make_copy_token(def);
+    mac->val = make_copy_token(val);
+
+    mac->next = macro;
+    macro = mac;
+}
+
+static Token* make_copy_token(Token* src){
+    Token* new_tok = calloc(1, sizeof(Token));
+    memcpy(new_tok, src, sizeof(Token));
+    new_tok->next = NULL;
+
+    return new_tok;
+}
+
+static Macro* find_macro(Token* tok){
+
+    for(Macro* cur = macro; cur; cur = cur->next){
+        if(equal_token(tok->str, cur->def)){
+            return cur;
+        }
+    }
+
+    return NULL;
 }

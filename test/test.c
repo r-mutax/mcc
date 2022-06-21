@@ -1,5 +1,7 @@
 #include "test.h"
 
+#define TEST_DEF 1
+
 long g_x;
 
 void assert(int lhs, int rhs, char* p){
@@ -514,6 +516,13 @@ int test_typedef(){
     printf("typedef test is completed.\n");    
 }
 
+int test_preprocess(){
+    int a = TEST_DEF;
+    assert(1, a, "error : #define num.\n");
+
+    printf("preprocess test is completed.\n");    
+}
+
 int main(){   
     test_expr();
     test_stmt();
@@ -526,6 +535,7 @@ int main(){
     test_literal();
     test_enum();
     test_typedef();
+    test_preprocess();
 
     printf("test completed !\n");
 
