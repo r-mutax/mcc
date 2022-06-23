@@ -11,7 +11,7 @@ static bool equal_token(char* directive, Token* tok);
 static void add_macro(Token* def, Token* val);
 static Token* make_copy_token(Token* src);
 static Macro* find_macro(Token* tok);
-static Token* analyze_ifdef(Token* tok, Token** tail);
+static Token* analyze_ifdef(Token* tok, Token** tail, bool is_ifdef);
 
 static Macro* macro;
 
@@ -42,7 +42,13 @@ Token* preprocess(Token* tok){
                 cur->next = val->next;
             } else if(equal_token("#ifdef", target)){
                 Token* endif;
-                Token* ifdef = analyze_ifdef(target->next, &endif);
+                Token* ifdef = analyze_ifdef(target->next, &endif, true);
+
+                cur->next = ifdef;
+                cur = ifdef;
+            } else if(equal_token("#ifndef", target)){
+                Token* endif;
+                Token* ifdef = analyze_ifdef(target->next, &endif, false);
 
                 cur->next = ifdef;
                 cur = ifdef;
@@ -115,7 +121,6 @@ static Token* read_include(Token* tok){
     strncpy(inc_path, path->str, path->len);
     inc_path = get_include_path(inc_path);
     Token* inc = tk_tokenize_file(inc_path);
-    //inc = preprocess(inc);
 
     return inc;
 }
@@ -161,9 +166,9 @@ static Macro* find_macro(Token* tok){
     return NULL;
 }
 
-static Token* analyze_ifdef(Token* tok, Token** tail){
+static Token* analyze_ifdef(Token* tok, Token** tail, bool is_ifdef){
 
-    bool is_defined = find_macro(tok) != NULL;
+    bool is_defined = is_ifdef == (find_macro(tok) != NULL);
     Token* t_head = tok->next;
     Token* t_tail = NULL;
     Token* f_head = NULL;
@@ -192,7 +197,13 @@ static Token* analyze_ifdef(Token* tok, Token** tail){
             f_head = target->next;
         } else if(equal_token("#ifdef", target)){
             Token* ifdef_tail;
-            Token* ifdef_head = analyze_ifdef(target->next, &ifdef_tail);
+            Token* ifdef_head = analyze_ifdef(target->next, &ifdef_tail, true);
+
+            cur->next = ifdef_head;
+            cur = ifdef_tail;
+        } else if(equal_token("#ifdef", target)){
+            Token* ifdef_tail;
+            Token* ifdef_head = analyze_ifdef(target->next, &ifdef_tail, false);
 
             cur->next = ifdef_head;
             cur = ifdef_tail;
