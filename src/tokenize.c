@@ -123,6 +123,7 @@ Token* tk_tokenize(char* p){
 
         if(check_preprocess("#include", &p, &cur)
             || check_preprocess("#ifdef", &p, &cur)
+            || check_preprocess("#ifndef", &p, &cur)
             || check_preprocess("#else", &p, &cur)
             || check_preprocess("#endif", &p, &cur)
             || check_preprocess("#define", &p, &cur)){

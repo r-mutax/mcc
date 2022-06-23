@@ -546,6 +546,20 @@ int test_preprocess(){
     printf("#ifdef : No #else pattern test OK.\n");
 #endif
 
+#ifndef TEST_DEF1
+    printf("#ifndef : No #else pattern test OK.\n");
+#endif
+
+#ifndef TEST_DEF
+#ifdef TEST_DEF1
+    1;
+#endif
+#else
+#ifdef TEST_DEF
+    printf("#ifndef : Nesting pattern test OK.\n");
+#endif
+#endif
+
     printf("preprocess test is completed.\n");
 }
 
