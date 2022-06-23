@@ -11,6 +11,7 @@ static bool equal_token(char* directive, Token* tok);
 static void add_macro(Token* def, Token* val);
 static Token* make_copy_token(Token* src);
 static Macro* find_macro(Token* tok);
+static Token* analyze_ifdef(Token* tok, Token** tail);
 
 static Macro* macro;
 
@@ -39,6 +40,12 @@ Token* preprocess(Token* tok){
                 add_macro(def, val);
 
                 cur->next = val->next;
+            } else if(equal_token("#ifdef", target)){
+                Token* endif;
+                Token* ifdef = analyze_ifdef(target->next, &endif);
+
+                cur->next = ifdef;
+                cur = ifdef;
             }
         } else {
             Macro* mac = find_macro(target);
@@ -153,3 +160,63 @@ static Macro* find_macro(Token* tok){
 
     return NULL;
 }
+
+static Token* analyze_ifdef(Token* tok, Token** tail){
+
+    bool is_defined = find_macro(tok) != NULL;
+    Token* t_head = tok->next;
+    Token* t_tail = NULL;
+    Token* f_head = NULL;
+    Token* f_tail = NULL;
+    bool tf_path = true;
+
+    Token head;
+    Token* cur = &head;
+    head.next = tok->next;
+
+    while(cur){
+        Token* target = cur->next;
+
+        if(equal_token("#endif", target)){
+            cur->next = target->next;
+            if(tf_path){
+                t_tail = cur;
+            } else {
+                f_tail = cur;
+                t_tail->next = cur->next;
+            }
+            break; 
+        } else if(equal_token("#else", target)){
+            tf_path = false;
+            t_tail = cur;
+            f_head = target->next;
+        } else if(equal_token("#ifdef", target)){
+            Token* ifdef_tail;
+            Token* ifdef_head = analyze_ifdef(target->next, &ifdef_tail);
+
+            cur->next = ifdef_head;
+            cur = ifdef_tail;
+        }
+        cur = cur->next;
+    }
+
+    if(is_defined){
+        if(t_tail)
+            *tail = t_tail;
+
+        else {
+            *tail = cur->next;
+            t_head = *tail;
+        }
+        return t_head;
+    } else {
+        if(f_tail != NULL){
+            *tail = f_tail;
+            return f_head;
+        } else {
+            *tail = t_tail;
+            return t_tail;
+        }
+    }
+}
+
