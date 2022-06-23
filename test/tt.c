@@ -1,3 +1,7 @@
+#define ABC 1
+#ifdef ABC
+static int a;
+#endif
 int main(){
 
     enum ABC_ENUM{

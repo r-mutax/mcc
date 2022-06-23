@@ -520,7 +520,33 @@ int test_preprocess(){
     int a = TEST_DEF;
     assert(1, a, "error : #define num.\n");
 
-    printf("preprocess test is completed.\n");    
+#ifdef TEST_DEF1
+    assert(0, 1, "error : not defined pattern , not invalid path.\n");
+#else
+    printf("#ifdef : not defined pattern #else path OK.\n");
+#endif
+
+#ifdef TEST_DEF
+    printf("#ifdef : defined pattern #true path OK.\n");
+#else
+    assert(0, 1, "error : defined pattern , not invalid path.\n");
+#endif
+
+#ifdef TEST_DEF
+#ifdef TEST_DEF1
+    assert(0, 1, "error : Nesting #ifdef pattern 1.\n");
+#else
+    printf("#ifdef : Nesting pattern test OK.\n");
+#endif
+#else
+    assert(0, 1, "error : Nesting #ifdef pattern 2.\n");
+#endif
+
+#ifdef TEST_DEF
+    printf("#ifdef : No #else pattern test OK.\n");
+#endif
+
+    printf("preprocess test is completed.\n");
 }
 
 int main(){   
