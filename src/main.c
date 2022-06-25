@@ -7,6 +7,20 @@
 #include "file.h"
 #include "errormsg.h"
 
+void init_include_directory(int argc, char** argv){
+
+    char cwd[256] = { 0 };
+    char* pos = strrchr(argv[0], '/');
+    strncpy(cwd, argv[0], pos - argv[0] + 1); 
+    char* p = cwd;
+    sprintf(cwd, "%s/stdlib/include/", p);
+    register_include_directory(cwd);
+
+    memset(cwd, 0, sizeof(cwd));
+    pos = strrchr(argv[1], '/');
+    strncpy(cwd, argv[1], pos - argv[1] + 1); 
+    register_include_directory(cwd);
+}
 
 int main(int argc, char **argv){
 
@@ -14,10 +28,7 @@ int main(int argc, char **argv){
         fprintf(stderr, "mcc: error: Invalid Argument num.");
     }
 
-    char cwd[256] = { 0 };
-    char* pos = strrchr(argv[1], '/');
-    strncpy(cwd, argv[1], pos - argv[1] + 1); 
-    register_include_directory(cwd);
+    init_include_directory(argc, argv);
 
     Token* tok = tk_tokenize_file(argv[1]);
     tk_set_token(tok);

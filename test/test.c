@@ -1,4 +1,5 @@
 #include "test.h"
+#include "testlib.h"
 
 #define TEST_DEF 1
 
@@ -564,6 +565,7 @@ int test_preprocess(){
 }
 
 int main(){   
+    test_lib();
     test_expr();
     test_stmt();
     test_func();
