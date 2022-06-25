@@ -1,5 +1,6 @@
 load/*
 bin/mcc
+bin/mlibc
 test/tmp
 test/tmp.s
 test/test_func/*.o

@@ -10,11 +10,14 @@
 void init_include_directory(int argc, char** argv){
 
     char cwd[256] = { 0 };
-    sprintf(cwd, "%s/%s", argv[0], "include");
+    char* pos = strrchr(argv[0], '/');
+    strncpy(cwd, argv[0], pos - argv[0] + 1); 
+    char* p = cwd;
+    sprintf(cwd, "%s/stdlib/include/", p);
     register_include_directory(cwd);
 
     memset(cwd, 0, sizeof(cwd));
-    char* pos = strrchr(argv[1], '/');
+    pos = strrchr(argv[1], '/');
     strncpy(cwd, argv[1], pos - argv[1] + 1); 
     register_include_directory(cwd);
 }

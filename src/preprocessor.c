@@ -32,8 +32,8 @@ Token* preprocess(Token* tok){
 
                 cur->next = inc;
                 Token* tail = get_end_token(inc);
-                tail->next = path->next->next;
-                cur = path->next;
+                tail->next = path->next;
+                cur = tail;
             } else if(equal_token("#define", target)){
                 Token* def = target->next;
                 Token* val = def->next;
