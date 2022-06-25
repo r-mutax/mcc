@@ -1,5 +1,5 @@
 load/*
-bin/*
+bin/mcc
 test/tmp
 test/tmp.s
 test/test_func/*.o
