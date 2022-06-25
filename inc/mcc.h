@@ -157,6 +157,9 @@ struct Symbol{
     int         enum_val;
     Type*       type;
     char*       str;
+    
+    Symbol*     args;
+    int         argnum;
 };
 
 // type data definition --------------------------

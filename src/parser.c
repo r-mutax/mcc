@@ -167,39 +167,32 @@ static Node* function(){
     Type* ty = decl_spec(&sck);
     Symbol* sym = declare(ty, sck);
     st_declare(sym);
-
     sym->is_func = true;
     func->func_sym = sym;
-
     cur_func = func;
 
+    // function parameter
     sc_start_scope();
-
     tk_expect("(");
 
     if(!tk_consume(")")){
-        // this function has parameter.
-        if(!tk_istype()){
-            error("not a type.\n");
-        }
-        
         Symbol head;
         Symbol* cur = &head;
-        do{
-            Type* ty = tk_consume_type();
-            while(tk_consume("*"))
-                ty = ty_pointer_to(ty);
-            
-            Token* ident_tok = tk_expect_ident();
-            Symbol* sym = st_make_symbol(ident_tok, ty);
-            st_declare(sym);
 
-            cur = cur->next = st_copy_symbol(sym);
+        do {
+            Type* arg_ty = decl_spec(&sck);
+            Symbol* arg_sym = declare(arg_ty, sck);
+            st_declare(arg_sym);
+
+            Symbol* buf = st_copy_symbol(arg_sym);
+            cur = cur->next = buf;
             func->paramnum++;
         } while(tk_consume(","));
-        func->param = head.next;
-
         tk_expect(")");
+
+        func->param = head.next;
+        sym->args = head.next;
+        sym->argnum++;
     }
 
     func->body = compound_stmt();
