@@ -106,6 +106,11 @@ static void check_expr(Node* expr){
         case ND_ADDR:
             return;
         case ND_DREF:
+            if(expr->lhs->type->pointer_to){
+                if(expr->lhs->type->pointer_to->kind == TY_VOID){
+                    error("Try dereference void pointer.\n");
+                }
+            }
             check_expr(expr->lhs);
             return;
         case ND_COMMA:
