@@ -590,10 +590,19 @@ int test_preprocess(){
 
 void test_cast(){
 
+    struct TEST_DATA {
+        char c;
+        short s;
+        int i;
+        long l;
+    };
+
     char c = 127;
     short s = 32767;
     int i = 2147483647;
     long l = 9223372036854775807;
+
+    struct TEST_DATA test_str;
 
     // char data cast...
     assert((short)c, 127, "error : char to short cast.\n");
@@ -615,6 +624,14 @@ void test_cast(){
     assert_s((short)l, -1, "error : long to short cast.\n");
     assert((int)l, -1, "error : long to int cast.\n");
 
+    test_str.c = 100;
+    test_str.i = 100;
+    test_str.l = 200;
+    test_str.s = 1231;
+
+    long* non_pointer = &test_str;
+
+    assert(((struct TEST_DATA*)non_pointer)->s, 1231, "error : pointer cast.");
 
     printf("cast test is completed.\n");
 }
