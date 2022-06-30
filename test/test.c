@@ -5,9 +5,33 @@
 
 long g_x;
 
+void assert_c(char lhs, char rhs, char* p){
+    if(lhs != rhs){
+        print_int(lhs);
+        print_int(rhs);
+
+        exit_error(p);
+    }
+}
+
+void assert_s(short lhs, short rhs, char* p){
+    if(lhs != rhs){
+        print_int(lhs);
+        print_int(rhs);
+
+        exit_error(p);
+    }
+}
+
 void assert(int lhs, int rhs, char* p){
     if(lhs != rhs)
+    {
+        print_int(lhs);
+
+        print_int(rhs);
+
         exit_error(p);
+    }
 }
 
 void assert2(int lhs, int rhs, char* p){
@@ -564,6 +588,37 @@ int test_preprocess(){
     printf("preprocess test is completed.\n");
 }
 
+void test_cast(){
+
+    char c = 127;
+    short s = 32767;
+    int i = 2147483647;
+    long l = 9223372036854775807;
+
+    // char data cast...
+    assert((short)c, 127, "error : char to short cast.\n");
+    assert((int)c, 127, "error : char to int cast.\n");
+    assert((long)c, 127, "error : char to long cast.\n");
+
+    // short data cast to...
+    assert_c((char)s, -1, "error : short to char cast.\n");
+    assert((int)s, 32767, "error : short to int cast.\n");
+    assert((long)s, 32767, "error : short to long cast.\n");
+
+    // int data cast to...
+    assert_c((char)i, -1, "error : int to char cast.\n");
+    assert_s((short)i, -1, "error : int to short cast.\n");
+    assert((long)i, 2147483647, "error : int to long cast.\n");
+    
+    // long data cast to...
+    assert_c((char)l, -1, "error : long to char cast.\n");
+    assert_s((short)l, -1, "error : long to short cast.\n");
+    assert((int)l, -1, "error : long to int cast.\n");
+
+
+    printf("cast test is completed.\n");
+}
+
 int main(){   
     test_lib();
     test_expr();
@@ -578,6 +633,7 @@ int main(){
     test_enum();
     test_typedef();
     test_preprocess();
+    test_cast();
 
     printf("test completed !\n");
 

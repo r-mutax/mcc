@@ -12,6 +12,30 @@ static const char *argreg16[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
 static const char *argreg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static const char *argreg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
 
+// cast instruction dst_src
+static char i64_i8[] = "movsx rax, al";
+static char i32_i8[] = "movsx eax, al";
+static char i16_i8[] = "movsx ax, al";
+static char i8_i16[] = "mov rdi, 0\n  mov dil, al\n  mov rax, rdi";
+static char i32_i16[] = "movsx eax, ax";
+static char i64_i16[] = "movsx eax, ax";
+static char i8_i32[] = "mov rdi, 0\n  mov dil, al\n  mov rax, rdi";
+static char i16_i32[] = "mov rdi, 0\n  mov di, ax\n  mov rax, rdi";
+static char i64_i32[] = "movsx rax, eax";
+static char i8_i64[] = "mov rdi, 0\n  mov dil, al\n  mov rax, rdi";
+static char i16_i64[] = "mov rdi, 0\n  mov di, ax\n  mov rax, rdi";
+
+
+// cast instruction table
+// column : source, row : destination
+static char* cast_table[][4] = {
+    //  i8         i16         i32          i64
+    {   NULL,      i8_i16,     i8_i32,      i8_i64  },  // i8
+    {   i16_i8,    NULL,       i16_i32,     i16_i64 },  // i16
+    {   i32_i8,    i32_i16,    NULL,        NULL    },  // i32
+    {   i64_i8,    i64_i16,    NULL,        NULL    }   // i64
+};
+
 // local function forward declaration. ------------
 static void gen_lval(Node* node);
 static void gen_stmt(Node* node);
@@ -22,6 +46,8 @@ static void gen_printline(Token* p);
 static void gen_print_sym(Symbol* sym);
 static void gen_epilogue(void);
 static void gen(Node* node);
+static void gen_cast(Type* from, Type* to);
+static SIZE_TYPE_ID get_size_type_id(Type* ty);
 
 void gen_program(Program* prog){
 
@@ -131,6 +157,17 @@ static void gen_compound_stmt(Node* node){
             gen_stmt(cur);
         }
         cur = cur->next;
+    }
+}
+
+static void gen_cast(Type* from, Type* to){
+    SIZE_TYPE_ID src_i = get_size_type_id(from);
+    SIZE_TYPE_ID dst_i = get_size_type_id(to);
+
+    printf("  pop rax\n");
+
+    if(cast_table[dst_i][src_i]){
+        printf("  %s\n", cast_table[dst_i][src_i]);
     }
 }
 
@@ -417,6 +454,11 @@ static void gen(Node* node){
             printf(".L.End%d:\n", label);
             return;
         }
+        case ND_CAST:
+            gen(node->lhs);
+            gen_cast(node->lhs->type, node->type);
+            printf("  push rax\n");
+            return;
     }
 
     if(node->kind == ND_NUM){
@@ -541,3 +583,26 @@ static void gen_lval(Node* node){
     error("Not a Variable.\n");
 }
 
+static SIZE_TYPE_ID get_size_type_id(Type* ty)
+{
+    SIZE_TYPE_ID id = 0;
+    switch(ty->size){
+        case 1:
+            id = i8;
+            break;
+        case 2:
+            id = i16;
+            break;
+        case 4:
+            id = i32;
+            break;
+        case 8:
+            id = i64;
+            break;
+        default:
+            id = ierr;
+            break;
+    }
+
+    return id;
+}

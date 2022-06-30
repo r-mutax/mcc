@@ -45,7 +45,8 @@
     equality = relational ( '==' relational | '!=' relational)*
     relational = add ( '<' add | '<=' add | '>' add | '>=' add)*
     add = mul ( '+' mul | '-' mul | '%' mul )*
-    mul = primary ( '*' unary | '/' unary )*
+    mul = primary ( '*' cast | '/' cast )*
+    cast = '(' type-name ')' cast | unary
     unary = postfix
             | '++' unary
             | '--' unary
@@ -102,8 +103,9 @@ static Node* mul();
 static Node* postfix();
 static Node* primary();
 static Node* unary();
+static Node* cast();
 static bool is_function();
-
+static bool is_cast();
 static Node* cur_func;
 
 // -----------------------------------------------
@@ -963,19 +965,48 @@ static Node* add(){
 }
 
 static Node* mul(){
-    Node* node = unary();
+    Node* node = cast();
     
     for(;;){
         if(tk_consume("*")){
-            node = new_node(ND_MUL, node, unary());
+            node = new_node(ND_MUL, node, cast());
         } else if(tk_consume("/")){
-            node = new_node(ND_DIV, node, unary());
+            node = new_node(ND_DIV, node, cast());
         } else if(tk_consume("%")) {
-            node = new_node(ND_MOD, node, unary());
+            node = new_node(ND_MOD, node, cast());
         } else {
             return node;
         }
     }
+}
+
+static bool is_cast(){
+    bool retval = false;
+    Token* tok = tk_get_token();
+
+    if(tk_consume("(") && tk_istype()){
+        retval = true;
+    }
+
+    tk_set_token(tok);
+    return retval;
+}
+
+static Node* cast(){
+
+    if(is_cast()){
+        tk_expect("(");
+        StorageClassKind sck;
+        Type* ty = decl_spec(&sck);
+
+        tk_expect(")");
+
+        Node* node = new_node(ND_CAST, cast(), NULL);
+        node->type = ty;
+        return node;
+    }
+
+    return unary();
 }
 
 static Node* unary(){
@@ -985,13 +1016,13 @@ static Node* unary(){
         ty_add_type(node);
         return new_node_num(node->type->size);
     } else if(tk_consume("+")){
-        return unary();
+        return cast();
     } else if(tk_consume("-")){
-        return new_node(ND_SUB, new_node_num(0), unary());
+        return new_node(ND_SUB, new_node_num(0), cast());
     } else if(tk_consume("&")){
-        return new_node(ND_ADDR, unary(), NULL);
+        return new_node(ND_ADDR, cast(), NULL);
     } else if(tk_consume("*")){
-        return new_node(ND_DREF, unary(), NULL);
+        return new_node(ND_DREF, cast(), NULL);
     } else if(tk_consume("++")){
         // ++a -> a = a + 1
         Node* node = unary();
