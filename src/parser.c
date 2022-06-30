@@ -998,10 +998,21 @@ static Node* cast(){
         tk_expect("(");
         StorageClassKind sck;
         Type* ty = decl_spec(&sck);
+        while(tk_consume("*")){
+            ty = ty_pointer_to(ty);
+        }
 
         tk_expect(")");
 
-        Node* node = new_node(ND_CAST, cast(), NULL);
+        Node* node;
+        if(!ty->pointer_to){
+            node = new_node(ND_CAST, cast(), NULL);
+        } else {
+            node = cast();
+            node->type = ty;
+            return node;
+        }
+
         node->type = ty;
         return node;
     }
