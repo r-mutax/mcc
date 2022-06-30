@@ -101,7 +101,8 @@ typedef enum {
     ND_BREAK,
     ND_CONTINUE,
     ND_DEFAULT,
-    ND_VOID_STMT
+    ND_VOID_STMT,
+    ND_CAST
 } NodeKind;
 
 struct Node {
@@ -232,5 +233,13 @@ enum {
     K_SIGNED    = 1 << 17,
     K_UNSIGNED  = 1 << 18
 };
+
+typedef enum {
+    ierr = -1,
+    i8 = 0,
+    i16,
+    i32,
+    i64
+} SIZE_TYPE_ID;
 
 #endif
