@@ -176,5 +176,12 @@ void ty_add_type(Node* node){
         case ND_DECLARE:
             node->type = node->sym->type;
             break;
+        case ND_BIT_LSHIFT:
+        case ND_BIT_RSHIFT:
+        case ND_BIT_AND:
+        case ND_BIT_OR:
+        case ND_BIT_XOR:
+            node->type = node->lhs->type;
+            break;
     }
 }

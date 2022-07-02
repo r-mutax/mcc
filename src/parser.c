@@ -35,7 +35,9 @@
                         | '-=' assign
                         | '*=' assign
                         | '/=' assign
-                        | '%=' assign )?
+                        | '%=' assign
+                        | '<<=' assign
+                        | '>>=' assign )?
     cond_expr = logicOr '?' expr ':' cond_expr
     logicOr = logicAnd ('||' logicAnd)*
     logicAnd = bitOr ('&&' bitOr)*
@@ -71,6 +73,8 @@ static Node* new_node_sub(Node* lhs, Node* rhs);
 static Node* new_node_mul(Node* lhs, Node* rhs);
 static Node* new_node_div(Node* lhs, Node* rhs);
 static Node* new_node_mod(Node* lhs, Node* rhs);
+static Node* new_node_bit_shift_l(Node* lhs, Node* rhs);
+static Node* new_node_bit_shift_r(Node* lhs, Node* rhs);
 static Node* new_var(Symbol* sym);
 static Node* new_inc(Node* var);
 static Node* new_dec(Node* var);
@@ -838,6 +842,10 @@ static Node* assign(){
         node = new_node(ND_ASSIGN, node, new_node_div(node, assign()));
     } else if(tk_consume("%=")){
         node = new_node(ND_ASSIGN, node, new_node_mod(node, assign()));
+    } else if(tk_consume("<<=")){
+        node = new_node(ND_ASSIGN, node, new_node_bit_shift_l(node, assign()));
+    } else if(tk_consume(">>=")){
+        node = new_node(ND_ASSIGN, node, new_node_bit_shift_r(node, assign()));
     }
     return node;
 }
@@ -1340,6 +1348,38 @@ static Node* new_node_mod(Node* lhs, Node* rhs){
 
     node->lhs = lhs;
     node->rhs = rhs;    
+    return node;
+}
+
+static Node* new_node_bit_shift_l(Node* lhs, Node* rhs){
+    ty_add_type(lhs);
+    ty_add_type(rhs);
+
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_BIT_LSHIFT;
+
+    if(lhs->type->pointer_to || rhs->type->pointer_to){
+        error("error : Try bit-shift pointer.\n");
+    }
+
+    node->lhs = lhs;
+    node->rhs = rhs;
+    return node;
+}
+
+static Node* new_node_bit_shift_r(Node* lhs, Node* rhs){
+    ty_add_type(lhs);
+    ty_add_type(rhs);
+
+    Node* node = calloc(1, sizeof(Node));
+    node->kind = ND_BIT_RSHIFT;
+
+    if(lhs->type->pointer_to || rhs->type->pointer_to){
+        error("error : Try bit-shift pointer.\n");
+    }
+
+    node->lhs = lhs;
+    node->rhs = rhs;
     return node;
 }
 

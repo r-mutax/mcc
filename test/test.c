@@ -320,6 +320,13 @@ void test_expr(){
 
     assert(0, 255 >> 8, "error : bitwise shift to right 8bit.\n");
 
+    b = 8;
+    b <<= 3;
+    assert(64, b, "error : bitwise left-shift and assign.\n");
+    
+    b >>= 3;
+    assert(8, b, "error : bitwise right-shift and assign.\n");
+
     printf("expr test is completed !\n");
 }
 void test_enum(){
