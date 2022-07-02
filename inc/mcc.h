@@ -102,7 +102,9 @@ typedef enum {
     ND_CONTINUE,
     ND_DEFAULT,
     ND_VOID_STMT,
-    ND_CAST
+    ND_CAST,
+    ND_BIT_LSHIFT,
+    ND_BIT_RSHIFT
 } NodeKind;
 
 struct Node {

@@ -96,6 +96,14 @@ Token* tk_tokenize(char* p){
             continue;
         }
 
+        if(startswith(p, "<<=")
+            || startswith(p, ">>="))
+        {
+            cur = new_token(TK_OPERAND, cur, p, 3);
+            p += 3;
+            continue;
+        }
+
         if(startswith(p, "==")
             || startswith(p, "!=")
             || startswith(p, "<=")
@@ -105,6 +113,8 @@ Token* tk_tokenize(char* p){
             || startswith(p, "*=")
             || startswith(p, "/=")
             || startswith(p, "%=")
+            || startswith(p, "<<")
+            || startswith(p, ">>")
             || startswith(p, "++")
             || startswith(p, "--")
             || startswith(p, "&&")
