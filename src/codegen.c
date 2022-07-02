@@ -520,6 +520,14 @@ static void gen(Node* node){
         case ND_BIT_OR:
             printf("  or rax, rdi\n");
             break;
+        case ND_BIT_LSHIFT:
+            printf("  mov rcx, rdi\n");
+            printf("  shl rax, cl\n");
+            break;
+        case ND_BIT_RSHIFT:
+            printf("  mov rcx, rdi\n");
+            printf("  shr rax, cl\n");
+            break;
     }
 
     printf("  push rax\n");

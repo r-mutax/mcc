@@ -105,6 +105,8 @@ Token* tk_tokenize(char* p){
             || startswith(p, "*=")
             || startswith(p, "/=")
             || startswith(p, "%=")
+            || startswith(p, "<<")
+            || startswith(p, ">>")
             || startswith(p, "++")
             || startswith(p, "--")
             || startswith(p, "&&")

@@ -315,6 +315,11 @@ void test_expr(){
     assert(5, 1 ? 5 : 0, "error : conditon expression(true pattern).\n");
     assert(5, 0 ? 3 : 5, "error : conditon expression(false pattern).\n");
 
+    assert(8, 1 << 3 , "error : bitwise shift to left.\n");
+    assert(1, 8 >> 3 , "error : bitwise shift to left.\n");
+
+    assert(0, 255 >> 8, "error : bitwise shift to right 8bit.\n");
+
     printf("expr test is completed !\n");
 }
 void test_enum(){
