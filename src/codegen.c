@@ -11,6 +11,7 @@ static const char *argreg8[] = {"dil", "sil", "dl", "cl", "r8b", "r9b"};
 static const char *argreg16[] = {"di", "si", "dx", "cx", "r8w", "r9w"};
 static const char *argreg32[] = {"edi", "esi", "edx", "ecx", "r8d", "r9d"};
 static const char *argreg64[] = {"rdi", "rsi", "rdx", "rcx", "r8", "r9"};
+extern FILE* output_file;
 
 // cast instruction dst_src
 static char i64_i8[] = "movsx rax, al";
@@ -51,14 +52,14 @@ static SIZE_TYPE_ID get_size_type_id(Type* ty);
 
 void gen_program(Program* prog){
 
-    printf(".intel_syntax noprefix\n");
+    fprintf(output_file, ".intel_syntax noprefix\n");
 
     // string constant output
-    printf("  .data\n");
+    fprintf(output_file, "  .data\n");
     Symbol* sym = prog->string_list;
     while(sym){
         gen_print_sym(sym);
-        printf("  .string \"%s\"\n", sym->str);
+        fprintf(output_file, "  .string \"%s\"\n", sym->str);
         sym = sym->next;
     }
 
@@ -87,12 +88,12 @@ void gen_program(Program* prog){
 static void gen_print_sym(Symbol* sym){
     if(sym->is_static){
         if(sym->func_name){
-            printf(".L%s_%s:\n", sym->func_name, sym->name);
+            fprintf(output_file, ".L%s_%s:\n", sym->func_name, sym->name);
         } else {
-            printf(".L%s:\n", sym->name);
+            fprintf(output_file, ".L%s:\n", sym->name);
         }
     } else {
-        printf("%s:\n", sym->name);
+        fprintf(output_file, "%s:\n", sym->name);
     }
 }
 
@@ -103,7 +104,7 @@ static void gen_grobal_variable(Node* node){
     if(node->sym->type->pointer_to){
         size *= node->sym->type->array_len;
     }
-    printf("  .zero %d\n", size);
+    fprintf(output_file, "  .zero %d\n", size);
 }
 
 static void gen_function(Node* func){
@@ -114,30 +115,30 @@ static void gen_function(Node* func){
 
     cur_function = func;
 
-    printf("  .global %s\n", func->func_sym->name);
-    printf("  .text\n");
+    fprintf(output_file, "  .global %s\n", func->func_sym->name);
+    fprintf(output_file, "  .text\n");
     gen_print_sym(func->func_sym);
 
     // prologue
-    printf("  push rbp\n");
-    printf("  mov rbp, rsp\n");
+    fprintf(output_file, "  push rbp\n");
+    fprintf(output_file, "  mov rbp, rsp\n");
 
     // alloc local variable area.
     int size = func->stack_size;
     size = ((size + 15) / 16) * 16;
-    printf("  sub rsp, %d\n", size);
+    fprintf(output_file, "  sub rsp, %d\n", size);
 
     // move arguments register to stack.
     Symbol* param = func->param;
     for(int argn = 0; argn < func->paramnum; argn++){
         if(param->type->size == 1) {
-            printf("  mov [rbp - %d],%s\n", param->offset, argreg8[argn]);
+            fprintf(output_file, "  mov [rbp - %d],%s\n", param->offset, argreg8[argn]);
         }else if(param->type->size == 2){
-            printf("  mov [rbp - %d],%s\n", param->offset, argreg16[argn]);
+            fprintf(output_file, "  mov [rbp - %d],%s\n", param->offset, argreg16[argn]);
         }else if(param->type->size == 4){
-            printf("  mov [rbp - %d],%s\n", param->offset, argreg32[argn]);
+            fprintf(output_file, "  mov [rbp - %d],%s\n", param->offset, argreg32[argn]);
         } else if(param->type->size == 8){
-            printf("  mov [rbp - %d],%s\n", param->offset, argreg64[argn]);
+            fprintf(output_file, "  mov [rbp - %d],%s\n", param->offset, argreg64[argn]);
         }
         param = param->next;
     }
@@ -164,10 +165,10 @@ static void gen_cast(Type* from, Type* to){
     SIZE_TYPE_ID src_i = get_size_type_id(from);
     SIZE_TYPE_ID dst_i = get_size_type_id(to);
 
-    printf("  pop rax\n");
+    fprintf(output_file, "  pop rax\n");
 
     if(cast_table[dst_i][src_i]){
-        printf("  %s\n", cast_table[dst_i][src_i]);
+        fprintf(output_file, "  %s\n", cast_table[dst_i][src_i]);
     }
 }
 
@@ -180,22 +181,22 @@ static void gen_stmt(Node* node){
     switch(node->kind){
         case ND_RETURN:
             gen(node->lhs);
-            printf("  pop rax\n");
+            fprintf(output_file, "  pop rax\n");
             gen_epilogue();
             return;
         case ND_WHILE:
             {
                 int label = g_label++;
                 g_label_stack[++g_stack_idx] = label;
-                printf(".LBegin_%d:\n", label);
-                printf(".LLoop_%d:\n", label);
+                fprintf(output_file, ".LBegin_%d:\n", label);
+                fprintf(output_file, ".LLoop_%d:\n", label);
                 gen(node->cond);
-                printf("  pop rax\n");
-                printf("  cmp rax, 0\n");
-                printf("  je .LEnd_%d\n", label);
+                fprintf(output_file, "  pop rax\n");
+                fprintf(output_file, "  cmp rax, 0\n");
+                fprintf(output_file, "  je .LEnd_%d\n", label);
                 gen_stmt(node->body);
-                printf("  jmp .LBegin_%d\n", label);
-                printf(".LEnd_%d:\n", label);
+                fprintf(output_file, "  jmp .LBegin_%d\n", label);
+                fprintf(output_file, ".LEnd_%d:\n", label);
                 g_stack_idx--;
                 return;                
             }
@@ -204,18 +205,18 @@ static void gen_stmt(Node* node){
                 int label = g_label++;
                 g_label_stack[++g_stack_idx] = label;
                 gen(node->init);
-                printf("  pop rax\n");
-                printf(".LBegin_%d:\n", label);
+                fprintf(output_file, "  pop rax\n");
+                fprintf(output_file, ".LBegin_%d:\n", label);
                 gen(node->cond);
-                printf("  pop rax\n");
-                printf("  cmp rax, 0\n");
-                printf("  je .LEnd_%d\n", label);
+                fprintf(output_file, "  pop rax\n");
+                fprintf(output_file, "  cmp rax, 0\n");
+                fprintf(output_file, "  je .LEnd_%d\n", label);
                 gen_stmt(node->body);
-                printf(".LLoop_%d:\n", label);
+                fprintf(output_file, ".LLoop_%d:\n", label);
                 gen(node->iter);
-                printf("  pop rax\n");
-                printf("  jmp .LBegin_%d\n", label);
-                printf(".LEnd_%d:\n", label);
+                fprintf(output_file, "  pop rax\n");
+                fprintf(output_file, "  jmp .LBegin_%d\n", label);
+                fprintf(output_file, ".LEnd_%d:\n", label);
                 g_stack_idx--;
                 return;
             }
@@ -223,38 +224,38 @@ static void gen_stmt(Node* node){
         {
             int label = g_label++;
             gen(node->cond);
-            printf("  pop rax\n");
-            printf("  cmp rax, 0\n");
+            fprintf(output_file, "  pop rax\n");
+            fprintf(output_file, "  cmp rax, 0\n");
 
             if(node->else_body){
-                printf("  je .LIfElse%d\n", label);
+                fprintf(output_file, "  je .LIfElse%d\n", label);
             } else {
-                printf("  je .LIfEnd%d\n", label);
+                fprintf(output_file, "  je .LIfEnd%d\n", label);
             }
 
             // print true-body
             gen_stmt(node->body);
-            printf("  jmp .LIfEnd%d\n", label);
+            fprintf(output_file, "  jmp .LIfEnd%d\n", label);
             
             if(node->else_body){
-                printf(".LIfElse%d:\n", label);
+                fprintf(output_file, ".LIfElse%d:\n", label);
                 gen_stmt(node->else_body);
             }
-            printf(".LIfEnd%d:\n", label);
+            fprintf(output_file, ".LIfEnd%d:\n", label);
             return;
         }
         case ND_DOWHILE:
         {
             int label = g_label++;
             g_label_stack[++g_stack_idx] = label;
-            printf(".LBegin_%d:\n", label);
+            fprintf(output_file, ".LBegin_%d:\n", label);
             gen_stmt(node->body);
-            printf(".LLoop_%d:\n", label);
+            fprintf(output_file, ".LLoop_%d:\n", label);
             gen(node->cond);
-            printf("  pop rax\n");
-            printf("  cmp rax, 0\n");
-            printf("  jne .LBegin_%d\n", label);
-            printf(".LEnd_%d:\n",label);
+            fprintf(output_file, "  pop rax\n");
+            fprintf(output_file, "  cmp rax, 0\n");
+            fprintf(output_file, "  jne .LBegin_%d\n", label);
+            fprintf(output_file, ".LEnd_%d:\n",label);
             g_stack_idx--;
             return;
         }
@@ -262,58 +263,58 @@ static void gen_stmt(Node* node){
             gen_compound_stmt(node->body);
             return;
         case ND_LABEL:
-            printf(".L%s_%s:\n", cur_function->func_sym->name, node->label_name);
+            fprintf(output_file, ".L%s_%s:\n", cur_function->func_sym->name, node->label_name);
             return;
         case ND_GOTO:
-            printf("  jmp .L%s_%s\n", cur_function->func_sym->name, node->label_name);
+            fprintf(output_file, "  jmp .L%s_%s\n", cur_function->func_sym->name, node->label_name);
             return;
         case ND_CONTINUE:
             if(g_stack_idx == -1){
                 error("can't use continue in this place.\n");
             }
-            printf("  jmp .LLoop_%d\n", g_label_stack[g_stack_idx]);
+            fprintf(output_file, "  jmp .LLoop_%d\n", g_label_stack[g_stack_idx]);
             return;
         case ND_CASE:
             if(g_stack_idx == -1){
                 error("case label not with in switch statement.\n");
             }
-            printf(".LCase%d_%d:\n", g_label_stack[g_stack_idx], node->lhs->val);
+            fprintf(output_file, ".LCase%d_%d:\n", g_label_stack[g_stack_idx], node->lhs->val);
             return;
         case ND_BREAK:
             if(g_stack_idx == -1){
                 error("can't use break in this place.\n");
             }
-            printf("  jmp .LEnd_%d\n", g_label_stack[g_stack_idx]);
+            fprintf(output_file, "  jmp .LEnd_%d\n", g_label_stack[g_stack_idx]);
             return;
         case ND_SWITCH:
         {
             int label = g_label++;
             g_label_stack[++g_stack_idx] = label;
             gen(node->cond);
-            printf("  pop rax\n");
+            fprintf(output_file, "  pop rax\n");
             Node* cur_case = node->case_label;
             while(cur_case){
-                printf("  cmp rax, %d\n", cur_case->val);
-                printf("  je .LCase%d_%d\n", label, cur_case->val);
+                fprintf(output_file, "  cmp rax, %d\n", cur_case->val);
+                fprintf(output_file, "  je .LCase%d_%d\n", label, cur_case->val);
                 cur_case = cur_case->next;
             }
             if(node->default_label)
-                printf("  jmp .LDefault_%d\n", label);
+                fprintf(output_file, "  jmp .LDefault_%d\n", label);
 
-            printf("  jmp .LEnd_%d\n", label);
+            fprintf(output_file, "  jmp .LEnd_%d\n", label);
             gen_compound_stmt(node->body);
-            printf(".LEnd_%d:\n", label);
+            fprintf(output_file, ".LEnd_%d:\n", label);
             g_stack_idx--;
             return;
         }
         case ND_DEFAULT:
-            printf(".LDefault_%d:\n", g_label_stack[g_stack_idx]);
+            fprintf(output_file, ".LDefault_%d:\n", g_label_stack[g_stack_idx]);
             return;
         case ND_VOID_STMT:
             return;
         default:
             gen(node);
-            printf("  pop rax\n");
+            fprintf(output_file, "  pop rax\n");
             return;
     }
 }
@@ -327,24 +328,24 @@ static void gen(Node* node){
 
     switch(node->kind){
         case ND_NUM:
-            printf("  push %d\n", node->val);
+            fprintf(output_file, "  push %d\n", node->val);
             return;
         case ND_LVAR:
         case ND_GVAR:
         case ND_MEMBER:
             gen_lval(node);
             if(node->type->kind != TY_ARRAY){
-                printf("  pop rax\n");
+                fprintf(output_file, "  pop rax\n");
                 if(node->type->size == 1){
-                    printf("  movsx eax, BYTE PTR [rax]\n");
+                    fprintf(output_file, "  movsx eax, BYTE PTR [rax]\n");
                 }else if(node->type->size == 2){
-                    printf("  movsx eax, WORD PTR [rax]\n");
+                    fprintf(output_file, "  movsx eax, WORD PTR [rax]\n");
                 }else if(node->type->size == 4){
-                    printf("  mov eax, [rax]\n");
+                    fprintf(output_file, "  mov eax, [rax]\n");
                 } else if(node->type->size == 8){
-                    printf("  mov rax, [rax]\n");
+                    fprintf(output_file, "  mov rax, [rax]\n");
                 }
-                printf("  push rax\n");
+                fprintf(output_file, "  push rax\n");
             }
             return;
         case ND_CALL:
@@ -356,181 +357,181 @@ static void gen(Node* node){
                 }
 
                 for(;nargs; nargs--){
-                    printf("  pop %s\n", argreg64[nargs - 1]);
+                    fprintf(output_file, "  pop %s\n", argreg64[nargs - 1]);
                 }
 
-                printf("  call %s\n", node->sym->name);
-                printf("  push rax\n");
+                fprintf(output_file, "  call %s\n", node->sym->name);
+                fprintf(output_file, "  push rax\n");
                 return ;
             }
         case ND_ASSIGN:
             gen_lval(node->lhs);
             gen(node->rhs);
 
-            printf("  pop rdi\n");
-            printf("  pop rax\n");
+            fprintf(output_file, "  pop rdi\n");
+            fprintf(output_file, "  pop rax\n");
             if(node->lhs->type->size == 1){
-                printf("  mov [rax], dil\n");
+                fprintf(output_file, "  mov [rax], dil\n");
             } else if(node->lhs->type->size == 2){
-                printf("  mov [rax], di\n");
+                fprintf(output_file, "  mov [rax], di\n");
             } else if(node->lhs->type->size == 4){
-                printf("  mov [rax], edi\n");
+                fprintf(output_file, "  mov [rax], edi\n");
             } else if(node->lhs->type->size == 8){
-                printf("  mov [rax], rdi\n");
+                fprintf(output_file, "  mov [rax], rdi\n");
             }
-            printf("  push rdi\n");
+            fprintf(output_file, "  push rdi\n");
             return;
         case ND_ADDR:
             gen_lval(node->lhs);
             return;
         case ND_DREF:
             gen(node->lhs);
-            printf("  pop rax\n");
+            fprintf(output_file, "  pop rax\n");
             if(node->type->size == 1){
-                printf("  movsbq rax, BYTE PTR [rax]\n");
+                fprintf(output_file, "  movsbq rax, BYTE PTR [rax]\n");
             } else if(node->type->size == 2){
-                printf("  movswq rax, WORD PTR [rax]\n");
+                fprintf(output_file, "  movswq rax, WORD PTR [rax]\n");
             } else if(node->type->size == 4){
-                printf("  mov eax, [rax]\n");
+                fprintf(output_file, "  mov eax, [rax]\n");
             } else if(node->type->size == 8){
-                printf("  mov rax, [rax]\n");
+                fprintf(output_file, "  mov rax, [rax]\n");
             }
-            printf("  push rax\n");
+            fprintf(output_file, "  push rax\n");
             return;
         case ND_COMMA:
             gen(node->lhs);
-            printf("  pop rax\n");
+            fprintf(output_file, "  pop rax\n");
             gen(node->rhs);
             return;
         case ND_AND:
         {
             int c = g_label++;
             gen(node->lhs);
-            printf("  pop rax\n");
-            printf("  cmp rax, 0\n");
-            printf("  je .L.false%d\n", c);
+            fprintf(output_file, "  pop rax\n");
+            fprintf(output_file, "  cmp rax, 0\n");
+            fprintf(output_file, "  je .L.false%d\n", c);
             gen(node->rhs);
-            printf("  pop rax\n");
-            printf("  cmp rax, 0\n");
-            printf("  je .L.false%d\n", c);
-            printf("  mov rax, 1\n");
-            printf("  jmp .L.End%d\n", c);
-            printf(".L.false%d:\n", c);
-            printf("  mov rax, 0\n");
-            printf(".L.End%d:\n", c);
-            printf("  push rax\n");
+            fprintf(output_file, "  pop rax\n");
+            fprintf(output_file, "  cmp rax, 0\n");
+            fprintf(output_file, "  je .L.false%d\n", c);
+            fprintf(output_file, "  mov rax, 1\n");
+            fprintf(output_file, "  jmp .L.End%d\n", c);
+            fprintf(output_file, ".L.false%d:\n", c);
+            fprintf(output_file, "  mov rax, 0\n");
+            fprintf(output_file, ".L.End%d:\n", c);
+            fprintf(output_file, "  push rax\n");
             return;
         }
         case ND_OR:
         {
             int c = g_label++;
             gen(node->lhs);
-            printf("  pop rax\n");
-            printf("  cmp rax, 0\n");
-            printf("  jne .L.true%d\n", c);
+            fprintf(output_file, "  pop rax\n");
+            fprintf(output_file, "  cmp rax, 0\n");
+            fprintf(output_file, "  jne .L.true%d\n", c);
             gen(node->rhs);
-            printf("  pop rax\n");
-            printf("  cmp rax, 0\n");
-            printf("  jne .L.true%d\n", c);
-            printf("  mov rax, 0\n");
-            printf("  jmp .L.End%d\n", c);
-            printf(".L.true%d:\n", c);
-            printf("  mov rax, 1\n");
-            printf(".L.End%d:\n", c);
-            printf("  push rax\n");
+            fprintf(output_file, "  pop rax\n");
+            fprintf(output_file, "  cmp rax, 0\n");
+            fprintf(output_file, "  jne .L.true%d\n", c);
+            fprintf(output_file, "  mov rax, 0\n");
+            fprintf(output_file, "  jmp .L.End%d\n", c);
+            fprintf(output_file, ".L.true%d:\n", c);
+            fprintf(output_file, "  mov rax, 1\n");
+            fprintf(output_file, ".L.End%d:\n", c);
+            fprintf(output_file, "  push rax\n");
             return;
         }
         case ND_COND_EXPR:
         {
             int label = g_label++;
             gen(node->cond);
-            printf("  pop rax\n");
-            printf("  cmp rax, 0\n");
-            printf("  je .L.false%d\n", label);
+            fprintf(output_file, "  pop rax\n");
+            fprintf(output_file, "  cmp rax, 0\n");
+            fprintf(output_file, "  je .L.false%d\n", label);
             gen(node->lhs);
-            printf("  jmp .L.End%d\n", label);
-            printf(".L.false%d:\n", label);
+            fprintf(output_file, "  jmp .L.End%d\n", label);
+            fprintf(output_file, ".L.false%d:\n", label);
             gen(node->rhs);
-            printf(".L.End%d:\n", label);
+            fprintf(output_file, ".L.End%d:\n", label);
             return;
         }
         case ND_CAST:
             gen(node->lhs);
             gen_cast(node->lhs->type, node->type);
-            printf("  push rax\n");
+            fprintf(output_file, "  push rax\n");
             return;
     }
 
     if(node->kind == ND_NUM){
-        printf("  push %d\n", node->val);
+        fprintf(output_file, "  push %d\n", node->val);
         return;
     }
 
     gen(node->lhs);
     gen(node->rhs);
 
-    printf("  pop rdi\n");
-    printf("  pop rax\n");
+    fprintf(output_file, "  pop rdi\n");
+    fprintf(output_file, "  pop rax\n");
 
     switch(node->kind){
         case ND_ADD:
-            printf("  add rax, rdi\n");
+            fprintf(output_file, "  add rax, rdi\n");
             break;
         case ND_SUB:
-            printf("  sub rax, rdi\n");
+            fprintf(output_file, "  sub rax, rdi\n");
             break;
         case ND_MUL:
-            printf("  imul rax, rdi\n");
+            fprintf(output_file, "  imul rax, rdi\n");
             break;
         case ND_DIV:
-            printf("  cqo\n");
-            printf("  idiv rdi\n");
+            fprintf(output_file, "  cqo\n");
+            fprintf(output_file, "  idiv rdi\n");
             break;
         case ND_MOD:
-            printf("  cqo\n");
-            printf("  idiv rdi\n");
-            printf("  mov rax, rdx\n");
+            fprintf(output_file, "  cqo\n");
+            fprintf(output_file, "  idiv rdi\n");
+            fprintf(output_file, "  mov rax, rdx\n");
             break;
         case ND_EQ:
-            printf("  cmp rax, rdi\n");
-            printf("  sete al\n");
-            printf("  movzb rax, al\n");
+            fprintf(output_file, "  cmp rax, rdi\n");
+            fprintf(output_file, "  sete al\n");
+            fprintf(output_file, "  movzb rax, al\n");
             break;
         case ND_NE:
-            printf("  cmp rax, rdi\n");
-            printf("  setne al\n");
-            printf("  movzb rax, al\n");
+            fprintf(output_file, "  cmp rax, rdi\n");
+            fprintf(output_file, "  setne al\n");
+            fprintf(output_file, "  movzb rax, al\n");
             break;
         case ND_LT:
-            printf("  cmp rax, rdi\n");
-            printf("  setl al\n");
-            printf("  movzb rax, al\n");
+            fprintf(output_file, "  cmp rax, rdi\n");
+            fprintf(output_file, "  setl al\n");
+            fprintf(output_file, "  movzb rax, al\n");
             break;
         case ND_LE:
-            printf("  cmp rax, rdi\n");
-            printf("  setle al\n");
-            printf("  movzb rax, al\n");
+            fprintf(output_file, "  cmp rax, rdi\n");
+            fprintf(output_file, "  setle al\n");
+            fprintf(output_file, "  movzb rax, al\n");
             break;
         case ND_BIT_AND:
-            printf("  and rax, rdi\n");
+            fprintf(output_file, "  and rax, rdi\n");
             break;
         case ND_BIT_XOR:
-            printf("  xor rax, rdi\n");
+            fprintf(output_file, "  xor rax, rdi\n");
             break;
         case ND_BIT_OR:
-            printf("  or rax, rdi\n");
+            fprintf(output_file, "  or rax, rdi\n");
             break;
         case ND_BIT_LSHIFT:
-            printf("  mov rcx, rdi\n");
-            printf("  shl rax, cl\n");
+            fprintf(output_file, "  mov rcx, rdi\n");
+            fprintf(output_file, "  shl rax, cl\n");
             break;
         case ND_BIT_RSHIFT:
-            printf("  mov rcx, rdi\n");
-            printf("  shr rax, cl\n");
+            fprintf(output_file, "  mov rcx, rdi\n");
+            fprintf(output_file, "  shr rax, cl\n");
             break;
     }
 
-    printf("  push rax\n");
+    fprintf(output_file, "  push rax\n");
     return;
 }
 
@@ -546,14 +547,14 @@ static void gen_printline(Token* tok){
     // char* line = calloc(pos - tok->str + 1, sizeof(char));
 
     // strncpy(line, tok->str, pos - tok->str + 1);
-    // printf("# %s\n", line);
+    // fprintf(output_file, "# %s\n", line);
     // free(line);
 }
 
 static void gen_epilogue(void){
-    printf("  mov rsp, rbp\n");
-    printf("  pop rbp\n");
-    printf("  ret\n");
+    fprintf(output_file, "  mov rsp, rbp\n");
+    fprintf(output_file, "  pop rbp\n");
+    fprintf(output_file, "  ret\n");
 }
 
 // local function ---------------------------------
@@ -561,30 +562,30 @@ static void gen_lval(Node* node){
 
     switch (node->kind){
         case ND_LVAR:
-            printf("  mov rax, rbp\n");
-            printf("  sub rax, %d\n", node->offset);
-            printf("  push rax\n");
+            fprintf(output_file, "  mov rax, rbp\n");
+            fprintf(output_file, "  sub rax, %d\n", node->offset);
+            fprintf(output_file, "  push rax\n");
             return;
         case ND_GVAR:
             if(node->sym->is_static){
                 if(cur_function){
-                    printf("  mov rax, OFFSET FLAT:.L%s_%s\n", cur_function->func_sym->name, node->sym->name);
+                    fprintf(output_file, "  mov rax, OFFSET FLAT:.L%s_%s\n", cur_function->func_sym->name, node->sym->name);
                 } else {
-                    printf("  mov rax, OFFSET FLAT:.L%s\n", node->sym->name);
+                    fprintf(output_file, "  mov rax, OFFSET FLAT:.L%s\n", node->sym->name);
                 }
             } else {
-                printf("  mov rax, OFFSET FLAT:%s\n", node->sym->name);
+                fprintf(output_file, "  mov rax, OFFSET FLAT:%s\n", node->sym->name);
             }
-            printf("  push rax\n");
+            fprintf(output_file, "  push rax\n");
             return;
         case ND_DREF:
             gen(node->lhs);
             return;
         case ND_MEMBER:
             gen_lval(node->lhs);
-            printf("  pop rax\n");
-            printf("  add rax, %d\n", node->offset);
-            printf("  push rax\n");
+            fprintf(output_file, "  pop rax\n");
+            fprintf(output_file, "  add rax, %d\n", node->offset);
+            fprintf(output_file, "  push rax\n");
             return;        
     }
 

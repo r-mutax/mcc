@@ -244,4 +244,11 @@ typedef enum {
     i64
 } SIZE_TYPE_ID;
 
+typedef enum {
+    NO_OPTION = 0,
+    INCLUDE_PATH,
+    OUTPUT_FILE,
+    C_SRC_FILE
+} MCC_OPTION;
+
 #endif
