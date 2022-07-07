@@ -180,8 +180,12 @@ static void gen_stmt(Node* node){
     */
     switch(node->kind){
         case ND_RETURN:
-            gen(node->lhs);
-            fprintf(output_file, "  pop rax\n");
+            if(node->lhs){
+                gen(node->lhs);
+                fprintf(output_file, "  pop rax\n");
+            } else {
+                fprintf(output_file, "  nop\n");
+            }
             gen_epilogue();
             return;
         case ND_WHILE:

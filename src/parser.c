@@ -177,6 +177,7 @@ static Node* function(){
     st_declare(sym);
     sym->is_func = true;
     func->func_sym = sym;
+    func->type = ty;
     cur_func = func;
 
     // function parameter
@@ -714,7 +715,12 @@ static Node* stmt(){
 
     Node* node = NULL;
     if(tk_consume_keyword("return")){
-        node = new_node(ND_RETURN, expr(), NULL);
+        if(cur_func->type->kind == TY_VOID){
+            node = NULL;
+        } else {
+            node = expr();
+        }
+        node = new_node(ND_RETURN, node, NULL);
         tk_expect(";");
         node->line = tok;
         return node;

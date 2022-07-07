@@ -68,8 +68,8 @@ int read_option(char argc, char** argv){
 
 int main(int argc, char **argv){
 
-    if(argc != 2){
-        fprintf(stderr, "mcc: error: Invalid Argument num.");
+    if(argc < 2){
+        fprintf(stderr, "mcc: error: Invalid Argument num.\n");
     }
 
     output_file = stdout;

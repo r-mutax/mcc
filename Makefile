@@ -37,7 +37,7 @@ clean:
 	-rmdir $(OBJDIR)
 
 test:$(TARGET)
-	./bin/mcc ./test/test.c -o ./test/test.s
+	./bin/mcc -c ./test/test.c -o ./test/test.s
 	cc -s -static ./test/test.s ./test/test_func/foo.o ./bin/mlibc -o ./test/a.out
 	./test/a.out
 
