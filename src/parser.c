@@ -752,8 +752,12 @@ static Node* stmt(){
         tk_expect("(");
 
         if(!tk_consume(";")){
-            node->init = expr();
-            tk_expect(";");
+            if(tk_istype()){
+                node->init = declaration();
+            } else {
+                node->init = expr();
+                tk_expect(";");
+            }
         }
 
         if(!tk_consume(";")){
