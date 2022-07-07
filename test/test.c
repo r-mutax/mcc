@@ -1,8 +1,7 @@
 #include "test.h"
 #include "testlib.h"
-
 #define TEST_DEF 1
-
+#define TEST_NO_VALUE_MACRO
 long g_x;
 
 void assert_c(char lhs, char rhs, char* p){

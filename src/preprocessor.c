@@ -34,24 +34,28 @@ Token* preprocess(Token* tok){
                 Token* tail = get_end_token(inc);
                 tail->next = path->next;
                 cur = tail;
+                continue;
             } else if(equal_token("#define", target)){
                 Token* def = target->next;
                 Token* val = def->next;
                 add_macro(def, val);
 
                 cur->next = val->next;
+                continue;
             } else if(equal_token("#ifdef", target)){
                 Token* endif;
                 Token* ifdef = analyze_ifdef(target->next, &endif, true);
 
                 cur->next = ifdef;
                 cur = ifdef;
+                continue;
             } else if(equal_token("#ifndef", target)){
                 Token* endif;
                 Token* ifdef = analyze_ifdef(target->next, &endif, false);
 
                 cur->next = ifdef;
                 cur = ifdef;
+                continue;
             }
         } else {
             Macro* mac = find_macro(target);
