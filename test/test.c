@@ -238,6 +238,12 @@ void test_stmt(){
     // void statement test
     ;;;;;;
 
+    cnt = 0;
+    for(;;){
+        cnt++;
+        if(cnt > 10) break;
+    }
+
     printf("stmt test is completed !\n");
     return;
 }
