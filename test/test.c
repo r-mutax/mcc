@@ -244,6 +244,12 @@ void test_stmt(){
         if(cnt > 10) break;
     }
 
+    a = 0;
+    for(int i = 0; i < 10; i++){
+        a++;
+    }
+    assert(a, 10, "error : for loop counter.\n");
+
     printf("stmt test is completed !\n");
     return;
 }
