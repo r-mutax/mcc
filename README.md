@@ -23,9 +23,14 @@ so when compile C-file, you need two step.
 1. compile C-file to .asm file.
 2. assemble .asm file with `cc` command or another assembler.
 ``` Shell
-mcc source.c > out.asm
+mcc -c source.c -i /usr/include_dir -o out.asm
 cc -o a.out out.asm
 ```
+
+## Command Option
+`-c` : Specify compile C-Source file.
+`-i` : Set include directory.
+`-o` : Specify output file path.
 
 
 # Links to reference
