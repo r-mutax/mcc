@@ -16,7 +16,7 @@ LIBOBJDIR	= ./load/stdlib
 LIBOBJECTS	= $(addprefix $(LIBOBJDIR)/,$(notdir $(LIBSOURCES:.c=.o)))
 LIBDEPENDS	= $(LIBOBJECTS:.o=.d)
 
-$(TARGET): $(OBJECTS)
+$(TARGET): $(OBJECTS) 
 	-mkdir -p $(TARGETDIR)
 	$(COMPILER) -o $@ $^
 
