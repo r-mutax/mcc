@@ -12,6 +12,7 @@ void assert_c(char lhs, char rhs, char* p){
 
         exit_error(p);
     }
+    return;
 }
 
 void assert_s(short lhs, short rhs, char* p){
@@ -21,6 +22,7 @@ void assert_s(short lhs, short rhs, char* p){
 
         exit_error(p);
     }
+    return;
 }
 
 void assert(int lhs, int rhs, char* p){
@@ -32,12 +34,14 @@ void assert(int lhs, int rhs, char* p){
 
         exit_error(p);
     }
+    return;
 }
 
 void assert2(int lhs, int rhs, char* p){
     print_int(rhs);
     print_int(lhs);
     exit_error(p);
+    return;
 }
 
 int test_static(){
@@ -66,6 +70,7 @@ void test_func(){
 
     
     printf("function test is completed !\n");
+    return;
 }
 
 void test_stmt(){
@@ -234,6 +239,7 @@ void test_stmt(){
     ;;;;;;
 
     printf("stmt test is completed !\n");
+    return;
 }
 
 void test_expr(){
@@ -328,6 +334,7 @@ void test_expr(){
     assert(8, b, "error : bitwise right-shift and assign.\n");
 
     printf("expr test is completed !\n");
+    return;
 }
 void test_enum(){
 
@@ -347,6 +354,7 @@ void test_enum(){
     assert(a, 5, "error : enum test.\n");
 
     printf("enum test is completed !\n");
+    return;
 }
 void test_variable(){
 
@@ -430,6 +438,7 @@ void test_variable(){
     assert(2, test_static(), "error : test static variable.\n");
 
     printf("variable test is completed !\n");
+    return;
 }
 
 void test_sizeof(){
@@ -455,6 +464,8 @@ void test_sizeof(){
     assert(5, sizeof("abcd"), "error : sizeof operater at string literal.\n");
 
     printf("sizeof test is completed !\n");
+
+    return;
 }
 
 void test_string(){
@@ -464,6 +475,7 @@ void test_string(){
     assert(99, "abc"[2], "error : string literal access.\n");
 
     printf("string test is completed !\n");
+    return;
 }
 
 void test_comment(){
@@ -474,6 +486,8 @@ void test_comment(){
     */
 
     printf("comment test is completed !\n");
+
+    return;
 }
 
 void test_literal(){
@@ -482,6 +496,8 @@ void test_literal(){
     assert(94, '^', "error : character literal.\n");
 
     printf("literal test is completed !\n");
+
+    return;
 }
 
 void test_struct(){
@@ -518,10 +534,12 @@ void test_struct(){
     k.a = 124;
     assert(124, k.a, "error : named struct.\n");
 
-    printf("struct test is completed !\n");    
+    printf("struct test is completed !\n");
+
+    return;
 }
 
-int test_typedef(){
+void test_typedef(){
 
     typedef struct ABCD{
         int a;
@@ -551,9 +569,11 @@ int test_typedef(){
 
 
     printf("typedef test is completed.\n");    
+
+    return;
 }
 
-int test_preprocess(){
+void test_preprocess(){
     int a = TEST_DEF;
     assert(1, a, "error : #define num.\n");
 
@@ -598,6 +618,8 @@ int test_preprocess(){
 #endif
 
     printf("preprocess test is completed.\n");
+
+    return;
 }
 
 void test_cast(){
@@ -646,6 +668,8 @@ void test_cast(){
     assert(((struct TEST_DATA*)non_pointer)->s, 1231, "error : pointer cast.");
 
     printf("cast test is completed.\n");
+
+    return;
 }
 
 int main(){   
