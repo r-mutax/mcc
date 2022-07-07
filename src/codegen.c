@@ -208,17 +208,26 @@ static void gen_stmt(Node* node){
             {
                 int label = g_label++;
                 g_label_stack[++g_stack_idx] = label;
-                gen(node->init);
-                fprintf(output_file, "  pop rax\n");
+                if(node->init){
+                    gen(node->init);
+                    fprintf(output_file, "  pop rax\n");
+                }
                 fprintf(output_file, ".LBegin_%d:\n", label);
-                gen(node->cond);
-                fprintf(output_file, "  pop rax\n");
+
+                if(node->cond){
+                    gen(node->cond);
+                    fprintf(output_file, "  pop rax\n");
+                } else {
+                    fprintf(output_file, "  mov rax, 1\n");
+                }
                 fprintf(output_file, "  cmp rax, 0\n");
                 fprintf(output_file, "  je .LEnd_%d\n", label);
                 gen_stmt(node->body);
                 fprintf(output_file, ".LLoop_%d:\n", label);
-                gen(node->iter);
-                fprintf(output_file, "  pop rax\n");
+                if(node->iter){
+                    gen(node->iter);
+                    fprintf(output_file, "  pop rax\n");
+                }
                 fprintf(output_file, "  jmp .LBegin_%d\n", label);
                 fprintf(output_file, ".LEnd_%d:\n", label);
                 g_stack_idx--;

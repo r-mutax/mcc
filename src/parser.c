@@ -750,12 +750,21 @@ static Node* stmt(){
         node = new_node(ND_FOR, NULL, NULL);
 
         tk_expect("(");
-        node->init = expr();
-        tk_expect(";");
-        node->cond = expr();
-        tk_expect(";");
-        node->iter = expr();
-        tk_expect(")");
+
+        if(!tk_consume(";")){
+            node->init = expr();
+            tk_expect(";");
+        }
+
+        if(!tk_consume(";")){
+            node->cond = expr();
+            tk_expect(";");
+        }
+
+        if(!tk_consume(")")){
+            node->iter = expr();
+            tk_expect(")");
+        }
 
         node->body = stmt();
         node->line = tok;
