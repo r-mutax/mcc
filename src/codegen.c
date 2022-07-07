@@ -209,8 +209,12 @@ static void gen_stmt(Node* node){
                 int label = g_label++;
                 g_label_stack[++g_stack_idx] = label;
                 if(node->init){
-                    gen(node->init);
-                    fprintf(output_file, "  pop rax\n");
+                    if(node->init->kind == ND_CMPDSTMT){
+                        gen_stmt(node->init);
+                    } else {
+                        gen(node->init);
+                        fprintf(output_file, "  pop rax\n");
+                    }
                 }
                 fprintf(output_file, ".LBegin_%d:\n", label);
 
