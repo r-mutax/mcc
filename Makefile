@@ -16,9 +16,13 @@ LIBOBJDIR	= ./load/stdlib
 LIBOBJECTS	= $(addprefix $(LIBOBJDIR)/,$(notdir $(LIBSOURCES:.c=.o)))
 LIBDEPENDS	= $(LIBOBJECTS:.o=.d)
 
-$(TARGET): $(OBJECTS) 
+$(TARGET): $(OBJECTS) MAKE_STDLIB
+	make MAKE_STDLIB
 	-mkdir -p $(TARGETDIR)
-	$(COMPILER) -o $@ $^
+	$(COMPILER) -o $@ $(filter-out MAKE_STDLIB, $^)
+
+MAKE_STDLIB:
+	(cd stdlib; make;)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	-mkdir -p $(OBJDIR)
@@ -41,7 +45,7 @@ test:$(TARGET)
 	cc -s -static ./test/test.s ./test/test_func/foo.o ./bin/mlibc -o ./test/a.out
 	./test/a.out
 
-.PHONY: clean test
+.PHONY: clean test MAKE_STDLIB
 
 -include $(DEPENDS)
 	

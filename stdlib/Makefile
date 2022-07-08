@@ -1,17 +1,18 @@
+CUR_LIB_DIR		= $(shell pwd)
 
-COMPILER	= ../bin/mcc
-TARGETDIR	= ../bin
+MCC			= $(CUR_LIB_DIR)/../bin/mcc
+TARGETDIR	= $(CUR_LIB_DIR)/../bin
 TARGET		= mlibc
-INCDIR		= -i ./inc
-SRCDIR		= ./src
+INCDIR		= -i $(CUR_LIB_DIR)/inc
+SRCDIR		= $(CUR_LIB_DIR)/src
 SOURCES		= $(wildcard $(SRCDIR)/*.c)
-OBJDIR		= ./load
+OBJDIR		= $(CUR_LIB_DIR)/load
 OBJECTS		= $(addprefix $(OBJDIR)/,$(notdir $(SOURCES:.c=.o)))
-ASMDIR		= ./asm
+ASMDIR		= $(CUR_LIB_DIR)/asm
 ASMBLERS	= $(addprefix $(ASMDIR)/,$(notdir $(SOURCES:.c=.s)))
 
 $(TARGET) : $(OBJECTS)
-	rm $(TARGETDIR)/$(TARGET)
+	rm $(TARGETDIR)/$(TARGET) -f
 	ar rcs $(TARGETDIR)/$(TARGET) $(OBJECTS)
 
 $(OBJDIR)/%.o: $(ASMDIR)/%.s
@@ -20,4 +21,4 @@ $(OBJDIR)/%.o: $(ASMDIR)/%.s
 
 $(ASMDIR)/%.s: $(SRCDIR)/%.c
 	-mkdir -p $(ASMDIR)
-	$(COMPILER) -c $< $(INCDIR) -o $@
+	$(MCC) -c $< $(INCDIR) -o $@
