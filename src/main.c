@@ -16,7 +16,7 @@ void init_include_directory(int argc, char** argv){
     char* pos = strrchr(argv[0], '/');
     strncpy(cwd, argv[0], pos - argv[0] + 1); 
     char* p = cwd;
-    sprintf(cwd, "%s/stdlib/include/", p);
+    sprintf(cwd, "%s/stdlib/inc/", p);
     register_include_directory(cwd);
 
     memset(cwd, 0, sizeof(cwd));

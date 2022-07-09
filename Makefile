@@ -8,6 +8,7 @@ SOURCES		= $(wildcard $(SRCDIR)/*.c)
 OBJDIR		= ./load
 OBJECTS		= $(addprefix $(OBJDIR)/,$(notdir $(SOURCES:.c=.o)))
 DEPENDS		= $(OBJECTS:.o=.d)
+MAKE_STDLIB	= ./bin/mlibc
 
 LIBINCDIR	= -I./bin/stdlib/include
 LIBSRCDIR	= ./src/stdlib
@@ -16,12 +17,12 @@ LIBOBJDIR	= ./load/stdlib
 LIBOBJECTS	= $(addprefix $(LIBOBJDIR)/,$(notdir $(LIBSOURCES:.c=.o)))
 LIBDEPENDS	= $(LIBOBJECTS:.o=.d)
 
-$(TARGET): $(OBJECTS) MAKE_STDLIB
-	make MAKE_STDLIB
+$(TARGET): $(OBJECTS) $(MAKE_STDLIB)
+	make $(MAKE_STDLIB)
 	-mkdir -p $(TARGETDIR)
-	$(COMPILER) -o $@ $(filter-out MAKE_STDLIB, $^)
+	$(COMPILER) -o $@ $(filter-out $(MAKE_STDLIB), $^)
 
-MAKE_STDLIB:
+$(MAKE_STDLIB):
 	(cd stdlib; make;)
 
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
@@ -41,11 +42,11 @@ clean:
 	-rmdir $(OBJDIR)
 
 test:$(TARGET)
-	./bin/mcc -c ./test/test.c -o ./test/test.s
+	./bin/mcc -c ./test/test.c -o ./test/test.s -i ./stdlib/inc
 	cc -s -static ./test/test.s ./test/test_func/foo.o ./bin/mlibc -o ./test/a.out
 	./test/a.out
 
-.PHONY: clean test MAKE_STDLIB
+.PHONY: clean test
 
 -include $(DEPENDS)
 	
