@@ -1,4 +1,6 @@
 #include "mcc.h"
+#include "file.h"
+#include "utility.h"
 
 char* filename;
 
@@ -12,25 +14,27 @@ void error(char *fmt, ...) {
 
 void error_at(Token* tok, char *msg){
 
-    char* loc = tok->str;
-    char* line = loc;
-    char* user_input = tok->src->input_data;
-    while(user_input < line && line[-1] != '\n')
-        line--;
+    char* start = tok->src->input_data;
+    int line = 1;
 
-    char* end = loc;
-    while(*end != '\n')
-        end++;
-    
-    int line_num = 1;
-    for(char* p = user_input; p != line; p++)
-        if(*p == '\n')
-            line_num++;
-    
-    int indent = fprintf(stderr, "%s:%d: ", filename, line_num);
-    fprintf(stderr, "%.*s\n", (int)(end - line), line);
+    do{
+        if(line == tok->row){
+            break;
+        }
+        
+        if(*start == '\n'){
+            line++;
+        }
 
-    int pos = loc - line + indent;
+        start++;
+    } while(*start);
+
+    int indent = fprintf(stderr, "%s:%ld: ", get_filename(tok->src), tok->row);
+    char* end = strchr(start, '\n');
+    char* err_str = strndup(start, end - start + 1);
+    fprintf(stderr, "%s", err_str);
+
+    int pos = tok->pos - start + indent;
     fprintf(stderr, "%*s", pos, "");
     fprintf(stderr, "^ %s", msg);
     fprintf(stderr, "\n");

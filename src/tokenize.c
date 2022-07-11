@@ -9,6 +9,8 @@
 Token* token;
 SrcFile* cur_file;
 
+static long row = 1;
+
 // local function forward definition. ------------
 static Token* new_token(TokenKind kind, Token* cur, char* str, int len);
 static bool startswith(char* lhs, char* rhs);
@@ -66,7 +68,13 @@ Token* tk_tokenize(char* p){
         }
 
         if(strncmp(p, "/*", 2) == 0){
-            char *q = strstr(p + 2, "*/");
+            char* q = p;
+            while(*q){
+                if(*q == '*' && *(q+1) == '/') break;
+                if(*q == '\n')
+                    row++;
+                q++;
+            }
             if(q == 0){
                 error("error : Not close block comment.\n");
             }
@@ -343,6 +351,11 @@ static Token* new_token(TokenKind kind, Token* cur, char* str, int len){
     tok->str = strndup(str, len);
     tok->len = len;
     tok->src = cur_file;
+    tok->row = row;
+    tok->pos = str;
+    if(kind == TK_NEWLINE){
+        row++;
+    }
     cur->next = tok;
     return tok;
 }

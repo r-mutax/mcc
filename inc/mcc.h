@@ -57,6 +57,10 @@ struct Token {
     int         val;
     char*       str;
     int         len;
+
+    // for errormsg
+    char*       pos;
+    long        row;
     SrcFile*    src;
 };
 
