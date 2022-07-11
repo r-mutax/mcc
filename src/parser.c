@@ -177,7 +177,7 @@ static Node* function(){
     st_declare(sym);
     sym->is_func = true;
     func->func_sym = sym;
-    func->type = ty;
+    func->type = sym->type;
     cur_func = func;
 
     // function parameter

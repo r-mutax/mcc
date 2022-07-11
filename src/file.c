@@ -32,7 +32,8 @@ char* read_file(char* path){
 
 void register_include_directory(char* path){
 
-    int is_slash = path[strlen(path)] != '/';
+    int len = strlen(path);
+    int is_slash = path[len - 1] != '/';
 
     IncDir* inc = calloc(1, sizeof(IncDir));
     inc->path = calloc(1, strlen(path) + is_slash);

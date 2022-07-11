@@ -17,10 +17,9 @@ LIBOBJDIR	= ./load/stdlib
 LIBOBJECTS	= $(addprefix $(LIBOBJDIR)/,$(notdir $(LIBSOURCES:.c=.o)))
 LIBDEPENDS	= $(LIBOBJECTS:.o=.d)
 
-$(TARGET): $(OBJECTS) $(MAKE_STDLIB)
-	make $(MAKE_STDLIB)
+$(TARGET): $(OBJECTS)
 	-mkdir -p $(TARGETDIR)
-	$(COMPILER) -o $@ $(filter-out $(MAKE_STDLIB), $^)
+	$(COMPILER) -o $@ $^
 
 $(MAKE_STDLIB):
 	(cd stdlib; make;)
