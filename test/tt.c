@@ -1,7 +1,13 @@
 int main(){
 
-    short c = 32767;
-    char b = (char)c;
+    typedef struct ABC ABCD;
+    struct ABC {
+        int a;
+        int b;
+    };
 
-    return b;
+
+    ABCD a;
+    a.a = 10;
+    return 1;
 }

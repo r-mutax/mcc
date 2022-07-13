@@ -552,11 +552,13 @@ void test_struct(){
 
 void test_typedef(){
 
-    typedef struct ABCD{
+    typedef struct ABCD ABC;
+    
+    struct ABCD{
         int a;
         int b;
         char c;
-    } ABC;
+    };
 
     typedef ABC AKC;
     AKC ak;

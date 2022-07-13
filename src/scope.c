@@ -69,3 +69,13 @@ void sc_add_type(Type* type){
         cur_scope->type = type;
     }
 }
+
+void sc_add_struct_type(Type* struct_type){
+    
+    if(!cur_scope->str_type){
+        cur_scope->str_type = struct_type;
+    } else {
+        struct_type->next = cur_scope->type;
+        cur_scope->str_type = struct_type;
+    }
+}

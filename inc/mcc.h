@@ -202,8 +202,10 @@ struct Type {
     Type*       pointer_from;
     Type*       pointer_to;
     bool        is_typedef;
+    bool        is_imcomplete;
     Type*       base_type;
-    
+    Type*       complete_type;
+
     Member*     member;
 
     int         array_len;
@@ -223,6 +225,7 @@ struct Scope{
     ScopeKind   kind;
     Symbol*     symbol;
     Type*       type;
+    Type*       str_type;
     int         stacksize;
     Scope*      child;
     Scope*      parent;

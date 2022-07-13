@@ -11,3 +11,4 @@ void sc_add_symbol(Symbol* sym);
 Scope* sc_get_cur_scope();
 
 void sc_add_type(Type* type);
+void sc_add_struct_type(Type* struct_type);
