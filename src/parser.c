@@ -325,7 +325,7 @@ static Type* enum_spec(){
         ty->name = calloc(1, tok->len + 1);
         strncpy(ty->name, tok->str, tok->len);
         ty->len = tok->len;
-        ty_register_struct(ty);
+        ty_register_enum(ty);
     } else {
         ty->name = "__unnamed_enum";
     }

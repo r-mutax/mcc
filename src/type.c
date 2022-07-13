@@ -48,21 +48,6 @@ Type* ty_array_of(Type* base_type, int array_len){
     return ty;
 }
 
-Type* ty_find_struct(char* struct_name, int len){
-    
-    for(Scope* sc = sc_get_cur_scope(); sc; sc = sc->parent){
-        for(Type* cur = sc->type; cur; cur = cur->next){
-            // match cur typename and cur is 'struct' type.
-            if(cur->len == len
-                && memcmp(cur->name, struct_name, len) == 0
-                && cur->kind == TY_STRUCT){
-                return cur;
-            }
-        }
-    }
-
-}
-
 Type* ty_find_enum(char* enum_name, int len){
     
     for(Scope* sc = sc_get_cur_scope(); sc; sc = sc->parent){
@@ -77,8 +62,26 @@ Type* ty_find_enum(char* enum_name, int len){
     }
 }
 
+void ty_register_enum(Type* enum_type){
+    sc_add_type(enum_type);
+}
+
 void ty_register_struct(Type* struct_type){
-    sc_add_type(struct_type);
+    sc_add_struct_type(struct_type);
+}
+
+Type* ty_find_struct(char* struct_name, int len){
+    
+    for(Scope* sc = sc_get_cur_scope(); sc; sc = sc->parent){
+        for(Type* cur = sc->str_type; cur; cur = cur->next){
+            // match cur typename and cur is 'struct' type.
+            if(cur->len == len
+                && memcmp(cur->name, struct_name, len) == 0){
+                return cur;
+            }
+        }
+    }
+
 }
 
 Type* ty_get_type(char* type_name, int len){

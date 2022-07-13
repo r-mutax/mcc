@@ -223,6 +223,7 @@ struct Scope{
     ScopeKind   kind;
     Symbol*     symbol;
     Type*       type;
+    Type*       str_type;
     int         stacksize;
     Scope*      child;
     Scope*      parent;
