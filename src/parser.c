@@ -268,7 +268,16 @@ static Type* struct_spec(){
             // registerd struct.
             Type* ty = ty_find_struct(tok->str, tok->len);
 
-            if(!ty) error_at(tok, "implicit type.");
+            if(!ty){
+                // register imcomplete struct type.
+                ty = calloc(1, sizeof(Type));
+                ty->name = tok->str;
+                ty->len = tok->len;
+                ty->is_imcomplete = true;
+                ty_register_struct(ty);
+            } else if(ty->is_imcomplete == true){
+                error_at(tok, "Imcomplete structure type.\n");
+            }
             return ty;
         }
     }

@@ -67,6 +67,12 @@ void ty_register_enum(Type* enum_type){
 }
 
 void ty_register_struct(Type* struct_type){
+
+    Type* ret = ty_find_struct(struct_type->name, struct_type->len);
+    if(ret && ret->is_imcomplete){
+        ret->complete_type = struct_type;
+    }
+
     sc_add_struct_type(struct_type);
 }
 
@@ -89,6 +95,15 @@ Type* ty_get_type(char* type_name, int len){
     for(Scope* sc = sc_get_cur_scope(); sc; sc = sc->parent){
         for(Type* cur = sc->type; cur; cur = cur->next){
             if(cur->len == len && memcmp(cur->name, type_name, len) == 0){
+
+                while(cur->base_type){
+                    cur = cur->base_type;
+                }
+
+                if(cur->is_imcomplete){
+                    cur = cur->complete_type;
+                }
+
                 Type* ret = calloc(1, sizeof(Type));
                 if(cur->is_typedef){
                     memcpy(ret, cur->base_type, sizeof(Type));
