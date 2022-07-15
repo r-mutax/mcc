@@ -204,7 +204,6 @@ struct Type {
     bool        is_typedef;
     bool        is_imcomplete;
     Type*       base_type;
-    Type*       complete_type;
 
     Member*     member;
 

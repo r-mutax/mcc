@@ -558,11 +558,19 @@ void test_typedef(){
         int a;
         int b;
         char c;
+        ABC* abc;
     };
 
     typedef ABC AKC;
     AKC ak;
     ABC a, *b;
+
+    AKC ai;
+    ak.abc = &ai;
+    ai.b = 15;
+    assert(15, ak.abc->b, "error : imcomplete type declare.\n");
+
+
     a.a = 15;
     a.b = 12;
     a.c = 3;
