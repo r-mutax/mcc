@@ -70,7 +70,11 @@ void ty_register_struct(Type* struct_type){
 
     Type* ret = ty_find_struct(struct_type->name, struct_type->len);
     if(ret && ret->is_imcomplete){
-        ret->complete_type = struct_type;
+
+        ret->is_imcomplete = false;
+        ret->member = struct_type->member;
+        ret->size = struct_type->size;
+        return;
     }
 
     sc_add_struct_type(struct_type);
@@ -100,18 +104,7 @@ Type* ty_get_type(char* type_name, int len){
                     cur = cur->base_type;
                 }
 
-                if(cur->is_imcomplete){
-                    cur = cur->complete_type;
-                }
-
-                Type* ret = calloc(1, sizeof(Type));
-                if(cur->is_typedef){
-                    memcpy(ret, cur->base_type, sizeof(Type));
-                } else {
-                    memcpy(ret, cur, sizeof(Type));
-                }
-                ret->next = NULL;
-                return ret;
+                return cur;
             }
         }
     }
