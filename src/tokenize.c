@@ -288,10 +288,10 @@ bool tk_istype(){
     Type* ty = ty_get_type(token->str, token->len);
 
     if(ty != NULL
-        || memcmp(token->str, "static", 6) == 0
-        || memcmp(token->str, "typedef", 7) == 0
-        || memcmp(token->str, "enum", 4) == 0
-        || memcmp(token->str, "struct", 6) == 0){
+        || (memcmp(token->str, "static", 6) == 0 && token->len == 6)
+        || (memcmp(token->str, "typedef", 7) == 0 && token->len == 7)
+        || (memcmp(token->str, "enum", 4) == 0 && token->len == 4)
+        || (memcmp(token->str, "struct", 6) == 0 && token->len == 6)){
             return true;
     }
     return false;

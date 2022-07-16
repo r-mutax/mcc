@@ -11,7 +11,7 @@
             "request": "launch",
             "program": "${command:extension.vscode-wsl-workspaceFolder}/bin/mcc",
             "args": ["-c",
-                     "/mnt/c/source/mcc/test/test.c", 
+                     "/mnt/c/source/mcc/inc/mcc.h", 
                      "-o", 
                      "/mnt/c/source/mcc/test/test.s",
                      "-i", 

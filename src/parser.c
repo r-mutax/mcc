@@ -126,7 +126,7 @@ Program* parser(){
 static Program* program(){
     Program* prog = calloc(1, sizeof(Program));
 
-    Node head;
+    Node head = { 0 };
     Node* cur = &head;
 
     while(!tk_iseof()){
@@ -157,8 +157,8 @@ static bool is_function(){
         ;
     }
 
-    tk_expect_ident();
-    if(tk_consume("(")){
+    Token* symbol_tok = tk_consume_ident();
+    if(symbol_tok && tk_consume("(")){
         retval = true;
     }
 
@@ -275,8 +275,6 @@ static Type* struct_spec(){
                 ty->len = tok->len;
                 ty->is_imcomplete = true;
                 ty_register_struct(ty);
-            } else if(ty->is_imcomplete == true){
-                error_at(tok, "Imcomplete structure type.\n");
             }
             return ty;
         }
@@ -671,6 +669,12 @@ static Node* exchange_constant_expr(Node* expr){
         case ND_OR:
             retval = lhs || rhs;
             break;
+        case ND_BIT_LSHIFT:
+            retval = lhs << rhs;
+            break;
+        case ND_BIT_RSHIFT:
+            retval = lhs >> rhs;
+            break;
         case ND_COND_EXPR:
         {
             expr->cond = exchange_constant_expr(expr->cond);
@@ -679,7 +683,7 @@ static Node* exchange_constant_expr(Node* expr){
             break;
         }
         default:
-            error("case label can use only constant-expr.\n");
+            error("It is not constant expression.\n");
     }
     return new_node_num(retval);
 }
@@ -1121,6 +1125,9 @@ static Node* postfix(){
         }
 
         if(tk_consume("->")){
+            if(node->type->is_imcomplete){
+                error_at(node->line, "Imcomplete structure type.\n");
+            }
             node = new_node(ND_DREF, node, NULL);
             ty_add_type(node);
             node = new_node(ND_MEMBER, node,NULL);
@@ -1135,6 +1142,10 @@ static Node* postfix(){
         }
 
         if(tk_consume(".")){
+            if(node->type->is_imcomplete){
+                error_at(node->line, "Imcomplete structure type.\n");
+            }
+
             ty_add_type(node);
             node = new_node(ND_MEMBER, node,NULL);
             node->type = node->lhs->type;
@@ -1214,6 +1225,8 @@ static Node* primary(){
             } else {
                 node = new_var(sym);
             }
+
+            node->line = tok;
             
             return node;
         }
