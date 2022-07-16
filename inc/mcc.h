@@ -1,5 +1,8 @@
 #ifndef MCC_INC_H
 #define MCC_INC_H
+
+#ifndef MCC_COMPILER
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
@@ -7,6 +10,14 @@
 #include <ctype.h>
 #include <stdarg.h>
 #include <errno.h>
+
+#else
+
+typedef int bool;
+#define true 1
+#define false 0
+
+#endif
 
 typedef struct Token Token;
 typedef struct Type Type;

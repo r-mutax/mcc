@@ -4,5 +4,6 @@
 #include "mcc.h"
 
 Token* preprocess(Token* tok);
+void init_preprocess();
 
 #endif

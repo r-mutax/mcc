@@ -78,6 +78,17 @@ Token* preprocess(Token* tok){
     return tok;
 }
 
+void init_preprocess(){
+
+    Token tok,tok2;
+    tok.kind = TK_IDENT;
+    tok.str = "MCC_COMPILER";
+    tok.len = strlen(tok.str);
+
+    tok2.kind = TK_NEWLINE;
+    add_macro(&tok, &tok2);
+}
+
 // local function -------------------------------------------------
 static Token* del_newline(Token* tok){
 
@@ -205,7 +216,7 @@ static Token* analyze_ifdef(Token* tok, Token** tail, bool is_ifdef){
 
             cur->next = ifdef_head;
             cur = ifdef_tail;
-        } else if(equal_token("#ifdef", target)){
+        } else if(equal_token("#ifndef", target)){
             Token* ifdef_tail;
             Token* ifdef_head = analyze_ifdef(target->next, &ifdef_tail, false);
 

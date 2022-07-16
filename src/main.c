@@ -72,6 +72,8 @@ int main(int argc, char **argv){
         fprintf(stderr, "mcc: error: Invalid Argument num.\n");
     }
 
+    init_preprocess();
+    
     output_file = stdout;
     read_option(argc, argv);
     init_include_directory(argc, argv);
