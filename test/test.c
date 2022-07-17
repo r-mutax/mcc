@@ -448,6 +448,20 @@ void test_variable(){
     assert(1, test_static(), "error : test static variable.\n");
     assert(2, test_static(), "error : test static variable.\n");
 
+    _Bool bl = 0;
+    assert(bl, 0, "error : _Bool variable, value is false.\n");
+    
+    bl = 1;
+    assert(bl, 1, "error : _Bool variable, value is true.\n");
+
+    a = 10;
+    bl = a;
+    assert(bl, 1, "error : _Bool variable, value is true.\n");
+ 
+    a = 0;
+    bl = a;
+    assert(bl, 0, "error : _Bool variable, value is false.\n");
+
     printf("variable test is completed !\n");
     return;
 }
@@ -663,21 +677,25 @@ void test_cast(){
     assert((short)c, 127, "error : char to short cast.\n");
     assert((int)c, 127, "error : char to int cast.\n");
     assert((long)c, 127, "error : char to long cast.\n");
+    assert((_Bool)c, 1, "error : char to _Bool cast.\n");
 
     // short data cast to...
     assert_c((char)s, -1, "error : short to char cast.\n");
     assert((int)s, 32767, "error : short to int cast.\n");
     assert((long)s, 32767, "error : short to long cast.\n");
+    assert((_Bool)s, 1, "error : short to _Bool cast.\n");
 
     // int data cast to...
     assert_c((char)i, -1, "error : int to char cast.\n");
     assert_s((short)i, -1, "error : int to short cast.\n");
     assert((long)i, 2147483647, "error : int to long cast.\n");
+    assert((_Bool)i, 1, "error : int to _Bool cast.\n");
     
     // long data cast to...
     assert_c((char)l, -1, "error : long to char cast.\n");
     assert_s((short)l, -1, "error : long to short cast.\n");
     assert((int)l, -1, "error : long to int cast.\n");
+    assert((_Bool)l, 1, "error : long to _Bool cast.\n");
 
     test_str.c = 100;
     test_str.i = 100;
