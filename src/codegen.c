@@ -387,6 +387,12 @@ static void gen(Node* node){
 
             fprintf(output_file, "  pop rdi\n");
             fprintf(output_file, "  pop rax\n");
+
+            if(node->lhs->type->kind == TY_BOOL){
+                fprintf(output_file, "  cmp rdi, 0\n");
+                fprintf(output_file, "  setne dil\n");
+            }
+
             if(node->lhs->type->size == 1){
                 fprintf(output_file, "  mov [rax], dil\n");
             } else if(node->lhs->type->size == 2){
@@ -475,6 +481,10 @@ static void gen(Node* node){
         case ND_CAST:
             gen(node->lhs);
             gen_cast(node->lhs->type, node->type);
+            if(node->type->kind == TY_BOOL){
+                fprintf(output_file, "  cmp rax, 0\n");
+                fprintf(output_file, "  setne al\n");               
+            }
             fprintf(output_file, "  push rax\n");
             return;
     }

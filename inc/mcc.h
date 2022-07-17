@@ -198,6 +198,7 @@ typedef enum {
 
 typedef enum {
     TY_INTEGER = 0,
+    TY_BOOL,
     TY_POINTER,
     TY_ARRAY,
     TY_VOID,
