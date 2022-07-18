@@ -17,6 +17,7 @@ static Macro* find_macro(Token* tok);
 static Token* analyze_ifdef(Token* tok, Token** tail, bool is_ifdef);
 static Token* find_newline(Token* tok);
 static char* get_header_path(Token* tok);
+static char* make_errormsg(Token* tok);
 
 static Macro* macro;
 
@@ -73,6 +74,10 @@ Token* preprocess(Token* tok){
 
                 cur->next = ifdef;
                 cur = ifdef;
+                continue;
+            } else if(equal_token("#error", target)){
+                char* msg = make_errormsg(target->next);
+                error(msg);
                 continue;
             }
         } else {
@@ -301,4 +306,19 @@ static char* get_header_path(Token* tok){
     }
 
     return inc_path;
+}
+
+static char* make_errormsg(Token* tok){
+
+    int len = 0;
+    char* p = tok->pos;
+    while(*p != '\n'){
+        len++;
+        p++;
+    }
+
+    char* msg = calloc(1, len);
+    strncpy(msg, tok->pos, len);
+
+    return msg;
 }
