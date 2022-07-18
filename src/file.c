@@ -62,7 +62,6 @@ char* get_include_path(char* path){
         cur = cur->next;
     }
 
-    error("can not find include file.\n");
     return NULL;
 }
 

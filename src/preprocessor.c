@@ -2,16 +2,21 @@
 #include "tokenize.h"
 #include "file.h"
 #include "errormsg.h"
+#include "utility.h"
+
 
 static Token* del_newline(Token* tok);
 static bool equal_token(char* directive, Token* tok);
-static Token* read_include(Token* tok);
+static Token* read_include(char* path);
+static Token* read_stdlib_include(char* path);
 static Token* get_end_token(Token* inc);
 static bool equal_token(char* directive, Token* tok);
 static void add_macro(Token* def, Token* val);
 static Token* make_copy_token(Token* src);
 static Macro* find_macro(Token* tok);
 static Token* analyze_ifdef(Token* tok, Token** tail, bool is_ifdef);
+static Token* find_newline(Token* tok);
+static char* get_header_path(Token* tok);
 
 static Macro* macro;
 
@@ -27,12 +32,25 @@ Token* preprocess(Token* tok){
         if(target->kind == TK_PREPROCESS){
             // preprocessor directive
             if(equal_token("#include", target)){
-                Token* path = target->next;
-                Token* inc = read_include(target->next);
+
+                char* inc_path = get_header_path(target->next);
+
+                Token* inc = NULL;
+                if(!equal_token("<", target->next)){
+                    inc = read_include(inc_path);
+                }
+
+                if(inc == NULL){
+                    inc = read_stdlib_include(inc_path);
+                    if(inc == NULL){
+                        error_at(target->next, "Can not find header file.\n");
+                    }
+                }
 
                 cur->next = inc;
                 Token* tail = get_end_token(inc);
-                tail->next = path->next;
+                Token* new_line = find_newline(target);
+                tail->next = new_line->next;
                 cur = tail;
                 continue;
             } else if(equal_token("#define", target)){
@@ -118,23 +136,23 @@ static bool equal_token(char* directive, Token* tok){
     return false;
 }
 
-static Token* read_include(Token* tok){
+static Token* read_include(char* path){
 
-    Token* path = tok;
-    Token* new_line = path->next;
+    Token* inc = NULL;
+    char* inc_path = get_include_path(path);
 
-    if(path->kind != TK_STRING_CONST){
-        error_at(path, "[error] expect string const.");
+    if(inc_path){
+        inc = tk_tokenize_file(inc_path);
     }
 
-    if(new_line->kind != TK_NEWLINE){
-        error_at(new_line, "[error] continue some token exclude new-line after #include directive.");
-    }
+    return inc;
+}
 
-    // reaf header file.
-    char* inc_path = calloc(1, path->len);
-    strncpy(inc_path, path->str, path->len);
-    inc_path = get_include_path(inc_path);
+static Token* read_stdlib_include(char* path){
+
+    char* inc_path = calloc(1, strlen(path) + strlen(STDLIB_PATH));
+    strcat(inc_path, STDLIB_PATH);
+    strcat(inc_path, path);
     Token* inc = tk_tokenize_file(inc_path);
 
     return inc;
@@ -246,3 +264,41 @@ static Token* analyze_ifdef(Token* tok, Token** tail, bool is_ifdef){
     }
 }
 
+static Token* find_newline(Token* tok){
+    Token* cur = tok;
+
+    while(cur->kind != TK_NEWLINE){
+        cur = cur->next;
+        if(cur->next->kind == TK_EOF){
+            error_at(cur, "Reach eof before find new-line token.\n");
+        }
+    }
+    return cur;
+}
+
+static char* get_header_path(Token* tok){
+
+    if(tok->kind == TK_STRING_CONST){
+        return strndup(tok->str, tok->len);
+    }
+
+    if(tok->kind != TK_OPERAND || !equal_token("<", tok)){
+        error_at(tok, "Expect include file path.\n");
+    }
+
+    int len = 0;
+    Token* cur = tok->next;
+    while(!equal_token(">", cur)){
+        len += cur->len;
+        cur = cur->next;
+    }
+
+    char* inc_path = calloc(1, len);
+    cur = tok->next;
+    while(!equal_token(">", cur)){
+        strcat(inc_path, cur->str);
+        cur = cur->next;
+    }
+
+    return inc_path;
+}
