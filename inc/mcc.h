@@ -5,19 +5,22 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <errno.h>
+#include <stdbool.h>
 
 #else
+#include <stdbool.h>
 
-typedef int bool;
-#define true 1
-#define false 0
+// typedef int bool;
+// #define true 1
+// #define false 0
 
 #endif
+
+#define STDLIB_PATH "/usr/lib/gcc/x86_64-linux-gnu/9/include/"
 
 typedef struct Token Token;
 typedef struct Type Type;
