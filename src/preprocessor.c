@@ -11,13 +11,25 @@ static Token* read_include(char* path);
 static Token* read_stdlib_include(char* path);
 static Token* get_end_token(Token* inc);
 static bool equal_token(char* directive, Token* tok);
-static void add_macro(Token* def, Token* val);
+static void add_macro(Token* tok);
 static Token* make_copy_token(Token* src);
-static Macro* find_macro(Token* tok);
+static Macro* find_macro(Token* tok, Macro* mac);
 static Token* analyze_ifdef(Token* tok, Token** tail, bool is_ifdef);
 static Token* find_newline(Token* tok);
 static char* get_header_path(Token* tok);
 static char* make_errormsg(Token* tok);
+static bool is_funclike(Token* tok);
+static Token* read_token_to_eol(Token* tok);
+static Token* add_macro_funclike(Token* tok);
+static Token* add_macro_objlike(Token* tok);
+static Token* replace_token(Token* target, Macro* mac, Macro* list);
+static Macro* copy_macro(Macro* mac);
+static Token* copy_token_list(Token* tok);
+static bool is_expanded(Token* tok, Macro* list);
+static Macro* make_param_list(Token* target, Macro* mac, Token** to_tok);
+static Token* expand_funclike_macro(Token* target, Macro* mac, Token** to_tok);
+
+
 
 static Macro* macro;
 
@@ -55,11 +67,8 @@ Token* preprocess(Token* tok){
                 cur = tail;
                 continue;
             } else if(equal_token("#define", target)){
-                Token* def = target->next;
-                Token* val = def->next;
-                add_macro(def, val);
-
-                cur->next = val->next;
+                add_macro(target->next);
+                cur->next = find_newline(target)->next;
                 continue;
             } else if(equal_token("#ifdef", target)){
                 Token* endif;
@@ -81,12 +90,9 @@ Token* preprocess(Token* tok){
                 continue;
             }
         } else {
-            Macro* mac = find_macro(target);
+            Macro* mac = find_macro(target, macro);
             if(mac){
-                Token* new_token = make_copy_token(mac->val);
-
-                new_token->next = target->next;
-                cur->next = new_token;
+                cur->next = replace_token(target, mac, NULL);
             }
         }
 
@@ -109,7 +115,11 @@ void init_preprocess(){
     tok.len = strlen(tok.str);
 
     tok2.kind = TK_NEWLINE;
-    add_macro(&tok, &tok2);
+
+    Macro* mac = calloc(1, sizeof(Macro));
+    mac->def = &tok;
+    mac->val = &tok2;
+    macro = mac;
 }
 
 // local function -------------------------------------------------
@@ -175,14 +185,227 @@ static Token* get_end_token(Token* inc){
     return bef;
 }
 
-static void add_macro(Token* def, Token* val){
+static Macro* copy_macro(Macro* mac){
+    Macro* ret = calloc(1, sizeof(Macro));
+    memcpy(ret, mac, sizeof(Macro));
+    ret->next = NULL;
+    
+    return ret;
+}
+
+static Token* copy_token_list(Token* tok){
+    Token head;
+    Token* cur = &head;
+    while(tok){
+        cur->next = make_copy_token(tok);
+        cur = cur->next;
+        tok = tok->next;
+    }
+
+    return head.next;
+}
+
+static bool is_expanded(Token* tok, Macro* list){
+
+    if(tok->kind != TK_IDENT){
+        return false;
+    }
+
+    Macro* cur = list;
+    while(cur){
+        if(equal_token(tok->str, cur->def)){
+            return true;
+        }
+    }
+
+    return false;
+}
+
+static Macro* make_param_list(Token* target, Macro* mac, Token** to_tok){
+
+    Macro head;
+    Macro* arg_list = &head;
+    target = target->next;  // skip functype macro ident
+    target = target->next;  // skip lparam
+    
+    Token* param = mac->param;
+
+    while(!equal_token(")", target)){
+
+        arg_list = arg_list->next = calloc(1, sizeof(Macro));
+        
+        arg_list->def = make_copy_token(param);
+        arg_list->val = make_copy_token(target);
+        if(arg_list->val->kind == TK_NUM){
+            arg_list->val->str = strndup(arg_list->val->str, arg_list->val->len);
+        }
+
+        param = param->next;
+        
+        target = target->next;
+        if(equal_token(")", target)){
+            break;
+        }
+
+        if(!equal_token(",", target)){
+            error_at(target, "expect , operater.\n");
+        }
+        target = target->next;
+    }
+
+    *to_tok = target->next;
+
+    return head.next;
+}
+
+static Token* expand_funclike_macro(Token* target, Macro* mac, Token** to_tok){
+
+    // make param list
+    Macro* param_list = make_param_list(target, mac, to_tok);
+
+    // change parameter to arguments
+    Token head;
+    head.next = mac->val;
+    Token* cur = &head;
+    while(cur->next){
+        Token* tok = cur->next;
+
+        Macro* m = find_macro(tok, param_list);
+        if(m){
+            cur->next = make_copy_token(m->val);
+            cur->next->next = tok->next;
+        }
+        cur = cur->next;
+    }
+
+    return head.next;
+}
+
+static Token* replace_token(Token* target, Macro* mac, Macro* list){
+
+    // add expand list.
+    if(!list){
+        list = copy_macro(mac);
+    } else {
+        list->next = copy_macro(mac);
+    }
+
+    // get macro value.
+    Token* val = NULL;
+    Token* to_tok = NULL;
+    if(mac->is_func){
+        val = expand_funclike_macro(target, mac, &to_tok);
+    } else {
+        val = copy_token_list(mac->val);
+        to_tok = target->next;
+    }
+
+    // expand macro to macro value. 
+    Token head;
+    head.next = val;
+    Token* cur = &head;
+    while(cur->next){
+        Token* target = cur->next;
+
+        // skip expanded macro.
+        if(is_expanded(target, list)){
+            cur = cur->next;
+            continue;
+        }
+
+        Macro* m = find_macro(target, macro);
+        if(m){
+            cur->next = replace_token(target, m, list);
+        }
+        cur = cur->next;
+    }
+
+    // connect token
+    cur = val;
+    while(cur->next){
+        cur = cur->next;
+    }
+
+    cur->next = to_tok;
+
+    return val;
+}
+
+static bool is_funclike(Token* tok){
+    return *(tok->pos + tok->len) == '(';
+}
+
+static Token* read_token_to_eol(Token* tok){
+    Token head;
+    Token* cur = &head;
+    Token* c_tok = tok;
+    while(c_tok->kind != TK_NEWLINE){
+        cur->next = make_copy_token(c_tok);
+        cur = cur->next;
+        c_tok = c_tok->next;
+    }
+
+    return head.next;
+}
+
+static Token* add_macro_funclike(Token* tok){
+    if(find_macro(tok, macro)){
+        error_at(tok, "Redefined macro.\n");
+    }
+
     Macro* mac = calloc(1, sizeof(Macro));
 
-    mac->def = make_copy_token(def);
-    mac->val = make_copy_token(val);
+    mac->def = make_copy_token(tok);
+    tok = tok->next;    // progress to '(' token.
+    tok = tok->next;    // progress to first parameter token.
+
+    // read paramater.
+    Token head;
+    Token* cur = &head;
+    while(!equal_token(")", tok)){
+        cur->next = make_copy_token(tok);
+        cur = cur->next;
+        tok = tok->next;
+
+        if(equal_token(",", tok)){
+            tok = tok->next;
+        }
+    }
+    tok = tok->next;
+
+    mac->param = head.next;
+    mac->val = read_token_to_eol(tok);
+    mac->is_func = true;
 
     mac->next = macro;
     macro = mac;
+}
+
+static Token* add_macro_objlike(Token* tok){
+    if(find_macro(tok, macro)){
+        error_at(tok, "Redefined macro.\n");
+    }
+
+    Macro* mac = calloc(1, sizeof(Macro));
+
+    mac->def = make_copy_token(tok);
+    mac->val = read_token_to_eol(tok->next);
+
+    mac->next = macro;
+    macro = mac;
+}
+
+static void add_macro(Token* tok){
+
+    if(tok->kind != TK_IDENT){
+        error_at(tok, "Expect identify token.");
+    }
+
+    if(is_funclike(tok)){
+        add_macro_funclike(tok);
+    } else {
+        add_macro_objlike(tok);
+    }
 }
 
 static Token* make_copy_token(Token* src){
@@ -193,9 +416,13 @@ static Token* make_copy_token(Token* src){
     return new_tok;
 }
 
-static Macro* find_macro(Token* tok){
+static Macro* find_macro(Token* tok, Macro* mac){
 
-    for(Macro* cur = macro; cur; cur = cur->next){
+    if(tok->kind != TK_IDENT){
+        return NULL;
+    }
+
+    for(Macro* cur = mac; cur; cur = cur->next){
         if(equal_token(tok->str, cur->def)){
             return cur;
         }
@@ -206,7 +433,7 @@ static Macro* find_macro(Token* tok){
 
 static Token* analyze_ifdef(Token* tok, Token** tail, bool is_ifdef){
 
-    bool is_defined = is_ifdef == (find_macro(tok) != NULL);
+    bool is_defined = is_ifdef == (find_macro(tok, macro) != NULL);
     Token* t_head = tok->next;
     Token* t_tail = NULL;
     Token* f_head = NULL;

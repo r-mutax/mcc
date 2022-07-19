@@ -39,6 +39,7 @@ Token* tk_tokenize(char* p){
     Token head;
     head.next = NULL;
     Token* cur = &head;
+    row = 1;
 
     while(*p){
 

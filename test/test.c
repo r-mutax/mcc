@@ -652,6 +652,8 @@ void test_preprocess(){
 #endif
 #endif
 
+    assert(5, FUNC_MACRO(2, 3), "error : Function like macro.\n");
+
     printf("preprocess test is completed.\n");
 
     return;

@@ -37,6 +37,8 @@ typedef struct Macro Macro;
 struct Macro{
     Token* def;
     Token* val;
+    Token* param;
+    bool is_func;
     Macro* next;
 };
 
