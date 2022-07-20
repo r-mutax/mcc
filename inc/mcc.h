@@ -39,7 +39,6 @@ struct Macro{
     Token* val;
     Token* param;
     bool is_func;
-    bool is_invalid;
     Macro* next;
 };
 
