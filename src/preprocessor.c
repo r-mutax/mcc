@@ -12,6 +12,7 @@ static Token* read_stdlib_include(char* path);
 static Token* get_end_token(Token* inc);
 static bool equal_token(char* directive, Token* tok);
 static void add_macro(Token* tok);
+static void del_macro(Token* tok);
 static Token* make_copy_token(Token* src);
 static Macro* find_macro(Token* tok, Macro* mac);
 static Token* analyze_ifdef(Token* tok, Token** tail, bool is_ifdef);
@@ -68,6 +69,10 @@ Token* preprocess(Token* tok){
                 continue;
             } else if(equal_token("#define", target)){
                 add_macro(target->next);
+                cur->next = find_newline(target)->next;
+                continue;
+            } else if(equal_token("#undef", target)){
+                del_macro(target->next);
                 cur->next = find_newline(target)->next;
                 continue;
             } else if(equal_token("#ifdef", target)){
@@ -405,6 +410,22 @@ static void add_macro(Token* tok){
         add_macro_funclike(tok);
     } else {
         add_macro_objlike(tok);
+    }
+}
+
+static void del_macro(Token* tok){
+
+    Macro head;
+    head.next = macro;
+    Macro* cur = &head;
+    while(cur){
+        Macro* target = cur->next;
+        if(equal_token(tok->str, target->def)){
+            cur->next = target->next;
+            free(target);
+            break;
+        }
+        cur = cur->next;
     }
 }
 
