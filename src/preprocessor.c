@@ -29,7 +29,8 @@ static Token* copy_token_list(Token* tok);
 static bool is_expanded(Token* tok, Macro* list);
 static Macro* make_param_list(Token* target, Macro* mac, Token** to_tok);
 static Token* expand_funclike_macro(Token* target, Macro* mac, Token** to_tok);
-
+static bool is_ifgroup(Token* tok);
+static Token* read_if_section(Token* tok);
 
 
 static Macro* macro;
@@ -75,20 +76,23 @@ Token* preprocess(Token* tok){
                 del_macro(target->next);
                 cur->next = find_newline(target)->next;
                 continue;
-            } else if(equal_token("#ifdef", target)){
-                Token* endif;
-                Token* ifdef = analyze_ifdef(target->next, &endif, true);
-
-                cur->next = ifdef;
-                cur = ifdef;
+            } else if(is_ifgroup(target)){
+                cur->next = read_if_section(target);
                 continue;
-            } else if(equal_token("#ifndef", target)){
-                Token* endif;
-                Token* ifdef = analyze_ifdef(target->next, &endif, false);
+            // } else if(equal_token("#ifdef", target)){
+            //     Token* endif;
+            //     Token* ifdef = analyze_ifdef(target->next, &endif, true);
 
-                cur->next = ifdef;
-                cur = ifdef;
-                continue;
+            //     cur->next = ifdef;
+            //     cur = ifdef;
+            //     continue;
+            // } else if(equal_token("#ifndef", target)){
+            //     Token* endif;
+            //     Token* ifdef = analyze_ifdef(target->next, &endif, false);
+
+            //     cur->next = ifdef;
+            //     cur = ifdef;
+            //     continue;
             } else if(equal_token("#error", target)){
                 char* msg = make_errormsg(target->next);
                 error(msg);
@@ -450,6 +454,106 @@ static Macro* find_macro(Token* tok, Macro* mac){
     }
 
     return NULL;
+}
+
+static bool is_ifgroup(Token* tok){
+    if(equal_token("#if", tok)
+    || equal_token("#ifdef", tok)
+    || equal_token("#ifndef", tok))
+    {
+        return true;
+    }
+    return false;
+}
+
+static bool is_branch(Token* tok){
+    if(equal_token("#elif", tok)
+    || equal_token("#else", tok)
+    || equal_token("#endif", tok))
+    {
+        return true;
+    }
+    return false;
+}
+
+static Token* get_nl_token(Token* tok){
+    while(tok){
+        if(tok->kind == TK_NEWLINE){
+            return tok;
+        }
+
+        tok = tok->next;
+    }
+    return NULL;
+}
+
+static bool read_cond(Token* tok){
+
+    if(equal_token("#if", tok)){
+
+    } else if(equal_token("#elif", tok)){
+
+    } else if(equal_token("#ifdef", tok)){
+        return find_macro(tok->next, macro) != NULL;
+    } else if(equal_token("#ifndef", tok)){
+        return find_macro(tok->next, macro) == NULL;
+    } else if(equal_token("#else", tok)){
+        return true;
+    }
+}
+
+static Token* get_endif(Token* tok){
+
+    Token* cur = tok->next;
+    while(cur){
+        if(equal_token("#endif", cur)){
+            return cur;
+        } else if(is_ifgroup(cur)){
+            cur = get_endif(cur);
+        }
+
+        cur = cur->next;
+    }
+
+}
+
+static Token* read_if_section(Token* tok){
+
+    // ans token
+    Token* h = get_nl_token(tok)->next;
+    Token* rt = h;
+    Token* rh = NULL;
+    bool cur_cond = read_cond(tok);
+
+    Token head;
+    Token* cur = &head;
+    head.next = get_nl_token(tok)->next;
+    while(cur->next){
+        Token* target = cur->next;
+
+        if(equal_token("#endif", target)){
+            if(cur_cond && !rh){
+                rh = h;
+                rt = cur;
+            }
+            break;
+        } else if(equal_token("#else", target)){
+            if(cur_cond && !rh){
+                rh = h;
+                rt = cur;
+            }
+            cur_cond = true;
+            h = target->next;
+        } else if(is_ifgroup(target)){
+            cur = get_endif(target);
+        }
+
+        cur = cur->next;
+    }
+
+    rt->next = cur->next->next;
+
+    return rh;
 }
 
 static Token* analyze_ifdef(Token* tok, Token** tail, bool is_ifdef){
