@@ -31,6 +31,29 @@ static Macro* make_param_list(Token* target, Macro* mac, Token** to_tok);
 static Token* expand_funclike_macro(Token* target, Macro* mac, Token** to_tok);
 static bool is_ifgroup(Token* tok);
 static Token* read_if_section(Token* tok);
+static long constant_expr(Token* tok);
+static void pp_set_token(Token* tok);
+static void pp_expect(char* op);
+static int pp_expect_num();
+static bool pp_consume(char* op);
+static bool pp_consume_preprocess(char* prepro);
+static int pp_primary();
+static int pp_unary();
+static int pp_add();
+static int pp_mul();
+static int pp_bitShift();
+static int pp_relational();
+static int pp_equality();
+static int pp_bitAnd();
+static int pp_bitXor();
+static int pp_bitOr();
+static int pp_logicAnd();
+static int pp_logicOr();
+static int pp_cond_expr();
+static int pp_expr();
+
+
+static Token* pp_tok = NULL;
 
 
 static Macro* macro;
@@ -79,20 +102,6 @@ Token* preprocess(Token* tok){
             } else if(is_ifgroup(target)){
                 cur->next = read_if_section(target);
                 continue;
-            // } else if(equal_token("#ifdef", target)){
-            //     Token* endif;
-            //     Token* ifdef = analyze_ifdef(target->next, &endif, true);
-
-            //     cur->next = ifdef;
-            //     cur = ifdef;
-            //     continue;
-            // } else if(equal_token("#ifndef", target)){
-            //     Token* endif;
-            //     Token* ifdef = analyze_ifdef(target->next, &endif, false);
-
-            //     cur->next = ifdef;
-            //     cur = ifdef;
-            //     continue;
             } else if(equal_token("#error", target)){
                 char* msg = make_errormsg(target->next);
                 error(msg);
@@ -354,6 +363,9 @@ static Token* read_token_to_eol(Token* tok){
         c_tok = c_tok->next;
     }
 
+    cur->next = make_copy_token(c_tok);
+    cur = cur->next;
+
     return head.next;
 }
 
@@ -490,9 +502,9 @@ static Token* get_nl_token(Token* tok){
 static bool read_cond(Token* tok){
 
     if(equal_token("#if", tok)){
-
+        return constant_expr(read_token_to_eol(tok->next)) != 0;
     } else if(equal_token("#elif", tok)){
-
+        return constant_expr(read_token_to_eol(tok->next)) != 0;
     } else if(equal_token("#ifdef", tok)){
         return find_macro(tok->next, macro) != NULL;
     } else if(equal_token("#ifndef", tok)){
@@ -551,7 +563,11 @@ static Token* read_if_section(Token* tok){
         cur = cur->next;
     }
 
-    rt->next = cur->next->next;
+    if(!rh){
+        rh = cur->next->next;
+    } else {
+        rt->next = cur->next->next;
+    }
 
     return rh;
 }
@@ -673,4 +689,298 @@ static char* make_errormsg(Token* tok){
     strncpy(msg, tok->pos, len);
 
     return msg;
+}
+
+static void pp_set_token(Token* tok){
+    pp_tok = tok;
+}
+
+static void pp_expect_newline(){
+    if(pp_tok->kind != TK_NEWLINE){
+        error_at(pp_tok, "Expect newline, but this is another one.\n");
+    }
+}
+
+static void pp_expect(char* op){
+    if(!pp_consume(op)){
+        error_at(pp_tok, "No expected tokens.\n");
+    }
+}
+
+static int pp_expect_num(){
+    if(pp_tok->kind != TK_NUM)
+        error_at(pp_tok, "expect num\n");
+    
+    int ans = pp_tok->val;
+    pp_tok = pp_tok->next;
+    return ans;
+}
+
+static bool pp_consume(char* op){
+    if(equal_token(op, pp_tok)
+        && pp_tok->kind == TK_OPERAND){
+        pp_tok = pp_tok->next;
+        return true;
+    }
+    return false;
+}
+
+static bool pp_consume_preprocess(char* prepro){
+    if(equal_token(prepro, pp_tok)
+        && pp_tok->kind == TK_PREPROCESS){
+        pp_tok = pp_tok->next;
+        return true;
+    }
+    return false;
+}
+
+static int pp_expr(){
+    int ans = pp_cond_expr();
+    return ans;
+}
+
+static int pp_cond_expr(){
+    int ans = pp_logicOr();
+
+    if(pp_consume("?")){
+        int ans_tpath = pp_expr();
+        pp_expect(":");
+        int ans_fpath = pp_expr();
+
+        ans = ans ? ans_tpath : ans_fpath;
+    }
+    return ans;
+}
+
+static int pp_logicOr(){
+    int ans = pp_logicAnd();
+
+    for(;;){
+        if(pp_consume("||")){
+            ans = ans || pp_logicAnd();
+        } else {
+            return ans;
+        }
+    }
+}
+
+static int pp_logicAnd(){
+    int ans = pp_bitOr();
+
+    for(;;){
+        if(pp_consume("&&")){
+            ans = ans && pp_bitOr();
+        } else {
+            return ans;
+        }
+    }
+}
+
+static int pp_bitOr(){
+    int ans = pp_bitXor();
+
+    for(;;){
+        if(pp_consume("|")){
+            ans |= pp_bitXor();
+        } else {
+            return ans;
+        }
+    }
+}
+
+static int pp_bitXor(){
+    int ans = pp_bitAnd();
+
+    for(;;){
+        if(pp_consume("^")){
+            ans ^= pp_bitAnd();
+        } else {
+            return ans;
+        }
+    }
+}
+
+static int pp_bitAnd(){
+    int ans = pp_equality();
+
+    for(;;){
+        if(pp_consume("&")){
+            ans &= pp_equality();
+        } else {
+            return ans;
+        }
+    }
+}
+
+static int pp_equality(){
+    int ans = pp_relational();
+
+    for(;;){
+        if(pp_consume("==")){
+            ans = ans == pp_relational();
+        } else if(pp_consume("!=")){
+            ans = ans != pp_relational();
+        } else {
+            return ans;
+        }
+    }
+}
+
+static int pp_relational(){
+    int ans = pp_bitShift();
+
+    for(;;){
+        if(pp_consume("<")){
+            ans = ans < pp_bitShift();
+        } else if(pp_consume("<=")){
+            ans = ans <= pp_bitShift();
+        } else if(pp_consume(">")){
+            ans = ans > pp_bitShift();
+        } else if(pp_consume(">=")){
+            ans = ans >= pp_bitShift();
+        } else {
+            return ans;
+        }
+    }
+}
+
+static int pp_bitShift(){
+    int ans = pp_add();
+    for(;;){
+        if(pp_consume("<<")){
+            ans <<= pp_add();
+        } else if(pp_consume(">>")){
+            ans >>= pp_add();
+        } else {
+            return ans;
+        }
+    }
+}
+
+static int pp_add(){
+    int ans = pp_mul();
+
+    for(;;){
+        if(pp_consume("+")){
+            ans += pp_mul();
+        } else if(pp_consume("-")){
+            ans -= pp_mul();
+        } else {
+            return ans;
+        }
+    }
+}
+
+static int pp_mul(){
+    int ans = pp_unary();
+    for(;;){
+        if(pp_consume("*")){
+            ans *= pp_unary();
+        } else if(pp_consume("/")){
+            ans /= pp_unary();
+        } else if(pp_consume("%")){
+            ans %= pp_unary();
+        } else {
+            return ans;
+        }
+    }
+}
+
+static int pp_unary(){
+    if(pp_consume("+")){
+        return pp_primary();
+    } else if(pp_consume("-")){
+        return -pp_primary();
+    } else if(pp_consume_preprocess("defined")){
+        int ans = 0;
+        Token* tok;
+        if(pp_consume("(")){
+            tok = pp_tok;
+            pp_tok = pp_tok->next;
+            pp_expect(")");
+        } else {
+            tok = pp_tok;
+            pp_tok = pp_tok->next;
+        }
+        if(find_macro(tok, macro)){
+            ans = 1;
+        }
+        return ans;
+    } else {
+        return pp_primary();
+    }
+}
+
+static int pp_primary(){
+
+    if(pp_consume("(")){
+        int ans = pp_expr();
+        pp_expect(")");
+        return ans;
+    } else {
+        return pp_expect_num();
+    }
+}
+
+static Token* pp_expand_defined(Token* tok){
+
+    Token head;
+    Token* cur = &head;
+    head.next = tok;
+    while(cur->next){
+        Token* target = cur->next;
+        if(equal_token("defined", target)){
+            Token* ident;
+            target = target->next;
+
+            if(equal_token("(", target)){
+                target = target->next;  // ( -> ident
+                ident = target;
+                
+                target = target->next;  // ident -> )
+                if(!equal_token(")", target)){
+                    error_at(tok, "Expect ')' token, but get another one.\n");
+                }
+            } else {
+                ident = target;
+            }
+
+            target = target->next; // ')' or ident -> next;
+
+            Token* val = calloc(1, sizeof(Token));
+            val->kind = TK_NUM;
+            val->val = find_macro(ident, macro) ? 1 : 0;
+
+            cur->next = val;
+            val->next = target;
+            cur = target;
+        } else {
+            cur = cur->next;
+        }
+    }
+    return head.next;
+}
+
+static Token* pp_expand_macros(Token* tok){
+    Token head;
+    Token* cur = &head;
+    head.next = tok;
+    while(cur->next){
+        Token* target = cur->next;
+        Macro* mac = find_macro(target, macro);
+        if(mac){
+            cur->next = replace_token(target, mac, NULL);
+        }
+        cur = cur->next;
+    }
+    return head.next;
+}
+
+static long constant_expr(Token* tok){
+    tok = pp_expand_defined(tok);
+    tok = pp_expand_macros(tok);
+    pp_set_token(tok);
+    int ans = pp_expr();
+    pp_expect_newline();
+    return ans;
 }

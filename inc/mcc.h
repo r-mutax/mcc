@@ -1,23 +1,15 @@
 #ifndef MCC_INC_H
 #define MCC_INC_H
 
-#ifndef MCC_COMPILER
+#include <stdbool.h>
 
+#ifndef MCC_COMPILER
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
 #include <stdarg.h>
 #include <errno.h>
-#include <stdbool.h>
-
-#else
-#include <stdbool.h>
-
-// typedef int bool;
-// #define true 1
-// #define false 0
-
 #endif
 
 #define STDLIB_PATH "/usr/lib/gcc/x86_64-linux-gnu/9/include/"
