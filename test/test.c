@@ -652,6 +652,59 @@ void test_preprocess(){
 #endif
 #endif
 
+#if (2 * 3 - 6)
+    exit_error("error : #if multile - sub.\n");
+#endif
+
+#if (4 / 2 + 4) - 6
+    exit_error("error : #if div - add.\n");
+#endif
+
+#if (4 / 2 + 4) - 6
+    exit_error("error : #if div - sub.\n");
+#endif
+
+#if (5 % 3 + 1) - 3
+    exit_error("error : #if mod - add.\n");
+#endif
+
+#if (1 << 3 + 2) - 32
+    exit_error("error : #if bitShift(left) - add.\n");
+#endif
+
+#if (8 >> 3 - 2) - 4
+    exit_error("error : #if bitShift(right) - sub.\n");
+#endif
+
+#if (7 < 4 << 1) - 1
+    exit_error("error : #if less than - bitShift(left).\n");
+#endif
+
+#if (2 <= 8 >> 2) - 1
+    exit_error("error : #if less equal - bitShift(right).\n");
+#endif
+
+#if (17 > 4 << 2) - 1
+    exit_error("error : #if grater than - bitShift(left).\n");
+#endif
+
+#if (1 >= 4 >> 2) - 1
+    exit_error("error : #if grater than - bitShift(left).\n");
+#endif
+
+#if (1 == 2 > 0 != 2) - 1
+    exit_error("error : #if equal and not equal- lt.\n");
+#endif
+
+#if (2 & 5 ^ 3 | 9) - 11
+    exit_error("error : #if bitAnd - bitXor - bitOr.\n");
+#endif
+
+#if (3 == 3 && 4 != 4 ? 3 : 9) - 9
+    exit_error("error : #if condition expr - logicAnd.\n");
+#endif
+
+
     assert(5, FUNC_MACRO(2, 3), "error : Function like macro.\n");
 
     printf("preprocess test is completed.\n");

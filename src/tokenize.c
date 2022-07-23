@@ -148,6 +148,7 @@ Token* tk_tokenize(char* p){
             || check_preprocess("#endif", &p, &cur)
             || check_preprocess("#error", &p, &cur)
             || check_preprocess("#define", &p, &cur)
+            || check_preprocess("defined", &p, &cur)
             || check_preprocess("#undef", &p, &cur)){
 
             continue;
