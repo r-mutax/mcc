@@ -879,6 +879,8 @@ static Node* assign(){
     } else if(tk_consume(">>=")){
         node = new_node(ND_ASSIGN, node, new_node_bit_shift_r(node, assign()));
     }
+
+    ty_add_type(node);
     return node;
 }
 
@@ -1192,32 +1194,35 @@ static Node* primary(){
     tok = tk_consume_ident();
     if(tok != NULL){
         Symbol* sym = st_find_symbol(tok);
+        if(sym == NULL){
+            error_at(tok, "Not declared.\n");
+        }
 
-        if (tk_consume("(")){
-            Node* node = calloc(1, sizeof(Node));
-            node->kind = ND_CALL;
-            node->sym = sym;
+        if(sym->is_func){
+            if(tk_consume("(")){
+                Node* node = calloc(1, sizeof(Node));
+                node->kind = ND_CALL;
+                node->sym = sym;
+                node->type = sym->type;
+                node->line = tok;
 
-            // has arguments?
-            if(!tk_consume(")")){
-                Node* arg_head = assign();
-                Node* cur = arg_head;
+                Node a_head = { 0 };
+                Node* a_cur = &a_head;
 
-                while(tk_consume(",")){
-                    cur->next = assign();
-                    cur = cur->next;
+                if(!tk_consume(")")){
+                    do {
+                        a_cur = a_cur->next = assign();
+                        ty_add_type(a_cur);
+                    } while(tk_consume(","));
+                    tk_expect(")");
                 }
-                node->arg = arg_head;
-                tk_expect(")");
+                node->arg = a_head.next;
+
                 return node;
             } else {
-                return node;
+                // function pointer.
             }
         } else {
-            if(sym == NULL){
-                error_at(tok, "Not declared.\n");
-            }
-
             Node* node;
             if(sym->is_enum_symbol){
                 node = new_node_num(sym->enum_val);
@@ -1251,6 +1256,7 @@ static Node* new_node_num(int val){
 
     node->kind = ND_NUM;
     node->val = val;
+    node->type = ty_get_type("long", 4);
     return node;
 }
 

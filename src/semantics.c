@@ -96,10 +96,26 @@ static void check_expr(Node* expr){
         case ND_MEMBER:
             return;
         case ND_CALL:
-            for(Node* cur = expr->arg; cur; cur = cur->next){
-                check_expr(cur);
+            {
+                Symbol* param = expr->sym->args;
+                Node* arg = expr->arg; 
+
+                int param_cnt = 0;
+                int arg_cnt = 0;
+
+                for(; param; param = param->next){
+                    check_expr(arg);
+                    param_cnt++;
+                }
+
+                for(; arg; arg = arg->next)
+                    arg_cnt++;
+
+                if(param_cnt != arg_cnt)
+                    error_at(expr->line, "illigal arguments num.\n");
+
+                return;
             }
-            return;
         case ND_ASSIGN:
             check_expr(expr->rhs);
             return;
