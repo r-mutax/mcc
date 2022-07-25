@@ -152,7 +152,6 @@ void ty_add_type(Node* node){
     ty_add_type(node->iter);
     ty_add_type(node->else_body);
     ty_add_type(node->next);
-    //ty_add_type(node->arg);
 
     for(Node* cur = node->arg; cur; cur = cur->arg){
         ty_add_type(cur);
