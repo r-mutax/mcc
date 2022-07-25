@@ -879,6 +879,8 @@ static Node* assign(){
     } else if(tk_consume(">>=")){
         node = new_node(ND_ASSIGN, node, new_node_bit_shift_r(node, assign()));
     }
+
+    ty_add_type(node);
     return node;
 }
 
@@ -1201,6 +1203,8 @@ static Node* primary(){
                 Node* node = calloc(1, sizeof(Node));
                 node->kind = ND_CALL;
                 node->sym = sym;
+                node->type = sym->type;
+                node->line = tok;
 
                 Node a_head = { 0 };
                 Node* a_cur = &a_head;
@@ -1208,11 +1212,12 @@ static Node* primary(){
                 if(!tk_consume(")")){
                     do {
                         a_cur = a_cur->next = assign();
+                        ty_add_type(a_cur);
                     } while(tk_consume(","));
                     tk_expect(")");
                 }
-
                 node->arg = a_head.next;
+
                 return node;
             } else {
                 // function pointer.
@@ -1251,6 +1256,7 @@ static Node* new_node_num(int val){
 
     node->kind = ND_NUM;
     node->val = val;
+    node->type = ty_get_type("long", 4);
     return node;
 }
 

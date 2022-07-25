@@ -152,7 +152,11 @@ void ty_add_type(Node* node){
     ty_add_type(node->iter);
     ty_add_type(node->else_body);
     ty_add_type(node->next);
-    ty_add_type(node->arg);
+    //ty_add_type(node->arg);
+
+    for(Node* cur = node->arg; cur; cur = cur->arg){
+        ty_add_type(cur);
+    }
 
     switch(node->kind){
         case ND_ADD:
@@ -171,8 +175,13 @@ void ty_add_type(Node* node){
         case ND_NE:
         case ND_LT:
         case ND_LE:
+        case ND_AND:
+        case ND_OR:
         case ND_NUM:
             node->type = ty_get_type("long", 4);
+            break;
+        case ND_COND_EXPR:
+            node->type = node->lhs->type;
             break;
         case ND_ADDR:
             node->type = ty_pointer_to(node->lhs->type);
@@ -193,6 +202,9 @@ void ty_add_type(Node* node){
         case ND_BIT_AND:
         case ND_BIT_OR:
         case ND_BIT_XOR:
+            node->type = node->lhs->type;
+            break;
+        case ND_COMMA:
             node->type = node->lhs->type;
             break;
     }
