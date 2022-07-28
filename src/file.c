@@ -4,6 +4,7 @@
 #include "utility.h"
 
 IncDir* inc_dir_dict;
+IncDir* std_inc_dir_dict;
 
 static bool is_exist_path(char* path);
 
@@ -46,9 +47,42 @@ void register_include_directory(char* path){
     inc_dir_dict = inc;    
 }
 
+void register_std_include_directory(char* path){
+    int len = strlen(path);
+    int is_slash = path[len - 1] != '/';
+
+    IncDir* inc = calloc(1, sizeof(IncDir));
+    inc->path = calloc(1, strlen(path) + 5);
+    strcpy(inc->path, path);
+
+    if(is_slash)
+        strcat(inc->path, "/");
+
+    inc->next = std_inc_dir_dict;
+    std_inc_dir_dict = inc;    
+}
+
 char* get_include_path(char* path){
     
     IncDir* cur = inc_dir_dict;
+    int path_len = strlen(path);
+
+    while(cur){
+        char* inc_path = calloc(1, strlen(cur->path) + path_len);
+        sprintf(inc_path, "%s%s", cur->path, path);
+        if(is_exist_path(inc_path)){
+            return inc_path;
+        }
+
+        free(inc_path);
+        cur = cur->next;
+    }
+
+    return NULL;
+}
+
+char* get_std_include_path(char* path){
+    IncDir* cur = std_inc_dir_dict;
     int path_len = strlen(path);
 
     while(cur){

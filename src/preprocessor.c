@@ -84,12 +84,16 @@ Token* preprocess(Token* tok){
                         error_at(target->next, "Can not find header file.\n");
                     }
                 }
-
-                cur->next = inc;
-                Token* tail = get_end_token(inc);
                 Token* new_line = find_newline(target);
-                tail->next = new_line->next;
-                cur = tail;
+                Token* tail = get_end_token(inc);
+
+                if(tail == NULL){
+                    cur = cur->next = new_line;
+                } else {
+                    cur->next = inc;
+                    tail->next = new_line->next;
+                    cur = tail;
+                }
                 continue;
             } else if(equal_token("#define", target)){
                 add_macro(target->next);
@@ -183,17 +187,18 @@ static Token* read_include(char* path){
 
 static Token* read_stdlib_include(char* path){
 
-    char* inc_path = calloc(1, strlen(path) + strlen(STDLIB_PATH));
-    strcat(inc_path, STDLIB_PATH);
-    strcat(inc_path, path);
-    Token* inc = tk_tokenize_file(inc_path);
+    Token* inc = NULL;
+    char* inc_path = get_std_include_path(path);
+    if(inc_path){
+        inc = tk_tokenize_file(inc_path);
+    }
 
     return inc;
 }
 
 static Token* get_end_token(Token* inc){
     
-    Token* bef;
+    Token* bef = NULL;
 
     while(inc->kind != TK_EOF){
         bef = inc;
@@ -644,6 +649,8 @@ static Token* find_newline(Token* tok){
         cur = cur->next;
         if(cur->next->kind == TK_EOF){
             error_at(cur, "Reach eof before find new-line token.\n");
+        } else if(equal_token("\\",cur->next)){
+            cur =cur->next;
         }
     }
     return cur;

@@ -12,7 +12,8 @@
 #include <errno.h>
 #endif
 
-#define STDLIB_PATH "/usr/lib/gcc/x86_64-linux-gnu/9/include/"
+#define STDLIB_PATH "/usr/include/"
+#define ADDITIVE_STDLIB_PATH "/usr/lib/gcc/x86_64-linux-gnu/9/include/"
 
 typedef struct Token Token;
 typedef struct Type Type;

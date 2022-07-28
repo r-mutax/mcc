@@ -23,6 +23,9 @@ void init_include_directory(int argc, char** argv){
     pos = strrchr(src_file, '/');
     strncpy(cwd, src_file, pos - src_file + 1); 
     register_include_directory(cwd);
+
+    register_std_include_directory(STDLIB_PATH);
+    register_std_include_directory(ADDITIVE_STDLIB_PATH);
 }
 
 int read_option(char argc, char** argv){
