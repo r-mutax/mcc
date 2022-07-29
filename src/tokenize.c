@@ -18,7 +18,7 @@ static bool is_ident1(char p);
 static bool is_ident2(char p);
 static bool is_keyword(char* lhs, char* rhs);
 static bool check_keyword(char* keyword, char** p, Token** tok);
-static bool check_preprocess(char* directive, char** p, Token** tok);
+static bool check_preprocess(char* directive, char** p, Token** tok, char* start);
 // -----------------------------------------------
 Token* tk_tokenize_file(char* path){
 
@@ -140,17 +140,31 @@ Token* tk_tokenize(char* p){
             continue;
         }
 
-        if(check_preprocess("#include", &p, &cur)
-            || check_preprocess("#if", &p, &cur)
-            || check_preprocess("#ifdef", &p, &cur)
-            || check_preprocess("#ifndef", &p, &cur)
-            || check_preprocess("#else", &p, &cur)
-            || check_preprocess("#endif", &p, &cur)
-            || check_preprocess("#error", &p, &cur)
-            || check_preprocess("#define", &p, &cur)
-            || check_preprocess("defined", &p, &cur)
-            || check_preprocess("#undef", &p, &cur)){
+        // tokenize preprocessor directive
+        if(*p == '#'){
+            
+            char* start = p++;
 
+            // skip blank
+            while(*p == ' ' || *p == '\t') p++;
+
+            if(check_preprocess("include", &p, &cur, start)
+                || check_preprocess("if", &p, &cur, start)
+                || check_preprocess("ifdef", &p, &cur, start)
+                || check_preprocess("ifndef", &p, &cur, start)
+                || check_preprocess("else", &p, &cur, start)
+                || check_preprocess("endif", &p, &cur, start)
+                || check_preprocess("error", &p, &cur, start)
+                || check_preprocess("define", &p, &cur, start)
+                || check_preprocess("undef", &p, &cur, start)){
+                continue;
+            }
+        }
+
+        if(startswith(p, "defined")){
+            int len = strlen("defined");
+            cur = new_token(TK_PREPROCESS, cur, p, len);
+            p += len;
             continue;
         }
 
@@ -400,11 +414,14 @@ static bool check_keyword(char* keyword, char** p, Token** tok){
     return false;
 }
 
-static bool check_preprocess(char* directive, char** p, Token** tok){
+static bool check_preprocess(char* directive, char** p, Token** tok, char* start){
 
     if (is_keyword(*p, directive)){
-        int len = strlen(directive);
-        *tok = new_token(TK_PREPROCESS, *tok, *p, len);
+        int len = strlen(directive);    // length : # + directive
+        *tok = new_token(TK_PREPROCESS, *tok, *p, len + 1);
+        char* n = realloc((*tok)->str, len + 1);
+        memset((*tok)->str, 0, len + 1);
+        sprintf((*tok)->str, "#%s", directive);
         *p += len;
         return true;
     }
