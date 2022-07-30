@@ -190,6 +190,9 @@ Token* tk_tokenize(char* p){
             || check_keyword("static", &p, &cur)
             || check_keyword("typedef", &p, &cur)
             || check_keyword("enum", &p, &cur)
+            || check_keyword("const", &p, &cur)
+            || check_keyword("restrict", &p, &cur)
+            || check_keyword("volatile", &p, &cur)
             || check_keyword("struct", &p, &cur)){
             continue;
         }
@@ -309,6 +312,7 @@ bool tk_istype(){
 
     if(ty != NULL
         || (memcmp(token->str, "static", 6) == 0 && token->len == 6)
+        || (memcmp(token->str, "const", 5) == 0 && token->len == 5)
         || (memcmp(token->str, "typedef", 7) == 0 && token->len == 7)
         || (memcmp(token->str, "enum", 4) == 0 && token->len == 4)
         || (memcmp(token->str, "struct", 6) == 0 && token->len == 6)){

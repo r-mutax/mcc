@@ -214,6 +214,7 @@ struct Type {
     Type*       pointer_to;
     bool        is_typedef;
     bool        is_imcomplete;
+    bool        is_const;
     Type*       base_type;
 
     Member*     member;
