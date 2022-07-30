@@ -425,6 +425,7 @@ static Type* decl_spec(StorageClassKind* sck){
 
     // parse type specifies.
     int type_flg = 0;
+    bool is_const = false;
     Type* ty = NULL;
     while(tk_istype()){
         Token* tok = tk_get_token();
@@ -440,6 +441,12 @@ static Type* decl_spec(StorageClassKind* sck){
                 error_at(tok, "duplicate type keyword.\n");
             ty = struct_spec();
             type_flg += K_USER;
+            continue;
+        }
+
+        if(tk_consume_keyword("const")){
+            if(is_const) error_at(tok, "duplicate const.");
+            is_const = true;
             continue;
         }
 
@@ -517,6 +524,8 @@ static Type* decl_spec(StorageClassKind* sck){
                 break;
         }
     }
+
+    ty->is_const = is_const;
 
     return ty;
 }
@@ -861,6 +870,7 @@ static Node* expr(){
 
 static Node* assign(){
     Node* node = cond_expr();
+    ty_add_type(node);
 
     if(tk_consume("=")){
         node = new_node(ND_ASSIGN, node, assign());
@@ -878,6 +888,11 @@ static Node* assign(){
         node = new_node(ND_ASSIGN, node, new_node_bit_shift_l(node, assign()));
     } else if(tk_consume(">>=")){
         node = new_node(ND_ASSIGN, node, new_node_bit_shift_r(node, assign()));
+    }
+
+    if(node->kind == ND_ASSIGN
+        && node->lhs->type->is_const){
+        error("assignment of read only variable.\n");
     }
 
     ty_add_type(node);

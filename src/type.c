@@ -177,6 +177,7 @@ void ty_add_type(Node* node){
         case ND_AND:
         case ND_OR:
         case ND_NUM:
+        case ND_NOT:
             node->type = ty_get_type("long", 4);
             break;
         case ND_COND_EXPR:
