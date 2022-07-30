@@ -344,6 +344,14 @@ void test_expr(){
     b >>= 3;
     assert(8, b, "error : bitwise right-shift and assign.\n");
 
+    a = 0;
+    assert(1, !a, "error : logical not - at 0.\n");
+
+    a = 1;
+    assert(0, !a, "error : logical not - at 1.\n");
+    assert(1, !!a, "error : logical not - bang-bang.\n");
+    assert(0, !!!a, "error : logical not - bang-bang-bang.\n");
+
     printf("expr test is completed !\n");
     return;
 }
