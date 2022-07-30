@@ -898,6 +898,8 @@ static int pp_unary(){
         return pp_primary();
     } else if(pp_consume("-")){
         return -pp_primary();
+    } else if(pp_consume("!")){
+        return !pp_primary();
     } else if(pp_consume_preprocess("defined")){
         int ans = 0;
         Token* tok;

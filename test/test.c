@@ -712,6 +712,9 @@ void test_preprocess(){
     exit_error("error : #if condition expr - logicAnd.\n");
 #endif
 
+#if ! defined TEST_DEF
+    exit_error("error : #if logical NOT.\n");   
+#endif
 
     assert(5, FUNC_MACRO(2, 3), "error : Function like macro.\n");
 
