@@ -1091,6 +1091,8 @@ static Node* unary(){
         return new_node(ND_ADDR, cast(), NULL);
     } else if(tk_consume("*")){
         return new_node(ND_DREF, cast(), NULL);
+    } else if(tk_consume("!")){
+        return new_node(ND_NOT, cast(), NULL);
     } else if(tk_consume("++")){
         // ++a -> a = a + 1
         Node* node = unary();

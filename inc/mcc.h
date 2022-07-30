@@ -117,7 +117,8 @@ typedef enum {
     ND_VOID_STMT,
     ND_CAST,
     ND_BIT_LSHIFT,
-    ND_BIT_RSHIFT
+    ND_BIT_RSHIFT,
+    ND_NOT
 } NodeKind;
 
 struct Node {

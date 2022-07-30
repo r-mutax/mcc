@@ -487,6 +487,14 @@ static void gen(Node* node){
             }
             fprintf(output_file, "  push rax\n");
             return;
+        case ND_NOT:
+            gen(node->lhs);
+            fprintf(output_file, "  pop rax\n");
+            fprintf(output_file, "  cmp rax, 0\n");
+            fprintf(output_file, "  sete al\n");
+            fprintf(output_file, "  movzb eax, al\n");
+            fprintf(output_file, "  push rax\n");
+            return;
     }
 
     if(node->kind == ND_NUM){
