@@ -649,8 +649,6 @@ static Token* find_newline(Token* tok){
         cur = cur->next;
         if(cur->next->kind == TK_EOF){
             error_at(cur, "Reach eof before find new-line token.\n");
-        } else if(equal_token("\\",cur->next)){
-            cur =cur->next;
         }
     }
     return cur;

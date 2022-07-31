@@ -54,6 +54,17 @@ Token* tk_tokenize(char* p){
             continue;
         }
 
+        // skip \ \r \n or \ \n
+        if(startswith(p, "\\\r\n")){
+            p += 3;
+            continue;
+        }
+
+        if(startswith(p, "\\\n")){
+            p += 2;
+            continue;
+        }
+
         // skip space, new line carrige return and so on.
         if(isspace(*p)){
             p++;

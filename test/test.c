@@ -716,6 +716,11 @@ void test_preprocess(){
     exit_error("error : #if logical NOT.\n");   
 #endif
 
+#ifdef ! \
+defined TEST_DEF
+    exit_error("error : skip continuous \\ and newline.\n");   
+#endif
+
     assert(5, FUNC_MACRO(2, 3), "error : Function like macro.\n");
 
     printf("preprocess test is completed.\n");
