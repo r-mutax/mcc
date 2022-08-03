@@ -26,6 +26,7 @@ void init_include_directory(int argc, char** argv){
 
     register_std_include_directory(STDLIB_PATH);
     register_std_include_directory(ADDITIVE_STDLIB_PATH);
+    register_std_include_directory(CSTDLIB_INC_PATH);
 }
 
 int read_option(char argc, char** argv){
