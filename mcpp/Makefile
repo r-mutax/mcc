@@ -13,7 +13,6 @@ DEPENDS			= $(OBJECTS:.o=.d)
 
 
 $(TARGET) : $(OBJECTS)
-	echo $(CUR_MCPP_DIR)
 	-mkdir -p $(TARGETDIR)
 	$(COMPILER) -o $(TARGETDIR)/$(TARGET) $^
 

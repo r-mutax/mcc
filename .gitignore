@@ -1,6 +1,7 @@
 load/*
 bin/mcc
 bin/mlibc
+bin/mcpp
 test/tmp
 test/tmp.s
 test/test_func/*.o
@@ -9,3 +10,4 @@ test/test.s
 test/tt.c
 stdlib/asm/*
 stdlib/load/*
+mcpp/load/*
