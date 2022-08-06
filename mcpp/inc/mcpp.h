@@ -3,7 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <stdbool.h>
 #include <string.h>
+#include <ctype.h>
 #include <errno.h>
 
 
@@ -21,10 +23,12 @@ typedef enum {
     PTK_OPERAND,
     PTK_NUM,
     PTK_IDENT,
+    PTK_PP_KEYWORD,
     PTK_KEYWORD,
     PTK_STRING_CONST,
     PTK_HASH,
     PTK_NEWLINE,
+    PTK_SPACE,
     PTK_EOF
 } PP_TokenKind;
 
@@ -32,8 +36,12 @@ struct PP_Token{
     PP_TokenKind    kind;
     PP_Token*       next;
     int             val;
-    char*           pos;
+    char*           str;
     int             len;
+
+    char*           pos;
+    int             row;
+    SrcFile*        src;
 };
 
 // -----------------------------------------------------------------
@@ -49,5 +57,6 @@ void error(char *fmt, ...);
 
 // utility
 char* strdup(char* src);
+char* strndup(char* src, size_t n);
 
 #endif
