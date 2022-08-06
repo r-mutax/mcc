@@ -11,6 +11,7 @@
 
 typedef struct SrcFile SrcFile;
 typedef struct PP_Token PP_Token;
+typedef struct Macro Macro;
 
 struct SrcFile{
     char* path;
@@ -44,10 +45,35 @@ struct PP_Token{
     SrcFile*        src;
 };
 
+typedef enum {
+    PP_NONE = 0,
+    PP_INCLUDE,
+    PP_IF,
+    PP_IFDEF,
+    PP_IFNDEF,
+    PP_ELSE,
+    PP_ENDIF,
+    PP_ERROR,
+    PP_DEFINE,
+    PP_DEFINED,
+    PP_UNDEF
+} PP_KIND;
+
+struct Macro{
+    PP_Token* def;
+    PP_Token* val;
+    PP_Token* param;
+    bool is_func;
+    Macro* next;
+};
+
 // -----------------------------------------------------------------
 
 // tokenizer
 PP_Token* ptk_tokenize_file(char* path);
+
+// preprocessor
+PP_Token* preprocess(PP_Token* tok);
 
 // file io
 char* read_file(char* path);

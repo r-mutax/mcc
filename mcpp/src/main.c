@@ -10,6 +10,7 @@ int main(int argc, char** argv){
 
     src_path = argv[1];
     PP_Token* tok = ptk_tokenize_file(src_path);
+    tok = preprocess(tok);
 
     return 0;
 }
