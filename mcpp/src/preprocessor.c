@@ -3,8 +3,18 @@
 static Macro* macro;
 
 static PP_KIND get_preprocess_kind(PP_Token* token);
-static bool equal_token(const char* word, PP_Token* target);
+
+// macro definition
 static void add_macro(PP_Token* tok);
+static bool is_funclike_macro(PP_Token* tok);
+static void add_macro_objlike(PP_Token* tok);
+static Macro* find_macro(PP_Token* tok, Macro* mac);
+
+
+static bool equal_token(const char* word, PP_Token* target);
+static PP_Token* get_next_newline(PP_Token* tok);
+static PP_Token* copy_token(PP_Token* tok);
+static PP_Token* copy_token_eol(PP_Token* tok);
 
 // preprocess exchange 
 PP_Token* preprocess(PP_Token* tok){
@@ -28,6 +38,8 @@ PP_Token* preprocess(PP_Token* tok){
                 case PP_ERROR:
                     break;
                 case PP_DEFINE:
+                    add_macro(target);
+                    cur->next = get_next_newline(target);
                     break;
                 case PP_UNDEF:
                     break;
@@ -83,4 +95,84 @@ static PP_KIND get_preprocess_kind(PP_Token* token){
     }
 
     return kind;
+}
+
+static Macro* find_macro(PP_Token* tok, Macro* mac){
+
+    if(tok->kind != PTK_IDENT){
+        return NULL;
+    }
+
+    for(Macro* cur = mac; cur; cur = cur->next){
+        if(equal_token(tok->str, cur->def)){
+            return cur;
+        }
+    }
+}
+
+static void add_macro(PP_Token* tok){
+
+    // skip to macro def
+    tok = tok->next;
+    tok = tok->kind == PTK_SPACE ? tok->next : tok;
+    tok = tok->next;
+
+    if(tok->kind != PTK_IDENT){
+        error_at(tok, "[error] Expect identify token.");
+    }
+
+    if(is_funclike_macro(tok)){
+        
+    } else {
+        add_macro_objlike(tok);
+    }
+}
+
+static bool is_funclike_macro(PP_Token* tok){
+    return equal_token("(", tok->next);
+}
+
+static void add_macro_objlike(PP_Token* tok){
+    if(find_macro(tok, macro)){
+        error_at(tok, "[error] redefined macro.\n");
+    }
+
+    Macro* mac = calloc(1, sizeof(Macro));
+
+    mac->def = copy_token(tok);
+    mac->val = copy_token_eol(tok);
+}
+
+static PP_Token* get_next_newline(PP_Token* tok){
+    PP_Token* start = tok;
+    while(tok->kind != PTK_NEWLINE){
+        if(tok->kind == PTK_EOF){
+            error_at(start, "[error] reach end of file.\n");
+        }
+        tok = tok->next;
+    }
+    return tok;
+}
+
+static PP_Token* copy_token(PP_Token* src){
+    PP_Token* new_tok = calloc(1, sizeof(PP_Token));
+    memcpy(new_tok, src, sizeof(PP_Token));
+    new_tok->next = NULL;
+
+    return new_tok;
+}
+
+static PP_Token* copy_token_eol(PP_Token* tok){
+    PP_Token head;
+    PP_Token* cur = &head;
+    PP_Token* c_tok = tok;
+    while(c_tok->kind != PTK_NEWLINE){
+        cur->next = copy_token(c_tok);
+        cur = cur->next;
+        c_tok = c_tok->next;
+    }
+
+    cur->next = copy_token(c_tok);
+    cur = cur->next;
+    return head.next;
 }

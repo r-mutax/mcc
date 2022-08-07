@@ -41,7 +41,7 @@ struct PP_Token{
     int             len;
 
     char*           pos;
-    int             row;
+    long            row;
     SrcFile*        src;
 };
 
@@ -77,9 +77,11 @@ PP_Token* preprocess(PP_Token* tok);
 
 // file io
 char* read_file(char* path);
+char* get_filename(SrcFile* src_file);
 
 // errormsg
 void error(char *fmt, ...);
+void error_at(PP_Token* tok, char *msg);
 
 // utility
 char* strdup(char* src);

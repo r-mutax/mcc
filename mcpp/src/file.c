@@ -37,3 +37,8 @@ static int get_file_size(char* path){
     fclose(fp);
     return size;
 }
+
+char* get_filename(SrcFile* src_file){
+    char* yen_pos = strrchr(src_file->path, '/');
+    return strndup(yen_pos + 1, strlen(src_file->path) + (yen_pos - src_file->path) - 1);
+}
