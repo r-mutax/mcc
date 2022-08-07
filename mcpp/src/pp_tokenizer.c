@@ -23,7 +23,7 @@ PP_Token* ptk_tokenize_file(char* path){
 
     PP_Token* tok = ptk_tokenize(cur_file->input_data);
 
-    return NULL;
+    return tok;
 }
 
 static PP_Token* ptk_tokenize(char* p){
@@ -185,6 +185,9 @@ static PP_Token* ptk_tokenize(char* p){
 
         error("find cannnot tokenize words.\n");
     }
+
+    cur = new_token(PTK_EOF, cur, p, 0);
+
     return head.next;
 }
 

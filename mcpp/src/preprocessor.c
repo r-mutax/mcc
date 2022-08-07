@@ -50,6 +50,8 @@ PP_Token* preprocess(PP_Token* tok){
         } else {
             // replace token
         }
+
+        cur = cur->next;
     } while(cur->kind != PTK_EOF);
 
     return NULL;
@@ -72,25 +74,25 @@ static PP_KIND get_preprocess_kind(PP_Token* token){
     }
 
     PP_KIND kind = PP_NONE;
-    if(equal_token("include", token)){
+    if(equal_token("include", target)){
         kind = PP_INCLUDE;
-    } else if(equal_token("if", token)){
+    } else if(equal_token("if", target)){
         kind = PP_IF;
-    } else if(equal_token("ifdef", token)){
+    } else if(equal_token("ifdef", target)){
         kind = PP_IFDEF;
-    } else if(equal_token("ifndef", token)){
+    } else if(equal_token("ifndef", target)){
         kind = PP_IFNDEF;
-    } else if(equal_token("else", token)){
+    } else if(equal_token("else", target)){
         kind = PP_ELSE;
-    } else if(equal_token("endif", token)){
+    } else if(equal_token("endif", target)){
         kind = PP_ENDIF;
-    } else if(equal_token("error", token)){
+    } else if(equal_token("error", target)){
         kind = PP_ERROR;
-    } else if(equal_token("define", token)){
+    } else if(equal_token("define", target)){
         kind = PP_DEFINE;
-    } else if(equal_token("defined", token)){
+    } else if(equal_token("defined", target)){
         kind = PP_DEFINED;
-    } else if(equal_token("undef", token)){
+    } else if(equal_token("undef", target)){
         kind = PP_UNDEF;
     }
 
@@ -113,12 +115,12 @@ static Macro* find_macro(PP_Token* tok, Macro* mac){
 static void add_macro(PP_Token* tok){
 
     // skip to macro def
-    tok = tok->next;
-    tok = tok->kind == PTK_SPACE ? tok->next : tok;
-    tok = tok->next;
+    tok = tok->next;    // skip hash puncture
+    tok = tok->next;    // skip "define"
+    tok = tok->kind == PTK_SPACE ? tok->next : tok;     // skip space
 
     if(tok->kind != PTK_IDENT){
-        error_at(tok, "[error] Expect identify token.");
+        error_at(tok, "[error] Expect identity token.");
     }
 
     if(is_funclike_macro(tok)){

@@ -8,6 +8,7 @@ test/test_func/*.o
 test/a.out
 test/test.s
 test/tt.c
+test/mcpp/output.inc
 stdlib/asm/*
 stdlib/load/*
 mcpp/load/*

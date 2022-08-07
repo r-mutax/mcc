@@ -11,6 +11,8 @@ OBJDIR			= $(CUR_MCPP_DIR)/load
 OBJECTS			= $(addprefix $(OBJDIR)/,$(notdir $(SOURCES:.c=.o)))
 DEPENDS			= $(OBJECTS:.o=.d)
 
+TEST_DIR		= $(CUR_MCPP_DIR)/../test/mcpp
+
 
 $(TARGET) : $(OBJECTS)
 	-mkdir -p $(TARGETDIR)
@@ -19,6 +21,9 @@ $(TARGET) : $(OBJECTS)
 $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	-mkdir -p $(OBJDIR)
 	$(COMPILER) $(CFLAGS) $(INCDIR) -o $@ -c $<
+
+test:$(TARGET)
+	$(TARGETDIR)/$(TARGET) $(TEST_DIR)/tst_preprocess.inc > $(TEST_DIR)/output.inc
 
 clean:
 	-rm -f $(OBJECTS) $(DEPENDS) $(TARGET)
