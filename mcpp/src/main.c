@@ -12,5 +12,7 @@ int main(int argc, char** argv){
     PP_Token* tok = ptk_tokenize_file(src_path);
     tok = preprocess(tok);
 
+    print_token(tok);
+
     return 0;
 }

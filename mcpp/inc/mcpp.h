@@ -87,4 +87,7 @@ void error_at(PP_Token* tok, char *msg);
 char* strdup(char* src);
 char* strndup(char* src, size_t n);
 
+// dbeug
+void print_token(PP_Token* tok);
+
 #endif

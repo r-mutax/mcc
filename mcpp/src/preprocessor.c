@@ -9,10 +9,13 @@ static void add_macro(PP_Token* tok);
 static bool is_funclike_macro(PP_Token* tok);
 static void add_macro_objlike(PP_Token* tok);
 static Macro* find_macro(PP_Token* tok, Macro* mac);
-
+static PP_Token* replace_token(PP_Token* target, Macro* mac, Macro* list);
+static bool is_expanded(PP_Token* tok, Macro* list);
 
 static bool equal_token(const char* word, PP_Token* target);
 static PP_Token* get_next_newline(PP_Token* tok);
+static Macro* copy_macro(Macro* mac);
+static PP_Token* copy_token_list(PP_Token* tok);
 static PP_Token* copy_token(PP_Token* tok);
 static PP_Token* copy_token_eol(PP_Token* tok);
 
@@ -49,12 +52,16 @@ PP_Token* preprocess(PP_Token* tok){
             }
         } else {
             // replace token
+            Macro* mac = find_macro(target, macro);
+            if(mac){
+                cur->next = replace_token(target, mac, NULL);
+            }
         }
 
         cur = cur->next;
     } while(cur->kind != PTK_EOF);
 
-    return NULL;
+    return head.next;
 }
 
 static bool equal_token(const char* word, PP_Token* target){
@@ -142,7 +149,79 @@ static void add_macro_objlike(PP_Token* tok){
     Macro* mac = calloc(1, sizeof(Macro));
 
     mac->def = copy_token(tok);
+    tok = tok->next->next;
     mac->val = copy_token_eol(tok);
+
+    mac->next = macro;
+    macro = mac;
+}
+
+static PP_Token* replace_token(PP_Token* tok, Macro* mac, Macro* list){
+
+    // add expand list
+    if(!list){
+        list = copy_macro(mac);
+    } else {
+        list->next = copy_macro(mac);
+    }
+
+    // get macro value.
+    PP_Token* val = NULL;
+    PP_Token* to_tok = NULL;
+    if(mac->is_func){
+        // TODO : expand funclike macro.
+    } else {
+        val = copy_token_list(mac->val);
+        to_tok = tok->next;
+    }
+
+    // expand macro to macro value.
+    PP_Token head;
+    head.next = val;
+    PP_Token* cur = &head;
+    while(cur->next){
+        PP_Token* target = cur->next;
+
+        if(is_expanded(target, list)){
+            // "target" is expanded macro, skip expanding macro.
+            cur = cur->next;
+            continue;
+        }
+
+        Macro* m = find_macro(target, macro);
+        if(m){
+            cur->next = replace_token(target, m, list);
+        }
+        cur = cur->next;
+    }
+
+    // connect token
+    cur = val;
+    while(cur->next){
+        cur = cur->next;
+    }
+
+    cur->next = to_tok;
+
+    return val;
+
+}
+
+static bool is_expanded(PP_Token* tok, Macro* list){
+
+    if(tok->kind != PTK_IDENT){
+        return false;
+    }
+
+    Macro* cur = list;
+    while(cur){
+        if(equal_token(tok->str, cur->def)){
+            return true;
+        }
+        cur = cur->next;
+    }
+
+    return false;
 }
 
 static PP_Token* get_next_newline(PP_Token* tok){
@@ -154,6 +233,26 @@ static PP_Token* get_next_newline(PP_Token* tok){
         tok = tok->next;
     }
     return tok;
+}
+
+static Macro* copy_macro(Macro* mac){
+    Macro* ret = calloc(1, sizeof(Macro));
+    memcpy(ret, mac, sizeof(Macro));
+    ret->next = NULL;
+    
+    return ret;
+}
+
+static PP_Token* copy_token_list(PP_Token* tok){
+    PP_Token head;
+    PP_Token* cur = &head;
+    while(tok){
+        cur->next = copy_token(tok);
+        cur = cur->next;
+        tok = tok->next;
+    }
+
+    return head.next;
 }
 
 static PP_Token* copy_token(PP_Token* src){
@@ -174,7 +273,6 @@ static PP_Token* copy_token_eol(PP_Token* tok){
         c_tok = c_tok->next;
     }
 
-    cur->next = copy_token(c_tok);
-    cur = cur->next;
     return head.next;
 }
+
