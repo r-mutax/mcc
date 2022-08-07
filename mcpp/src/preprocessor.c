@@ -12,12 +12,16 @@ static Macro* find_macro(PP_Token* tok, Macro* mac);
 static PP_Token* replace_token(PP_Token* target, Macro* mac, Macro* list);
 static bool is_expanded(PP_Token* tok, Macro* list);
 
+// error directive
+static char* make_errormsg(PP_Token* target);
+
 static bool equal_token(const char* word, PP_Token* target);
 static PP_Token* get_next_newline(PP_Token* tok);
 static Macro* copy_macro(Macro* mac);
 static PP_Token* copy_token_list(PP_Token* tok);
 static PP_Token* copy_token(PP_Token* tok);
 static PP_Token* copy_token_eol(PP_Token* tok);
+static PP_Token* get_directive_value(PP_Token* hash);
 
 // preprocess exchange 
 PP_Token* preprocess(PP_Token* tok){
@@ -39,7 +43,11 @@ PP_Token* preprocess(PP_Token* tok){
                 case PP_IFNDEF:
                     break;
                 case PP_ERROR:
+                {
+                    char* msg = make_errormsg(target);
+                    error(msg);
                     break;
+                }
                 case PP_DEFINE:
                     add_macro(target);
                     cur->next = get_next_newline(target);
@@ -121,10 +129,7 @@ static Macro* find_macro(PP_Token* tok, Macro* mac){
 
 static void add_macro(PP_Token* tok){
 
-    // skip to macro def
-    tok = tok->next;    // skip hash puncture
-    tok = tok->next;    // skip "define"
-    tok = tok->kind == PTK_SPACE ? tok->next : tok;     // skip space
+    tok = get_directive_value(tok);
 
     if(tok->kind != PTK_IDENT){
         error_at(tok, "[error] Expect identity token.");
@@ -276,3 +281,34 @@ static PP_Token* copy_token_eol(PP_Token* tok){
     return head.next;
 }
 
+static char* make_errormsg(PP_Token* target){
+
+    target = get_directive_value(target);
+
+    int len = 0;
+    char* start = target->pos;
+    while(target){
+        if (target->kind == PTK_NEWLINE){
+            break;
+        }
+        len += target->len;
+        target = target->next;
+    }
+
+    char* msg = calloc(1, len);
+    strncpy(msg, start, len);
+
+    return msg;
+}
+
+static PP_Token* get_directive_value(PP_Token* hash){
+
+    PP_Token* target = hash;
+
+    target = target->next;  // hash -> directive
+    target = target->kind == PTK_SPACE ? target->next : target;
+    target = target->next;  // directive -> space
+    target = target->next;
+
+    return target;
+}

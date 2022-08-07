@@ -59,10 +59,11 @@ static PP_Token* ptk_tokenize(char* p){
         }
 
         if(isspace(*p)){
-            cur = new_token(PTK_SPACE, cur, p, 1);
+            char* start = p;
             do { 
                 p++;
             } while(isspace(*p));
+            cur = new_token(PTK_SPACE, cur, start, p - start);
             continue;
         }
 
