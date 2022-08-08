@@ -2,7 +2,8 @@
 
 static Macro* macro;
 
-static PP_KIND get_preprocess_kind(PP_Token* token);
+// if-group section
+static PP_Token* read_if_section(PP_Token* tok);
 
 // macro definition
 static void add_macro(PP_Token* tok);
@@ -11,11 +12,15 @@ static void add_macro_objlike(PP_Token* tok);
 static Macro* find_macro(PP_Token* tok, Macro* mac);
 static PP_Token* replace_token(PP_Token* target, Macro* mac, Macro* list);
 static bool is_expanded(PP_Token* tok, Macro* list);
+
+// undef ddirective
 static void del_macro(PP_Token* tok);
 
 // error directive
 static char* make_errormsg(PP_Token* target);
 
+// utilityies
+static PP_KIND get_preprocess_kind(PP_Token* token);
 static bool equal_token(const char* word, PP_Token* target);
 static PP_Token* get_next_newline(PP_Token* tok);
 static Macro* copy_macro(Macro* mac);
@@ -23,6 +28,7 @@ static PP_Token* copy_token_list(PP_Token* tok);
 static PP_Token* copy_token(PP_Token* tok);
 static PP_Token* copy_token_eol(PP_Token* tok);
 static PP_Token* get_directive_value(PP_Token* hash);
+static PP_Token* get_endif(PP_Token* tok);
 
 // preprocess exchange 
 PP_Token* preprocess(PP_Token* tok){
@@ -42,21 +48,22 @@ PP_Token* preprocess(PP_Token* tok){
                 case PP_IF:
                 case PP_IFDEF:
                 case PP_IFNDEF:
-                    break;
+                    cur->next = read_if_section(target);
+                    continue;
                 case PP_ERROR:
                 {
                     char* msg = make_errormsg(target);
                     error(msg);
-                    break;
+                    continue;
                 }
                 case PP_DEFINE:
                     add_macro(target);
                     cur->next = get_next_newline(target);
-                    break;
+                    continue;
                 case PP_UNDEF:
                     del_macro(target);
                     cur->next = get_next_newline(target);
-                    break;
+                    continue;
                 default:
                     error("unexpected preprocessor directive.\n");
                     break;
@@ -100,6 +107,8 @@ static PP_KIND get_preprocess_kind(PP_Token* token){
         kind = PP_IFDEF;
     } else if(equal_token("ifndef", target)){
         kind = PP_IFNDEF;
+    } else if(equal_token("elif", target)){
+        kind = PP_ELIF;
     } else if(equal_token("else", target)){
         kind = PP_ELSE;
     } else if(equal_token("endif", target)){
@@ -333,4 +342,89 @@ static PP_Token* get_directive_value(PP_Token* hash){
     target = target->next;
 
     return target;
+}
+
+static PP_Token* read_if_section(PP_Token* tok){
+
+    IF_SECTION_GROUP if_head;
+    IF_SECTION_GROUP* if_group = &if_head;
+    if_group = if_group->next = calloc(1, sizeof(IF_SECTION_GROUP));
+    if_group->cond = get_directive_value(tok)->val;
+    if_group->head = get_next_newline(tok)->next;
+
+    PP_Token head;
+    head.next = if_group->head;
+    PP_Token* cur = &head;
+    PP_Token* endpos = NULL;
+    while(cur){
+        PP_Token* target = cur->next;
+        bool exit_flg = false;
+
+        if(target->kind == PTK_HASH){
+            switch(get_preprocess_kind(target)){
+                case PP_IF:
+                case PP_IFDEF:
+                case PP_IFNDEF:
+                    cur = get_endif(get_next_newline(target));
+                    cur = get_next_newline(cur);
+                    continue;
+                case PP_ELIF:
+                    break;
+                case PP_ELSE:
+                    if_group->tail = cur;
+
+                    if_group = if_group->next = calloc(1, sizeof(IF_SECTION_GROUP));
+                    if_group->cond = 1;
+                    if_group->head = get_next_newline(target)->next;
+                    break;
+                case PP_ENDIF:
+                    if_group->tail = cur;
+                    exit_flg = true;
+                    endpos = target;
+                    break;
+            }
+        }
+
+        if(exit_flg){
+            break;
+        }
+        cur = cur->next;
+    }
+
+    IF_SECTION_GROUP* ret = NULL;
+    for(IF_SECTION_GROUP* cur = if_head.next; cur; cur = cur->next){
+        if(cur->cond){
+            ret = cur;
+            ret->tail->next = get_next_newline(endpos);
+            return ret->head;
+        }
+    }
+    
+    return get_next_newline(endpos);
+}
+
+static PP_Token* get_endif(PP_Token* tok){
+
+    PP_Token head;
+    PP_Token* cur = &head;
+    head.next = tok->next;
+
+    while(cur){
+        PP_Token* target = cur->next;
+        if(target->kind == PTK_HASH){
+            switch(get_preprocess_kind(target)){
+                case PP_ENDIF:
+                    return target;
+                case PP_IF:
+                case PP_IFDEF:
+                case PP_IFNDEF:
+                    cur = get_endif(cur);
+                    break;
+            }
+        } else if(target->kind == PTK_EOF) {
+            error_at(tok, "[error] reach EOF before find #endif.\n");
+        }
+
+        cur = cur->next;
+    }
 }

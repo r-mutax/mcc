@@ -12,6 +12,7 @@
 typedef struct SrcFile SrcFile;
 typedef struct PP_Token PP_Token;
 typedef struct Macro Macro;
+typedef struct IF_SECTION_GROUP IF_SECTION_GROUP;
 
 struct SrcFile{
     char* path;
@@ -51,6 +52,7 @@ typedef enum {
     PP_IF,
     PP_IFDEF,
     PP_IFNDEF,
+    PP_ELIF,
     PP_ELSE,
     PP_ENDIF,
     PP_ERROR,
@@ -59,7 +61,7 @@ typedef enum {
     PP_UNDEF
 } PP_KIND;
 
-struct Macro{
+struct Macro {
     PP_Token* def;
     PP_Token* val;
     PP_Token* param;
@@ -67,10 +69,18 @@ struct Macro{
     Macro* next;
 };
 
+struct IF_SECTION_GROUP {
+    int cond;
+    PP_Token* head;
+    PP_Token* tail;
+    IF_SECTION_GROUP* next;
+};
+
 // -----------------------------------------------------------------
 
 // tokenizer
 PP_Token* ptk_tokenize_file(char* path);
+PP_Token* new_token(PP_TokenKind kind, PP_Token* cur, char* str, int len);
 
 // preprocessor
 PP_Token* preprocess(PP_Token* tok);

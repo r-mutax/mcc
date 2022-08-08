@@ -6,7 +6,6 @@ unsigned long row = 0;
 
 static PP_Token* ptk_tokenize(char* path);
 static bool startswith(char* lhs, char* rhs);
-static PP_Token* new_token(PP_TokenKind kind, PP_Token* cur, char* str, int len);
 static bool check_keyword(char* keyword, char** p, PP_Token** tok, PP_TokenKind kind);
 static bool is_keyword(char* lhs, char* rhs);
 static bool is_ident1(char p);
@@ -192,7 +191,7 @@ static PP_Token* ptk_tokenize(char* p){
     return head.next;
 }
 
-static PP_Token* new_token(PP_TokenKind kind, PP_Token* cur, char* str, int len){
+PP_Token* new_token(PP_TokenKind kind, PP_Token* cur, char* str, int len){
     PP_Token* tok = calloc(1, sizeof(PP_Token));
     tok->kind = kind;
     tok->str = strndup(str, len);
