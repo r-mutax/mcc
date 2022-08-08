@@ -4,6 +4,7 @@ static Macro* macro;
 
 // if-group section
 static PP_Token* read_if_section(PP_Token* tok);
+static bool analyze_if_condition(PP_Token* hash);
 
 // macro definition
 static void add_macro(PP_Token* tok);
@@ -349,7 +350,7 @@ static PP_Token* read_if_section(PP_Token* tok){
     IF_SECTION_GROUP if_head;
     IF_SECTION_GROUP* if_group = &if_head;
     if_group = if_group->next = calloc(1, sizeof(IF_SECTION_GROUP));
-    if_group->cond = get_directive_value(tok)->val;
+    if_group->cond = analyze_if_condition(tok);
     if_group->head = get_next_newline(tok)->next;
 
     PP_Token head;
@@ -371,7 +372,7 @@ static PP_Token* read_if_section(PP_Token* tok){
                 case PP_ELIF:
                     if_group->tail = cur;
                     if_group = if_group->next = calloc(1, sizeof(IF_SECTION_GROUP));
-                    if_group->cond = get_directive_value(target)->val;
+                    if_group->cond = analyze_if_condition(target);
                     if_group->head = get_next_newline(target)->next;
                     break;
                 case PP_ELSE:
@@ -431,4 +432,23 @@ static PP_Token* get_endif(PP_Token* tok){
 
         cur = cur->next;
     }
+}
+
+static bool analyze_if_condition(PP_Token* hash){
+
+    switch(get_preprocess_kind(hash)){
+        case PP_IF:
+            return get_directive_value(hash)->val;
+        case PP_IFDEF:
+            if(find_macro(get_directive_value(hash), macro)){
+                return 1;
+            }
+        case PP_IFNDEF:
+            if(!find_macro(get_directive_value(hash), macro)){
+                return 1;
+            }
+        case PP_ELIF:
+            return get_directive_value(hash)->val;
+    }
+    return 0;
 }

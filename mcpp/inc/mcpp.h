@@ -70,7 +70,7 @@ struct Macro {
 };
 
 struct IF_SECTION_GROUP {
-    int cond;
+    bool cond;
     PP_Token* head;
     PP_Token* tail;
     IF_SECTION_GROUP* next;

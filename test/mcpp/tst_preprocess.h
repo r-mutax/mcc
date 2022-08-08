@@ -1,6 +1,20 @@
 #define TST_PREPROCESS_INC_H OK_TEST_DEFINE
 int OK_TEST_DEFINE;
 
+// test ifdef directive.
+#ifdef TST_PREPROCESS_INC_H
+int OK_TEST_IFDEF_DIRECTIVE;
+#else
+int NG_TEST_IFDEF_DIRECTIVE;
+#endif
+
+// test ifndef directive.
+#ifndef IFNDEF_TEST_DEFINE
+int OK_TEST_IFNDEF_DIRECTIVE;
+#else
+int NG_TEST_IFNDEF_DIRECTIVE;
+#endif
+
 // test #undef directive.
 #undef TST_PREPROCESS_INC_H
 int TST_PREPROCESS_INC_H;
