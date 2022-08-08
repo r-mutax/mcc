@@ -23,8 +23,8 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(COMPILER) $(CFLAGS) $(INCDIR) -o $@ -c $<
 
 test:$(TARGET)
-	$(TARGETDIR)/$(TARGET) $(TEST_DIR)/tst_preprocess.inc > $(TEST_DIR)/output.inc
-	diff -B $(TEST_DIR)/correct_output.inc $(TEST_DIR)/output.inc
+	$(TARGETDIR)/$(TARGET) $(TEST_DIR)/tst_preprocess.h > $(TEST_DIR)/output.h
+	diff -B $(TEST_DIR)/correct_output.h $(TEST_DIR)/output.h
 
 clean:
 	-rm -f $(OBJECTS) $(DEPENDS) $(TARGET)

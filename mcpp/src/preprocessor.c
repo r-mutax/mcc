@@ -369,6 +369,10 @@ static PP_Token* read_if_section(PP_Token* tok){
                     cur = get_next_newline(cur);
                     continue;
                 case PP_ELIF:
+                    if_group->tail = cur;
+                    if_group = if_group->next = calloc(1, sizeof(IF_SECTION_GROUP));
+                    if_group->cond = get_directive_value(target)->val;
+                    if_group->head = get_next_newline(target)->next;
                     break;
                 case PP_ELSE:
                     if_group->tail = cur;

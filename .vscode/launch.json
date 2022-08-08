@@ -42,7 +42,7 @@
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:extension.vscode-wsl-workspaceFolder}/bin/mcpp",
-            "args": ["/mnt/c/source/mcc/test/mcpp/tst_preprocess.inc"],
+            "args": ["/mnt/c/source/mcc/test/mcpp/tst_preprocess.h"],
             "stopAtEntry": false,
             "cwd": "${command:extension.vscode-wsl-workspaceFolder}/bin",
             "environment": [],
