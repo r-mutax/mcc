@@ -11,6 +11,7 @@ static void add_macro_objlike(PP_Token* tok);
 static Macro* find_macro(PP_Token* tok, Macro* mac);
 static PP_Token* replace_token(PP_Token* target, Macro* mac, Macro* list);
 static bool is_expanded(PP_Token* tok, Macro* list);
+static void del_macro(PP_Token* tok);
 
 // error directive
 static char* make_errormsg(PP_Token* target);
@@ -53,6 +54,8 @@ PP_Token* preprocess(PP_Token* tok){
                     cur->next = get_next_newline(target);
                     break;
                 case PP_UNDEF:
+                    del_macro(target);
+                    cur->next = get_next_newline(target);
                     break;
                 default:
                     error("unexpected preprocessor directive.\n");
@@ -246,6 +249,25 @@ static Macro* copy_macro(Macro* mac){
     ret->next = NULL;
     
     return ret;
+}
+
+static void del_macro(PP_Token* tok){
+
+    tok = get_directive_value(tok);
+
+    Macro head;
+    head.next = macro;
+    Macro* cur = &head;
+    while(cur){
+        Macro* target = cur->next;
+        if(equal_token(tok->str, target->def)){
+            cur->next = target->next;
+            free(target);
+            break;
+        }
+        cur = cur->next;
+    }
+    macro = head.next;
 }
 
 static PP_Token* copy_token_list(PP_Token* tok){
