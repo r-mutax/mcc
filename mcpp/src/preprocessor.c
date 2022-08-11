@@ -6,7 +6,7 @@ static Macro* macro;
 static PP_Token* read_if_section(PP_Token* tok);
 static bool analyze_if_condition(PP_Token* hash);
 static int evaluate_expr(PP_Token* tok);
-//static PP_Token* expand_defined(PP_Token* tok);
+static PP_Token* expand_defined(PP_Token* tok);
 
 
 // macro definition
@@ -33,6 +33,7 @@ static PP_Token* copy_token(PP_Token* tok);
 static PP_Token* copy_token_eol(PP_Token* tok);
 static PP_Token* get_directive_value(PP_Token* hash);
 static PP_Token* get_endif(PP_Token* tok);
+static PP_Token* get_next(PP_Token* tok);
 
 // preprocess exchange 
 PP_Token* preprocess(PP_Token* tok){
@@ -437,6 +438,14 @@ static PP_Token* get_endif(PP_Token* tok){
     }
 }
 
+static PP_Token* get_next(PP_Token* tok){
+    tok = tok->next;
+    if(tok->kind == PTK_SPACE){
+        tok = tok->next;
+    }
+    return tok;
+}
+
 static bool analyze_if_condition(PP_Token* hash){
 
     PP_Token* val = get_directive_value(hash);
@@ -458,5 +467,43 @@ static bool analyze_if_condition(PP_Token* hash){
 }
 
 static int evaluate_expr(PP_Token* tok){
+    tok = expand_defined(tok);
     return constant_expr(tok);
+}
+
+static PP_Token* expand_defined(PP_Token* tok){
+    PP_Token head;
+    PP_Token* cur = &head;
+    head.next = tok;
+    while(get_next(cur)->kind != PTK_NEWLINE){
+        PP_Token* target = get_next(cur);
+        
+        if(equal_token("defined", target)){
+            PP_Token* ident;
+            target = get_next(target);
+
+            if(equal_token("(", target)){
+                ident = target = get_next(target);
+                target = get_next(target);
+                if(!equal_token(")", target)){
+                    error_at(tok, "Expect ')' token.\n");
+                }
+            } else {
+                ident = target;
+            }
+            target = get_next(target);
+
+            PP_Token* val = calloc(1, sizeof(PP_Token));
+            val->kind = PTK_NUM;
+            val->val = find_macro(ident, macro) ? 1 : 0;
+
+            cur->next = val;
+            val->next = target;
+            cur = target;
+        } else {
+
+            cur = get_next(cur);
+        }
+    }
+    return head.next;
 }

@@ -89,3 +89,12 @@ int NG_TEST_IF_EXPR_bitAnd_bitXor_bitOr;
 #if (3 == 3 && 4 != 4 ? 3 : 9) - 9
 int NG_TEST_IF_EXPR_Condition_Expr;
 #endif
+
+#define TEST_DEF 1
+#if defined ( TEST_DEF ) - 1
+int NG_TEST_IF_EXPR_defined_val;
+#endif
+
+#if ! defined TEST_DEF
+int NG_TEST_IF_EXPR_defined;
+#endif
