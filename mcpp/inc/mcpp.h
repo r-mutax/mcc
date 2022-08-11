@@ -100,4 +100,7 @@ char* strndup(char* src, size_t n);
 // dbeug
 void print_token(PP_Token* tok);
 
+// evaluate expr
+int constant_expr(PP_Token* tok);
+
 #endif

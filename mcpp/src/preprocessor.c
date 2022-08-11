@@ -5,6 +5,9 @@ static Macro* macro;
 // if-group section
 static PP_Token* read_if_section(PP_Token* tok);
 static bool analyze_if_condition(PP_Token* hash);
+static int evaluate_expr(PP_Token* tok);
+//static PP_Token* expand_defined(PP_Token* tok);
+
 
 // macro definition
 static void add_macro(PP_Token* tok);
@@ -436,19 +439,24 @@ static PP_Token* get_endif(PP_Token* tok){
 
 static bool analyze_if_condition(PP_Token* hash){
 
+    PP_Token* val = get_directive_value(hash);
     switch(get_preprocess_kind(hash)){
         case PP_IF:
-            return get_directive_value(hash)->val;
+            return evaluate_expr(val);
         case PP_IFDEF:
-            if(find_macro(get_directive_value(hash), macro)){
+            if(find_macro(val, macro)){
                 return 1;
             }
         case PP_IFNDEF:
-            if(!find_macro(get_directive_value(hash), macro)){
+            if(!find_macro(val, macro)){
                 return 1;
             }
         case PP_ELIF:
-            return get_directive_value(hash)->val;
+            return evaluate_expr(val);
     }
     return 0;
+}
+
+static int evaluate_expr(PP_Token* tok){
+    return constant_expr(tok);
 }

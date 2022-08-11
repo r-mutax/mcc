@@ -41,4 +41,51 @@ int NG_TEST_IF_ELIF_ENDIF;
 int OK_TEST_IF_ELIF_ENDIF;
 #endif
 
-// #error this is error.
+// test #if directive expression
+#if (2 * 3 - 6)
+int NG_TEST_IF_EXPR_Multiple;
+#endif
+
+#if (4 / 2 + 4) - 6
+int NG_TEST_IF_EXPR_Division;
+#endif
+
+#if (5 % 3 + 1) - 3
+int NG_TEST_IF_EXPR_Mod;
+#endif
+
+#if (1 << 3 + 2) - 32
+int NG_TEST_IF_EXPR_RightBitShift;
+#endif
+
+#if (8 >> 3 - 2) - 4
+int NG_TEST_IF_EXPR_LeftBitShift;
+#endif
+
+#if (7 < 4 << 1) - 1
+int NG_TEST_IF_EXPR_Less_Than;
+#endif
+
+#if (2 <= 8 >> 2) - 1
+int NG_TEST_IF_EXPR_Less_Equal;
+#endif
+
+#if (17 > 4 << 2) - 1
+int NG_TEST_IF_EXPR_Greater_than;
+#endif
+
+#if (1 >= 4 >> 2) - 1
+int NG_TEST_IF_EXPR_Greater_Equal;
+#endif
+
+#if (1 == 2 > 0 != 2) - 1
+int NG_TEST_IF_EXPR_Equal_and_NotEqual;
+#endif
+
+#if (2 & 5 ^ 3 | 9) - 11
+int NG_TEST_IF_EXPR_bitAnd_bitXor_bitOr;
+#endif
+
+#if (3 == 3 && 4 != 4 ? 3 : 9) - 9
+int NG_TEST_IF_EXPR_Condition_Expr;
+#endif
