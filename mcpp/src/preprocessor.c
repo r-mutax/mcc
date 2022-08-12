@@ -7,6 +7,7 @@ static PP_Token* read_if_section(PP_Token* tok);
 static bool analyze_if_condition(PP_Token* hash);
 static int evaluate_expr(PP_Token* tok);
 static PP_Token* expand_defined(PP_Token* tok);
+static PP_Token* expand_macros(PP_Token* tok);
 
 
 // macro definition
@@ -581,6 +582,7 @@ static bool analyze_if_condition(PP_Token* hash){
 
 static int evaluate_expr(PP_Token* tok){
     tok = expand_defined(tok);
+    tok = expand_macros(tok);
     return constant_expr(tok);
 }
 
@@ -617,6 +619,22 @@ static PP_Token* expand_defined(PP_Token* tok){
 
             cur = get_next(cur);
         }
+    }
+    return head.next;
+}
+
+static PP_Token* expand_macros(PP_Token* tok){
+    PP_Token head;
+    PP_Token* cur = &head;
+    head.next = tok;
+
+    while(get_next(cur)->kind != PTK_NEWLINE){
+        PP_Token* target = get_next(cur);
+        Macro* mac = find_macro(target, macro);
+        if(mac){
+            cur->next = replace_token(target, mac, NULL);
+        }
+        cur = get_next(cur);
     }
     return head.next;
 }

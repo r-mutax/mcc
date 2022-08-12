@@ -99,6 +99,10 @@ int NG_TEST_IF_EXPR_defined_val;
 int NG_TEST_IF_EXPR_defined;
 #endif
 
-#define add(a, b) a + b
+#if TEST_DEF - 1
+int NG_TEST_EXPR_use objlike macro.
+#endif
 
+// test funclike macros.
+#define add(a, b) a + b
 int TEST_FUNCLIKE_MACRO = add(3, 5);
