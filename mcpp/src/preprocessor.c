@@ -13,9 +13,12 @@ static PP_Token* expand_defined(PP_Token* tok);
 static void add_macro(PP_Token* tok);
 static bool is_funclike_macro(PP_Token* tok);
 static void add_macro_objlike(PP_Token* tok);
+static void add_macro_funclike(PP_Token* tok);
 static Macro* find_macro(PP_Token* tok, Macro* mac);
 static PP_Token* replace_token(PP_Token* target, Macro* mac, Macro* list);
 static bool is_expanded(PP_Token* tok, Macro* list);
+static PP_Token* expand_funclike_macro(PP_Token* target, Macro* mac, PP_Token** to_tok);
+static Macro* make_param_list(PP_Token* target, Macro* mac, PP_Token** to_tok);
 
 // undef ddirective
 static void del_macro(PP_Token* tok);
@@ -26,6 +29,7 @@ static char* make_errormsg(PP_Token* target);
 // utilityies
 static PP_KIND get_preprocess_kind(PP_Token* token);
 static bool equal_token(const char* word, PP_Token* target);
+static PP_Token* expect_token(const char* word, PP_Token* target, PP_TokenKind kind);
 static PP_Token* get_next_newline(PP_Token* tok);
 static Macro* copy_macro(Macro* mac);
 static PP_Token* copy_token_list(PP_Token* tok);
@@ -96,6 +100,15 @@ static bool equal_token(const char* word, PP_Token* target){
     return false;
 }
 
+static PP_Token* expect_token(const char* word, PP_Token* target, PP_TokenKind kind){
+    if((target->kind != kind)
+        || !equal_token(word, target)){
+        error_at(target, "[error] No expected token.\n");
+    }
+
+    return get_next(target);
+}
+
 static PP_KIND get_preprocess_kind(PP_Token* token){
 
     PP_Token* target = token->next;
@@ -153,7 +166,7 @@ static void add_macro(PP_Token* tok){
     }
 
     if(is_funclike_macro(tok)){
-        
+        add_macro_funclike(tok);
     } else {
         add_macro_objlike(tok);
     }
@@ -178,6 +191,46 @@ static void add_macro_objlike(PP_Token* tok){
     macro = mac;
 }
 
+static void add_macro_funclike(PP_Token* tok){
+    if(find_macro(tok, macro)){
+        error_at(tok, "[error] Redefined macro.\n");
+    }
+
+    Macro* mac = calloc(1, sizeof(Macro));
+
+    mac->def = copy_token(tok);
+    tok = get_next(tok);    // progress to '(' token.
+    tok = get_next(tok);    // progress to firs paramater token.
+
+    // read paramater.
+    PP_Token head;
+    PP_Token* cur = &head;
+    while(!equal_token(")", tok)){
+
+        // get param
+        if(tok->kind != PTK_IDENT){
+            error_at(tok, "[error] Expected identity token.\n");
+        }
+        cur = cur->next = copy_token(tok);
+
+        // check
+        tok = get_next(tok);
+        if(equal_token(")", tok)){
+            break;
+        }
+        tok = expect_token(",", tok, PTK_OPERAND);
+    }
+
+    tok = get_next(tok);
+
+    mac->param = head.next;
+    mac->val = copy_token_eol(tok);
+    mac->is_func = true;
+
+    mac->next = macro;
+    macro = mac;
+}
+
 static PP_Token* replace_token(PP_Token* tok, Macro* mac, Macro* list){
 
     // add expand list
@@ -191,7 +244,7 @@ static PP_Token* replace_token(PP_Token* tok, Macro* mac, Macro* list){
     PP_Token* val = NULL;
     PP_Token* to_tok = NULL;
     if(mac->is_func){
-        // TODO : expand funclike macro.
+        val = expand_funclike_macro(tok, mac, &to_tok);
     } else {
         val = copy_token_list(mac->val);
         to_tok = tok->next;
@@ -244,6 +297,63 @@ static bool is_expanded(PP_Token* tok, Macro* list){
     }
 
     return false;
+}
+
+static PP_Token* expand_funclike_macro(PP_Token* target, Macro* mac, PP_Token** to_tok){
+    Macro* param_list = make_param_list(target, mac, to_tok);
+
+    PP_Token head;
+    head.next = mac->val;
+    PP_Token* cur = &head;
+    while(cur->next){
+        PP_Token* tok = get_next(cur);
+
+        Macro* m = find_macro(tok, param_list);
+        if(m){
+            cur->next = copy_token(m->val);
+            cur->next->next = get_next(tok);
+        }
+        cur = get_next(cur);
+    }
+
+    return head.next;
+}
+
+static Macro* make_param_list(PP_Token* target, Macro* mac, PP_Token** to_tok){
+
+    Macro head;
+    Macro* arg_list = &head;
+
+    target = get_next(target);      // ident -> '('
+    target = get_next(target);      // '(' -> first argument
+
+    PP_Token* param = mac->param;
+    while(!equal_token(")", target)){
+
+        arg_list = arg_list->next = calloc(1, sizeof(Macro));
+
+        arg_list->def = copy_token(param);
+        arg_list->val = copy_token(target);
+
+        if(arg_list->val->kind == PTK_NUM){
+            arg_list->val->str = strndup(arg_list->val->pos, arg_list->val->len);
+        }
+
+        param = get_next(param);
+        target = get_next(target);
+        if(equal_token(")", target)){
+            break;
+        }
+
+        if(!equal_token(",", target)){
+            error_at(target, "expect, operater.\n");
+        }
+        target = get_next(target);
+    }
+
+    *to_tok = get_next(target);
+
+    return head.next;
 }
 
 static PP_Token* get_next_newline(PP_Token* tok){
@@ -440,6 +550,9 @@ static PP_Token* get_endif(PP_Token* tok){
 
 static PP_Token* get_next(PP_Token* tok){
     tok = tok->next;
+    if(!tok){
+        return NULL;
+    }
     if(tok->kind == PTK_SPACE){
         tok = tok->next;
     }

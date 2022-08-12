@@ -98,3 +98,7 @@ int NG_TEST_IF_EXPR_defined_val;
 #if ! defined TEST_DEF
 int NG_TEST_IF_EXPR_defined;
 #endif
+
+#define add(a, b) a + b
+
+int TEST_FUNCLIKE_MACRO = add(3, 5);
