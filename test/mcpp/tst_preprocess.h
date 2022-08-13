@@ -5,7 +5,7 @@ int OK_TEST_DEFINE;
 #include "include_tst.h"
 
 // test std-include
-#include <string.h>
+//#include <string.h>
 
 // test ifdef directive.
 #ifdef TST_PREPROCESS_INC_H
@@ -107,6 +107,10 @@ int NG_TEST_IF_EXPR_defined;
 
 #if TEST_DEF - 1
 int NG_TEST_EXPR_use objlike macro.
+#endif
+
+#if 0xabc - 2748
+int NG_TEST_HEX_TOKEN;
 #endif
 
 // test funclike macros.
