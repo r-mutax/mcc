@@ -15,6 +15,7 @@ static PP_Token* expand_macros(PP_Token* tok);
 
 // macro definition
 static void add_macro(PP_Token* tok);
+static void add_predefined_macro(char* def);
 static bool is_funclike_macro(PP_Token* tok);
 static void add_macro_objlike(PP_Token* tok);
 static void add_macro_funclike(PP_Token* tok);
@@ -43,6 +44,12 @@ static PP_Token* get_directive_value(PP_Token* hash);
 static PP_Token* get_endif(PP_Token* tok);
 static PP_Token* get_next(PP_Token* tok);
 static PP_Token* get_before_eof(PP_Token* tok);
+
+#define PRE_MACRO___STDC_VERSION__ "#define __STDC_VERSION__ 201112"
+
+PP_Token* init_preprocess(){
+    add_predefined_macro(PRE_MACRO___STDC_VERSION__);
+}
 
 // preprocess exchange 
 PP_Token* preprocess(PP_Token* tok){
@@ -218,6 +225,11 @@ static void add_macro(PP_Token* tok){
     } else {
         add_macro_objlike(tok);
     }
+}
+
+static void add_predefined_macro(char* def){
+    PP_Token* tok = ptk_tokenize(def);
+    add_macro(tok);
 }
 
 static bool is_funclike_macro(PP_Token* tok){

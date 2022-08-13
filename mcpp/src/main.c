@@ -23,6 +23,9 @@ int main(int argc, char** argv){
     add_std_include_path(ADDITIVE_STDLIB_PATH);
     add_std_include_path(CSTDLIB_INC_PATH);
 
+    // init-preprocess
+    init_preprocess();
+
     src_path = argv[1];
     PP_Token* tok = ptk_tokenize_file(src_path);
     tok = preprocess(tok);

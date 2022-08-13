@@ -82,7 +82,8 @@ static int logicOr(){
     int ans = logicAnd();
     for(;;){
         if(consume("||")){
-            ans = ans || logicAnd();
+            int buf = logicAnd();
+            ans = ans || buf;
         } else {
             return ans;
         }
@@ -93,7 +94,8 @@ static int logicAnd(){
     int ans = bitOr();
     for(;;){
         if(consume("&&")){
-            ans = ans && bitOr();
+            int buf = bitOr();
+            ans = ans && buf;
         } else {
             return ans;
         }

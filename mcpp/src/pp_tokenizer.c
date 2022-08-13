@@ -4,7 +4,6 @@ PP_Token* token = NULL;
 SrcFile* cur_file = NULL;
 unsigned long row = 0;
 
-static PP_Token* ptk_tokenize(char* path);
 static bool startswith(char* lhs, char* rhs);
 static bool check_keyword(char* keyword, char** p, PP_Token** tok, PP_TokenKind kind);
 static bool is_keyword(char* lhs, char* rhs);
@@ -25,7 +24,7 @@ PP_Token* ptk_tokenize_file(char* path){
     return tok;
 }
 
-static PP_Token* ptk_tokenize(char* p){
+PP_Token* ptk_tokenize(char* p){
     PP_Token head;
     head.next = NULL;
     PP_Token* cur = &head;
@@ -49,11 +48,13 @@ static PP_Token* ptk_tokenize(char* p){
         // ----------------------------------
         if(startswith(p, "\\\r\n")){
             p += 3;
+            row++;
             continue;
         }
 
         if(startswith(p, "\\\n")){
             p += 2;
+            row++;
             continue;
         }
 
@@ -179,6 +180,7 @@ static PP_Token* ptk_tokenize(char* p){
             cur = new_token(PTK_NUM, cur, p, 0);
             char* q = p;
             cur->val = strtol(p, &p, 10);
+            if(*p == 'L') p++;
             cur->len = p - q;
             continue;
         }
@@ -186,6 +188,7 @@ static PP_Token* ptk_tokenize(char* p){
         error("find cannnot tokenize words.\n");
     }
 
+    cur = new_token(PTK_NEWLINE, cur, p, 0);
     cur = new_token(PTK_EOF, cur, p, 0);
 
     return head.next;

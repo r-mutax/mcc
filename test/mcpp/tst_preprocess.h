@@ -5,7 +5,7 @@ int OK_TEST_DEFINE;
 #include "include_tst.h"
 
 // test std-include
-//#include <string.h>
+#include <string.h>
 
 // test ifdef directive.
 #ifdef TST_PREPROCESS_INC_H

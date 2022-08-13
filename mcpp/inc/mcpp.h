@@ -87,9 +87,11 @@ struct IncludeDir {
 // tokenizer
 PP_Token* ptk_tokenize_file(char* path);
 PP_Token* new_token(PP_TokenKind kind, PP_Token* cur, char* str, int len);
+PP_Token* ptk_tokenize(char* path);
 
 // preprocessor
 PP_Token* preprocess(PP_Token* tok);
+PP_Token* init_preprocess();
 
 // file io
 char* read_file(char* path);
