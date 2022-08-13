@@ -1,6 +1,8 @@
 #include "mcpp.h"
 
+static IncludeDir* IncDir = NULL;
 static int get_file_size(char* path);
+static bool is_file_exist(char* path);
 
 char* read_file(char* path){
     
@@ -38,7 +40,51 @@ static int get_file_size(char* path){
     return size;
 }
 
+static bool is_file_exist(char* path){
+    FILE* fp = fopen(path, "r");
+
+    if(fp == NULL){
+        return false;
+    }
+    fclose(fp);
+    
+    return true;
+}
+
 char* get_filename(SrcFile* src_file){
     char* yen_pos = strrchr(src_file->path, '/');
     return strndup(yen_pos + 1, strlen(src_file->path) + (yen_pos - src_file->path) - 1);
+}
+
+void add_include_path(char* path){
+
+    IncludeDir* dir = calloc(1, sizeof(IncludeDir));
+    dir->dir = strdup(path);
+    
+    if(IncDir){
+        IncDir = IncDir->next = dir;
+    } else {
+        IncDir = dir;
+    }
+}
+
+char* find_include_file(char* include_name){
+    IncludeDir* cur = IncDir;
+    while(cur){
+        char path[256] = { 0 };
+        strcpy(path, cur->dir);
+        strcat(path, include_name);
+        if(is_file_exist(path)){
+            char* ret = calloc(strlen(path), sizeof(char));
+            strcpy(ret, path);
+            return ret;
+        }
+        cur = cur->next;
+    }
+    return NULL;
+}
+
+char* get_file_directory(char* filename, char* directory){
+    int len = strrchr(filename, '/') - filename + 1;
+    strncpy(directory, filename, len);
 }

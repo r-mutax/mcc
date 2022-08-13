@@ -2,13 +2,16 @@
 
 static Macro* macro;
 
+// include directive
+static PP_Token* read_include(PP_Token* hash);
+static char* get_include_filename(PP_Token* hash);
+
 // if-group section
 static PP_Token* read_if_section(PP_Token* tok);
 static bool analyze_if_condition(PP_Token* hash);
 static int evaluate_expr(PP_Token* tok);
 static PP_Token* expand_defined(PP_Token* tok);
 static PP_Token* expand_macros(PP_Token* tok);
-
 
 // macro definition
 static void add_macro(PP_Token* tok);
@@ -39,6 +42,7 @@ static PP_Token* copy_token_eol(PP_Token* tok);
 static PP_Token* get_directive_value(PP_Token* hash);
 static PP_Token* get_endif(PP_Token* tok);
 static PP_Token* get_next(PP_Token* tok);
+static PP_Token* get_before_eof(PP_Token* tok);
 
 // preprocess exchange 
 PP_Token* preprocess(PP_Token* tok){
@@ -54,6 +58,7 @@ PP_Token* preprocess(PP_Token* tok){
             
             switch(get_preprocess_kind(target)){
                 case PP_INCLUDE:
+                    cur->next = read_include(target);
                     break;
                 case PP_IF:
                 case PP_IFDEF:
@@ -90,6 +95,33 @@ PP_Token* preprocess(PP_Token* tok){
     } while(cur->kind != PTK_EOF);
 
     return head.next;
+}
+
+static PP_Token* read_include(PP_Token* hash){
+
+    PP_Token* val = get_directive_value(hash);
+    PP_Token* inc = NULL;
+
+    char* filepath = NULL;
+    if(val->kind == PTK_STRING_CONST){
+        filepath = find_include_file(val->str);
+        inc = ptk_tokenize_file(filepath);
+    }
+
+    // reconnect token
+    PP_Token* newline = get_next_newline(hash);
+    PP_Token* bef_eof = get_before_eof(inc);
+    bef_eof->next = newline->next;
+
+    return inc;
+}
+
+static char* get_include_filename(PP_Token* hash){
+    PP_Token* cur = get_directive_value(hash);
+
+    if(cur->kind == PTK_STRING_CONST){
+
+    }
 }
 
 static bool equal_token(const char* word, PP_Token* target){
@@ -558,6 +590,21 @@ static PP_Token* get_next(PP_Token* tok){
         tok = tok->next;
     }
     return tok;
+}
+
+static PP_Token* get_before_eof(PP_Token* tok){
+    PP_Token head;
+    PP_Token* cur = &head;
+    head.next = tok;
+
+    while(get_next(cur)){
+        PP_Token* target = get_next(cur);
+        if(target->kind == PTK_EOF){
+            return cur;
+        }
+        cur = get_next(cur);
+    }
+    return NULL;
 }
 
 static bool analyze_if_condition(PP_Token* hash){

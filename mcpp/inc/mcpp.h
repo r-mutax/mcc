@@ -13,6 +13,7 @@ typedef struct SrcFile SrcFile;
 typedef struct PP_Token PP_Token;
 typedef struct Macro Macro;
 typedef struct IF_SECTION_GROUP IF_SECTION_GROUP;
+typedef struct IncludeDir IncludeDir;
 
 struct SrcFile{
     char* path;
@@ -76,6 +77,11 @@ struct IF_SECTION_GROUP {
     IF_SECTION_GROUP* next;
 };
 
+struct IncludeDir {
+    char* dir;
+    IncludeDir* next;
+};
+
 // -----------------------------------------------------------------
 
 // tokenizer
@@ -88,6 +94,9 @@ PP_Token* preprocess(PP_Token* tok);
 // file io
 char* read_file(char* path);
 char* get_filename(SrcFile* src_file);
+void add_include_path(char* path);
+char* find_include_file(char* include_name);
+char* get_file_directory(char* filename, char* directory);
 
 // errormsg
 void error(char *fmt, ...);
