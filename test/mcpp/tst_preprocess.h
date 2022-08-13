@@ -4,6 +4,9 @@ int OK_TEST_DEFINE;
 // test include
 #include "include_tst.h"
 
+// test std-include
+//#include <string.h>
+
 // test ifdef directive.
 #ifdef TST_PREPROCESS_INC_H
 int OK_TEST_IFDEF_DIRECTIVE;

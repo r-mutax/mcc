@@ -95,7 +95,9 @@ PP_Token* preprocess(PP_Token* tok);
 char* read_file(char* path);
 char* get_filename(SrcFile* src_file);
 void add_include_path(char* path);
+void add_std_include_path(char* path);
 char* find_include_file(char* include_name);
+char* find_std_include_file(char* include_name);
 char* get_file_directory(char* filename, char* directory);
 
 // errormsg

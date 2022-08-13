@@ -105,7 +105,22 @@ static PP_Token* read_include(PP_Token* hash){
     char* filepath = NULL;
     if(val->kind == PTK_STRING_CONST){
         filepath = find_include_file(val->str);
+        if(!filepath){
+            filepath = find_std_include_file(val->str);
+        }
         inc = ptk_tokenize_file(filepath);
+    } else if(equal_token("<", val)){
+        char filename[256] = { 0 };
+        val = get_next(val);
+        while(!equal_token(">", val)){
+            strcat(filename, val->str);
+            val = get_next(val);
+        }
+
+        filepath = find_std_include_file(filename);
+        inc = ptk_tokenize_file(filepath);
+    } else {
+        error_at(val, "Unexpected Token.\n");
     }
 
     // reconnect token
@@ -415,7 +430,7 @@ static void del_macro(PP_Token* tok){
     Macro head;
     head.next = macro;
     Macro* cur = &head;
-    while(cur){
+    while(cur->next){
         Macro* target = cur->next;
         if(equal_token(tok->str, target->def)){
             cur->next = target->next;
@@ -570,7 +585,7 @@ static PP_Token* get_endif(PP_Token* tok){
                 case PP_IF:
                 case PP_IFDEF:
                 case PP_IFNDEF:
-                    cur = get_endif(cur);
+                    cur = get_endif(get_next_newline(target));
                     break;
             }
         } else if(target->kind == PTK_EOF) {
@@ -617,10 +632,12 @@ static bool analyze_if_condition(PP_Token* hash){
             if(find_macro(val, macro)){
                 return 1;
             }
+            break;
         case PP_IFNDEF:
             if(!find_macro(val, macro)){
                 return 1;
             }
+            break;
         case PP_ELIF:
             return evaluate_expr(val);
     }
