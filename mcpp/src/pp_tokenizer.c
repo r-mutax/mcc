@@ -176,16 +176,23 @@ PP_Token* ptk_tokenize(char* p){
             continue;
         }
 
-        if(*p == '0'
-            && ((*(p + 1) == 'x') || *(p + 1) == 'X')){
-            
-            cur = new_token(PTK_NUM, cur, p, 0);
-            char* q = p;
-            cur->val = strtol(p, &p, 16);
-            cur->len = p - q;
-            continue;
+        if(*p == '0') {
+                
+            if((*(p + 1) == 'x')
+                || (*(p + 1) == 'X')){
+                cur = new_token(PTK_NUM, cur, p, 0);
+                char* q = p;
+                cur->val = strtol(p, &p, 16);
+                cur->len = p - q;
+                continue;
+            } else if(isdigit(*(p + 1))){
+                cur = new_token(PTK_NUM, cur, p, 0);
+                char* q = p;
+                cur->val = strtol(p, &p, 8);
+                cur->len = p - q;
+                continue;
+            }
         }
-
 
         if(isdigit(*p)){
             cur = new_token(PTK_NUM, cur, p, 0);

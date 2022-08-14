@@ -113,6 +113,10 @@ int NG_TEST_EXPR_use objlike macro.
 int NG_TEST_HEX_TOKEN;
 #endif
 
+#if 0567 - 375
+int NG_TEST_OCT_TOKEN;
+#endif
+
 // test funclike macros.
 #define add(a, b) a + b
 int TEST_FUNCLIKE_MACRO = add(3, 5);
