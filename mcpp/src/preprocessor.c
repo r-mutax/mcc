@@ -26,6 +26,7 @@ static bool is_expanded(PP_Token* tok, Macro* list);
 static PP_Token* expand_funclike_macro(PP_Token* target, Macro* mac, PP_Token** to_tok);
 static Macro* make_param_list(PP_Token* target, Macro* mac, PP_Token** to_tok);
 static PP_Token* copy_function_argument(PP_Token** p_target);
+static PP_Token* convert_token_list_to_string(PP_Token* tok);
 
 // undef ddirective
 static void del_macro(PP_Token* tok);
@@ -385,12 +386,26 @@ static PP_Token* expand_funclike_macro(PP_Token* target, Macro* mac, PP_Token** 
     while(cur->next){
         PP_Token* tok = get_next(cur);
 
-        Macro* m = find_macro(tok, param_list);
-        if(m){
-            PP_Token* arg = copy_token_list(m->val);
-            get_end_token(arg)->next = tok->next;
-            cur->next = arg;
+        if(tok->kind == PTK_HASH){
+            tok = get_next(tok);
+            Macro* m = find_macro(tok, param_list);
+            if(m){
+                cur->next = convert_token_list_to_string(m->val);
+                cur->next->next = tok->next;
+                cur = get_next(cur);
+                continue;
+            } else {
+                error_at(tok, "unexpected preprocessor directive.\n");
+            }
+        } else {
+            Macro* m = find_macro(tok, param_list);
+            if(m){
+                PP_Token* arg = copy_token_list(m->val);
+                get_end_token(arg)->next = tok->next;
+                cur->next = arg;
+            }
         }
+
         cur = get_next(cur);
     }
 
@@ -460,6 +475,31 @@ static PP_Token* copy_function_argument(PP_Token** p_target){
     *p_target = tok;
 
     return head.next;
+}
+
+static PP_Token* convert_token_list_to_string(PP_Token* tok){
+
+    PP_Token* ret = calloc(1, sizeof(PP_Token));
+    
+    // count string const length
+    PP_Token* cur = tok;
+    int len = 0;
+    while(cur){
+        len += cur->len;
+        cur = get_next(cur);
+    }
+
+    ret->str = calloc(len, sizeof(char));
+    ret->kind = PTK_STRING_CONST;
+
+    // convert token list to string constant.
+    cur = tok;
+    while(cur){
+        strcat(ret->str, cur->str);
+        cur = get_next(cur);
+    }
+
+    return ret;
 }
 
 static PP_Token* get_next_newline(PP_Token* tok){

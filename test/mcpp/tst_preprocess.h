@@ -120,3 +120,6 @@ int NG_TEST_OCT_TOKEN;
 // test funclike macros.
 #define add(a, b) a + b
 int TEST_FUNCLIKE_MACRO = add(3, (1, 2, 4));
+
+#define CONVERT_TO_STRING(x)    #x
+char* TEST_HASH_OPERATER =  CONVERT_TO_STRING(TEST_IS_OK?);
