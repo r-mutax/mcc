@@ -12,6 +12,7 @@ static bool analyze_if_condition(PP_Token* hash);
 static int evaluate_expr(PP_Token* tok);
 static PP_Token* expand_defined(PP_Token* tok);
 static PP_Token* expand_macros(PP_Token* tok);
+static PP_Token* replace_ident_to_zero(PP_Token* tok);
 
 // macro definition
 static void add_macro(PP_Token* tok);
@@ -46,9 +47,11 @@ static PP_Token* get_next(PP_Token* tok);
 static PP_Token* get_before_eof(PP_Token* tok);
 
 #define PRE_MACRO___STDC_VERSION__ "#define __STDC_VERSION__ 201112"
+#define PRE_MACRO___x86_64__ "#define __x86_64__ 1"
 
 PP_Token* init_preprocess(){
     add_predefined_macro(PRE_MACRO___STDC_VERSION__);
+    add_predefined_macro(PRE_MACRO___x86_64__);
 }
 
 // preprocess exchange 
@@ -120,7 +123,13 @@ static PP_Token* read_include(PP_Token* hash){
         char filename[256] = { 0 };
         val = get_next(val);
         while(!equal_token(">", val)){
-            strcat(filename, val->str);
+            if(val->kind == PTK_NUM){
+                char buf[256] = { 0 };
+                sprintf(buf, "%d", val->val);
+                strcat(filename, buf);
+            } else {
+                strcat(filename, val->str);
+            }
             val = get_next(val);
         }
 
@@ -244,8 +253,10 @@ static void add_macro_objlike(PP_Token* tok){
     Macro* mac = calloc(1, sizeof(Macro));
 
     mac->def = copy_token(tok);
-    tok = tok->next->next;
-    mac->val = copy_token_eol(tok);
+
+    if(get_next(tok)->kind != PTK_NEWLINE){
+         mac->val = copy_token_eol(get_next(tok));
+    }
 
     mac->next = macro;
     macro = mac;
@@ -307,19 +318,23 @@ static PP_Token* replace_token(PP_Token* tok, Macro* mac, Macro* list){
         val = expand_funclike_macro(tok, mac, &to_tok);
     } else {
         val = copy_token_list(mac->val);
-        to_tok = tok->next;
+        to_tok = get_next(tok);
+    }
+
+    if(!val){
+        return get_next(tok);
     }
 
     // expand macro to macro value.
-    PP_Token head;
+    PP_Token head = { 0 };
     head.next = val;
     PP_Token* cur = &head;
     while(cur->next){
-        PP_Token* target = cur->next;
+        PP_Token* target = get_next(cur);
 
         if(is_expanded(target, list)){
             // "target" is expanded macro, skip expanding macro.
-            cur = cur->next;
+            cur = get_next(cur);
             continue;
         }
 
@@ -327,13 +342,13 @@ static PP_Token* replace_token(PP_Token* tok, Macro* mac, Macro* list){
         if(m){
             cur->next = replace_token(target, m, list);
         }
-        cur = cur->next;
+        cur = get_next(cur);
     }
 
     // connect token
     cur = val;
-    while(cur->next){
-        cur = cur->next;
+    while(get_next(cur)){
+        cur = get_next(cur);
     }
 
     cur->next = to_tok;
@@ -363,7 +378,7 @@ static PP_Token* expand_funclike_macro(PP_Token* target, Macro* mac, PP_Token** 
     Macro* param_list = make_param_list(target, mac, to_tok);
 
     PP_Token head;
-    head.next = mac->val;
+    head.next = copy_token_list(mac->val);
     PP_Token* cur = &head;
     while(cur->next){
         PP_Token* tok = get_next(cur);
@@ -455,7 +470,7 @@ static void del_macro(PP_Token* tok){
 }
 
 static PP_Token* copy_token_list(PP_Token* tok){
-    PP_Token head;
+    PP_Token head = { 0 };
     PP_Token* cur = &head;
     while(tok){
         cur->next = copy_token(tok);
@@ -475,7 +490,7 @@ static PP_Token* copy_token(PP_Token* src){
 }
 
 static PP_Token* copy_token_eol(PP_Token* tok){
-    PP_Token head;
+    PP_Token head = { 0 };
     PP_Token* cur = &head;
     PP_Token* c_tok = tok;
     while(c_tok->kind != PTK_NEWLINE){
@@ -498,7 +513,7 @@ static char* make_errormsg(PP_Token* target){
             break;
         }
         len += target->len;
-        target = target->next;
+        target = get_next(target);
     }
 
     char* msg = calloc(1, len);
@@ -659,6 +674,7 @@ static bool analyze_if_condition(PP_Token* hash){
 static int evaluate_expr(PP_Token* tok){
     tok = expand_defined(tok);
     tok = expand_macros(tok);
+    tok = replace_ident_to_zero(tok);
     return constant_expr(tok);
 }
 
@@ -712,5 +728,27 @@ static PP_Token* expand_macros(PP_Token* tok){
         }
         cur = get_next(cur);
     }
+    return head.next;
+}
+
+static PP_Token* replace_ident_to_zero(PP_Token* tok){
+
+    PP_Token head;
+    PP_Token* cur = &head;
+    head.next = tok;
+    while(get_next(cur)->kind != PTK_NEWLINE){
+        PP_Token* target = get_next(cur);
+        if(target->kind == PTK_IDENT){
+            PP_Token* val = calloc(1, sizeof(PP_Token));
+            val->kind = PTK_NUM;
+            val->val = 0;
+            cur->next = val;
+            val->next = target->next;
+            cur = val;
+        }
+
+        cur = get_next(cur);
+    }
+
     return head.next;
 }

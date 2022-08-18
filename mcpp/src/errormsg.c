@@ -25,7 +25,7 @@ void error_at(PP_Token* tok, char *msg){
         start++;
     } while(*start);
 
-    int indent = fprintf(stderr, "%s:%ld: ", get_filename(tok->src), tok->row);
+    int indent = fprintf(stderr, "%s:%ld: ", tok->src->path, tok->row);
     char* end = strchr(start, '\n');
     char* err_str = strndup(start, end - start + 1);
     fprintf(stderr, "%s", err_str);

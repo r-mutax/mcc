@@ -24,7 +24,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 
 test:$(TARGET)
 	$(TARGETDIR)/$(TARGET) $(TEST_DIR)/tst_preprocess.h > $(TEST_DIR)/output.h
-	diff -B $(TEST_DIR)/correct_output.h $(TEST_DIR)/output.h
+	diff -Bw $(TEST_DIR)/correct_output.h $(TEST_DIR)/output.h
 
 clean:
 	-rm -f $(OBJECTS) $(DEPENDS) $(TARGET)

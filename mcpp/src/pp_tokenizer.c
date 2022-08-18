@@ -16,7 +16,6 @@ PP_Token* ptk_tokenize_file(char* path){
     srcfile->input_data = read_file(path);
     srcfile->path = strdup(path);
 
-    free(cur_file);
     cur_file = srcfile;
 
     PP_Token* tok = ptk_tokenize(cur_file->input_data);
@@ -72,6 +71,7 @@ PP_Token* ptk_tokenize(char* p){
             while(*p != '\n'){
                 p++;
             }
+            p++;
             continue;
         }
 
