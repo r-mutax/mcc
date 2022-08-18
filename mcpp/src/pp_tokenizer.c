@@ -200,6 +200,7 @@ PP_Token* ptk_tokenize(char* p){
             cur->val = strtol(p, &p, 10);
             if(*p == 'L') p++;
             cur->len = p - q;
+            cur->str = strndup(q, cur->len);
             continue;
         }
 

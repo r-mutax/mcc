@@ -119,4 +119,4 @@ int NG_TEST_OCT_TOKEN;
 
 // test funclike macros.
 #define add(a, b) a + b
-int TEST_FUNCLIKE_MACRO = add(3, 5);
+int TEST_FUNCLIKE_MACRO = add(3, (1, 2, 4));

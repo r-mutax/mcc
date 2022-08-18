@@ -25,6 +25,7 @@ static PP_Token* replace_token(PP_Token* target, Macro* mac, Macro* list);
 static bool is_expanded(PP_Token* tok, Macro* list);
 static PP_Token* expand_funclike_macro(PP_Token* target, Macro* mac, PP_Token** to_tok);
 static Macro* make_param_list(PP_Token* target, Macro* mac, PP_Token** to_tok);
+static PP_Token* copy_function_argument(PP_Token** p_target);
 
 // undef ddirective
 static void del_macro(PP_Token* tok);
@@ -45,6 +46,7 @@ static PP_Token* get_directive_value(PP_Token* hash);
 static PP_Token* get_endif(PP_Token* tok);
 static PP_Token* get_next(PP_Token* tok);
 static PP_Token* get_before_eof(PP_Token* tok);
+static PP_Token* get_end_token(PP_Token* tok);
 
 #define PRE_MACRO___STDC_VERSION__ "#define __STDC_VERSION__ 201112"
 #define PRE_MACRO___x86_64__ "#define __x86_64__ 1"
@@ -385,8 +387,9 @@ static PP_Token* expand_funclike_macro(PP_Token* target, Macro* mac, PP_Token** 
 
         Macro* m = find_macro(tok, param_list);
         if(m){
-            cur->next = copy_token(m->val);
-            cur->next->next = get_next(tok);
+            PP_Token* arg = copy_token_list(m->val);
+            get_end_token(arg)->next = tok->next;
+            cur->next = arg;
         }
         cur = get_next(cur);
     }
@@ -408,14 +411,10 @@ static Macro* make_param_list(PP_Token* target, Macro* mac, PP_Token** to_tok){
         arg_list = arg_list->next = calloc(1, sizeof(Macro));
 
         arg_list->def = copy_token(param);
-        arg_list->val = copy_token(target);
-
-        if(arg_list->val->kind == PTK_NUM){
-            arg_list->val->str = strndup(arg_list->val->pos, arg_list->val->len);
-        }
+        arg_list->val = copy_function_argument(&target);
 
         param = get_next(param);
-        target = get_next(target);
+
         if(equal_token(")", target)){
             break;
         }
@@ -427,6 +426,38 @@ static Macro* make_param_list(PP_Token* target, Macro* mac, PP_Token** to_tok){
     }
 
     *to_tok = get_next(target);
+
+    return head.next;
+}
+
+static PP_Token* copy_function_argument(PP_Token** p_target){
+
+    PP_Token head = { 0 };
+    PP_Token* cur = &head;
+    PP_Token* tok = *p_target;
+    while(1){
+        if(equal_token("(", tok)){
+            do {
+                cur = cur->next = copy_token(tok);
+                tok = get_next(tok);
+            } while(!equal_token(")", tok));
+            cur = cur->next = copy_token(tok);
+            tok = get_next(tok);        // skipt ")" token.
+        }
+
+        if(equal_token(",", tok) || equal_token(")", tok)){
+            break;
+        }
+
+        if(tok->kind == PTK_EOF){
+            error_at(*p_target, "unexpected token.\n");
+        }
+
+        cur = cur->next = copy_token(tok);
+        tok = get_next(tok);
+    }
+
+    *p_target = tok;
 
     return head.next;
 }
@@ -647,6 +678,16 @@ static PP_Token* get_before_eof(PP_Token* tok){
         cur = get_next(cur);
     }
     return NULL;
+}
+
+static PP_Token* get_end_token(PP_Token* tok){
+
+    PP_Token* ret = NULL;
+    do {
+        ret = tok;
+        tok = get_next(tok);
+    } while(tok);
+    return ret;
 }
 
 static bool analyze_if_condition(PP_Token* hash){
