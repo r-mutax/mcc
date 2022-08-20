@@ -1,18 +1,17 @@
-CUR_MCPP_DIR	= $(shell pwd)
+CUR_MCC1_DIR	= $(shell pwd)
 
 COMPILER		= cc
 CFLAGS			= -std=c11 -g -static
-TARGET			= mcpp
-TARGETDIR		= $(CUR_MCPP_DIR)/../bin
-SRCDIR			= $(CUR_MCPP_DIR)/src
+TARGET			= mcc1
+TARGETDIR		= $(CUR_MCC1_DIR)/../bin
+SRCDIR			= $(CUR_MCC1_DIR)/src
 SOURCES			= $(wildcard $(SRCDIR)/*.c)
-INCDIR			= -I$(CUR_MCPP_DIR)/inc
-OBJDIR			= $(CUR_MCPP_DIR)/load
+INCDIR			= -I$(CUR_MCC1_DIR)/inc
+OBJDIR			= $(CUR_MCC1_DIR)/load
 OBJECTS			= $(addprefix $(OBJDIR)/,$(notdir $(SOURCES:.c=.o)))
 DEPENDS			= $(OBJECTS:.o=.d)
 
-TEST_DIR		= $(CUR_MCPP_DIR)/../test/mcpp
-
+TEST_DIR		= $(CUR_MCC1_DIR)/../test
 
 $(TARGET) : $(OBJECTS)
 	-mkdir -p $(TARGETDIR)
@@ -23,12 +22,13 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(COMPILER) $(CFLAGS) $(INCDIR) -o $@ -c $<
 
 test:$(TARGET)
-	$(TARGETDIR)/$(TARGET) $(TEST_DIR)/tst_preprocess.h > $(TEST_DIR)/output.h
-	diff -Bw $(TEST_DIR)/correct_output.h $(TEST_DIR)/output.h
+	$(TARGETDIR)/$(TARGET)  -c $(TEST_DIR)/test.c -o $(TEST_DIR)/test.s -i ../stdlib/inc
+	cc -s -static $(TEST_DIR)/test.s $(TEST_DIR)/test_func/foo.o $(TARGETDIR)/mlibc -o $(TEST_DIR)/a.out
+	$(TEST_DIR)/a.out
 
 clean:
 	-rm -f $(OBJECTS) $(DEPENDS) $(TARGET)
 	-rm $(TARGETDIR)/mcpp
 	-rmdir $(OBJDIR)
 
-.PHONY: clean test
+.PHONY: clean
