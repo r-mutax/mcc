@@ -82,6 +82,12 @@ struct IncludeDir {
     IncludeDir* next;
 };
 
+typedef enum {
+    SRC_FILE_PATH = 0,
+    INCLUDE_PATH,
+    OUTPUT_FILE
+}MCPP_OPTION;
+
 // -----------------------------------------------------------------
 
 // tokenizer
@@ -101,6 +107,7 @@ void add_std_include_path(char* path);
 char* find_include_file(char* include_name);
 char* find_std_include_file(char* include_name);
 char* get_file_directory(char* filename, char* directory);
+void output_preprocessed_file(PP_Token* tok, FILE* fp);
 
 // errormsg
 void error(char *fmt, ...);

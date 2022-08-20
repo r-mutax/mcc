@@ -99,11 +99,6 @@ char* find_include_file(char* include_name){
     return NULL;
 }
 
-char* get_file_directory(char* filename, char* directory){
-    int len = strrchr(filename, '/') - filename + 1;
-    strncpy(directory, filename, len);
-}
-
 char* find_std_include_file(char* include_name){
     IncludeDir* cur = StdIncDir;
     while(cur){
@@ -118,4 +113,23 @@ char* find_std_include_file(char* include_name){
         cur = cur->next;
     }
     return NULL;
+}
+
+char* get_file_directory(char* filename, char* directory){
+    int len = strrchr(filename, '/') - filename + 1;
+    strncpy(directory, filename, len);
+}
+
+void output_preprocessed_file(PP_Token* tok, FILE* fp){
+    while(tok){
+        if(tok->kind == PTK_STRING_CONST){
+            fprintf(fp, "\"");
+        }
+        fprintf(fp, "%s", tok->str);
+        if(tok->kind == PTK_STRING_CONST){
+            fprintf(fp, "\"");
+        }
+        tok = tok->next;
+    }
+    fclose(fp);
 }

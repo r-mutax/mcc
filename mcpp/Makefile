@@ -23,7 +23,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 	$(COMPILER) $(CFLAGS) $(INCDIR) -o $@ -c $<
 
 test:$(TARGET)
-	$(TARGETDIR)/$(TARGET) $(TEST_DIR)/tst_preprocess.h > $(TEST_DIR)/output.h
+	$(TARGETDIR)/$(TARGET) $(TEST_DIR)/tst_preprocess.h -o $(TEST_DIR)/output.h
 	diff -Bw $(TEST_DIR)/correct_output.h $(TEST_DIR)/output.h
 
 clean:
