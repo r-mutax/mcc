@@ -1,8 +1,19 @@
 load/*
+
+# mcc command
 bin/mcc
-bin/mlibc
+mcc/load/*
+
+# mcpp command
 bin/mcpp
+mcpp/load/*
+
+# mcc1 command
 bin/mcc1
+mcc1/load/*
+
+bin/mlibc
+
 test/tmp
 test/tmp.s
 test/test_func/*.o
@@ -12,5 +23,3 @@ test/tt.c
 test/mcpp/output.h
 stdlib/asm/*
 stdlib/load/*
-mcpp/load/*
-mcc1/load/*
