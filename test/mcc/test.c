@@ -782,8 +782,7 @@ void test_cast(){
     return;
 }
 
-int main(){   
-    test_lib();
+int main(){
     test_expr();
     test_stmt();
     test_func();

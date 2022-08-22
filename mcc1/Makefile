@@ -11,7 +11,7 @@ OBJDIR			= $(CUR_MCC1_DIR)/load
 OBJECTS			= $(addprefix $(OBJDIR)/,$(notdir $(SOURCES:.c=.o)))
 DEPENDS			= $(OBJECTS:.o=.d)
 
-TEST_DIR		= $(CUR_MCC1_DIR)/../test
+TEST_DIR		= $(CUR_MCC1_DIR)/../test/mcc
 
 $(TARGET) : $(OBJECTS)
 	-mkdir -p $(TARGETDIR)
@@ -23,7 +23,7 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 
 test:$(TARGET)
 	$(TARGETDIR)/$(TARGET)  -c $(TEST_DIR)/test.c -o $(TEST_DIR)/test.s -i ../stdlib/inc
-	cc -s -static $(TEST_DIR)/test.s $(TEST_DIR)/test_func/foo.o $(TARGETDIR)/mlibc -o $(TEST_DIR)/a.out
+	cc -s -static $(TEST_DIR)/test.s $(TEST_DIR)/../test_func/foo.o $(TARGETDIR)/mlibc -o $(TEST_DIR)/a.out
 	$(TEST_DIR)/a.out
 
 clean:
