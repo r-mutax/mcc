@@ -1,51 +1,20 @@
-COMPILER	= cc
-CFLAGS		= -std=c11 -g -static
-TARGETDIR	= ./bin
-TARGET		= $(TARGETDIR)/$(shell basename `readlink -f .`)
-INCDIR		= -I./inc
-SRCDIR		= ./src
-SOURCES		= $(wildcard $(SRCDIR)/*.c)
-OBJDIR		= ./load
-OBJECTS		= $(addprefix $(OBJDIR)/,$(notdir $(SOURCES:.c=.o)))
-DEPENDS		= $(OBJECTS:.o=.d)
-MAKE_STDLIB	= ./bin/mlibc
+BIN_DIR		= ./bin
+MCC			= $(BIN_DIR)/mcc
+MCC1		= $(BIN_DIR)/mcc1
+MCPP		= $(BIN_DIR)/mcpp
 
-LIBINCDIR	= -I./bin/stdlib/include
-LIBSRCDIR	= ./src/stdlib
-LIBSOURCES	= $(wildcard $(LIBSRCDIR)/*.c)
-LIBOBJDIR	= ./load/stdlib
-LIBOBJECTS	= $(addprefix $(LIBOBJDIR)/,$(notdir $(LIBSOURCES:.c=.o)))
-LIBDEPENDS	= $(LIBOBJECTS:.o=.d)
+all:$(MCC) $(MCC1) $(MCPP)
 
-$(TARGET): $(OBJECTS)
-	-mkdir -p $(TARGETDIR)
-	$(COMPILER) -o $@ $^
+$(MCC):
+	(cd mcc; make;)
 
-$(MAKE_STDLIB):
-	(cd stdlib; make;)
+$(MCC1):
+	(cd mcc1; make;)
 
-$(OBJDIR)/%.o: $(SRCDIR)/%.c
-	-mkdir -p $(OBJDIR)
-	$(COMPILER) $(CFLAGS) $(INCDIR) -o $@ -c $<
+$(MCPP):
+	(cd mcpp; make;)
 
-stdlib: $(LIBOBJECTS)
-	ar rc $(TARGETDIR)/mlibc $(LIBOBJECTS)
+test:$(MCC) $(MCC1) $(MCPP)
+	(cd mcc; make test;)
 
-$(LIBOBJDIR)/%.o: $(LIBSRCDIR)/%.c
-	$(COMPILER) $(CFLAGS) $(LIBINCDIR) -o $@ -c $< -static
-
-
-clean:
-	-rm -f $(OBJECTS) $(DEPENDS) $(TARGET)
-	-rmdir $(TARGETDIR)/mcc
-	-rmdir $(OBJDIR)
-
-test:$(TARGET)
-	./bin/mcc -c ./test/test.c -o ./test/test.s -i ./stdlib/inc
-	cc -s -static ./test/test.s ./test/test_func/foo.o ./bin/mlibc -o ./test/a.out
-	./test/a.out
-
-.PHONY: clean test
-
--include $(DEPENDS)
-	
+.PHONY: all test
