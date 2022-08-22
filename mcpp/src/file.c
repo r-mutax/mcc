@@ -62,7 +62,14 @@ char* get_filename(SrcFile* src_file){
 void add_include_path(char* path){
 
     IncludeDir* dir = calloc(1, sizeof(IncludeDir));
-    dir->dir = strdup(path);
+
+    int len = strlen(path);
+    if(path[len - 1] != '/'){
+        dir->dir = calloc(len + 2, sizeof(char));
+        sprintf(dir->dir, "%s/", path);
+    } else {
+        dir->dir = strdup(path);
+    }
     
     if(IncDir){
         IncTail = IncTail->next = dir;

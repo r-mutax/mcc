@@ -3,6 +3,7 @@ int OK_TEST_DEFINE;
 
 // test include
 #include "include_tst.h"
+#include "include_subdir_tst.h"
 
 // test std-include
 //#include <string.h>

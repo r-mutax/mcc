@@ -72,7 +72,7 @@ PP_Token* preprocess(PP_Token* tok){
             switch(get_preprocess_kind(target)){
                 case PP_INCLUDE:
                     cur->next = read_include(target);
-                    break;
+                    continue;;
                 case PP_IF:
                 case PP_IFDEF:
                 case PP_IFNDEF:

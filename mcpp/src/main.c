@@ -22,7 +22,7 @@ int main(int argc, char** argv){
 
     // Add Srcfile directory to include path
     char cdir[256] = { 0 };
-    get_file_directory(argv[1], cdir);
+    get_file_directory(src_path, cdir);
     add_include_path(cdir);
 
     // Add Stdlib directory to std-include path
@@ -33,7 +33,6 @@ int main(int argc, char** argv){
     // init-preprocess
     init_preprocess();
 
-    src_path = argv[1];
     PP_Token* tok = ptk_tokenize_file(src_path);
     tok = preprocess(tok);
 
