@@ -3,6 +3,8 @@ load/*
 # mcc command
 bin/mcc
 mcc/load/*
+test/mcc/a.out
+test/mcc/test.stdlib
 
 # mcpp command
 bin/mcpp
