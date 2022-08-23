@@ -2,7 +2,6 @@
 #include "tokenize.h"
 #include "type.h"
 #include "errormsg.h"
-#include "preprocessor.h"
 #include "file.h"
 #include "utility.h"
 
@@ -19,6 +18,7 @@ static bool is_ident2(char p);
 static bool is_keyword(char* lhs, char* rhs);
 static bool check_keyword(char* keyword, char** p, Token** tok);
 static bool check_preprocess(char* directive, char** p, Token** tok, char* start);
+static Token* delete_newline_tok(Token* tok);
 // -----------------------------------------------
 Token* tk_tokenize_file(char* path){
 
@@ -29,7 +29,7 @@ Token* tk_tokenize_file(char* path){
     cur_file = srcfile;
 
     Token* tok = tk_tokenize(srcfile->input_data);
-    tok = preprocess(tok);
+    tok = delete_newline_tok(tok);
 
     return tok;
 }
@@ -451,3 +451,18 @@ static bool check_preprocess(char* directive, char** p, Token** tok, char* start
     return false;
 }
 
+static Token* delete_newline_tok(Token* tok){
+    Token head = { 0 };
+    Token* cur = &head;
+    head.next = tok;
+
+    while(cur->kind != TK_EOF){
+        Token* target = cur->next;
+        if(target->kind == TK_NEWLINE){
+            cur->next = target->next;
+            continue;
+        }
+        cur = cur->next;
+    }
+    return head.next;
+}
