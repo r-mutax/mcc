@@ -1,5 +1,5 @@
 #include "test.h"
-#include "testlib.h"
+
 #define TEST_DEF 1
 #define TEST_NO_VALUE_MACRO
 long g_x;
@@ -716,7 +716,7 @@ void test_preprocess(){
     exit_error("error : #if logical NOT.\n");   
 #endif
 
-#ifdef ! \
+#if ! \
 defined TEST_DEF
     exit_error("error : skip continuous \\ and newline.\n");   
 #endif
@@ -782,8 +782,7 @@ void test_cast(){
     return;
 }
 
-int main(){   
-    test_lib();
+int main(){
     test_expr();
     test_stmt();
     test_func();

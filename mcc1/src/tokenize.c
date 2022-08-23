@@ -432,12 +432,19 @@ static bool check_keyword(char* keyword, char** p, Token** tok){
 static bool check_preprocess(char* directive, char** p, Token** tok, char* start){
 
     if (is_keyword(*p, directive)){
-        int len = strlen(directive);    // length : # + directive
-        *tok = new_token(TK_PREPROCESS, *tok, *p, len + 1);
-        char* n = realloc((*tok)->str, len + 1);
-        memset((*tok)->str, 0, len + 1);
-        sprintf((*tok)->str, "#%s", directive);
-        *p += len;
+        Token* tcur = calloc(1, sizeof(Token));
+        tcur->kind = TK_PREPROCESS;
+        tcur->len = strlen(directive) + 1; // # + directive 
+        tcur->pos = *p;
+        tcur->row = row;
+        tcur->src = cur_file;
+        tcur->str = calloc(1, tcur->len + 1);
+        sprintf(tcur->str, "#%s", directive);
+        tcur->val = 0;
+
+        *p += tcur->len - 1;
+        (*tok)->next = tcur;
+        *tok = tcur;
         return true;
     }
 

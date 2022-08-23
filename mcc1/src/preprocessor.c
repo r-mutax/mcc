@@ -60,7 +60,7 @@ static Macro* macro;
 
 Token* preprocess(Token* tok){
 
-    Token head;
+    Token head = { 0 };
     Token* cur = &head;
     head.next = tok;
 
@@ -671,7 +671,7 @@ static char* get_header_path(Token* tok){
         cur = cur->next;
     }
 
-    char* inc_path = calloc(1, len);
+    char* inc_path = calloc(1, len + 10);
     cur = tok->next;
     while(!equal_token(">", cur)){
         strcat(inc_path, cur->str);

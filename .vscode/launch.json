@@ -11,11 +11,41 @@
             "request": "launch",
             "program": "${command:extension.vscode-wsl-workspaceFolder}/bin/mcc",
             "args": ["-c",
-                     "/mnt/c/source/mcc/test/test.c", 
+                     "/mnt/c/source/mcc/inc/mcc.h", 
                      "-o", 
                      "/mnt/c/source/mcc/test/test.s",
                      "-i", 
                      "/mnt/c/source/mcc/stdlib/inc"],
+            "stopAtEntry": false,
+            "cwd": "${command:extension.vscode-wsl-workspaceFolder}/bin",
+            "environment": [],
+            "externalConsole": true,
+            "pipeTransport": {
+                "debuggerPath": "/usr/bin/gdb",
+                "pipeProgram": "${env:windir}\\system32\\bash.exe",
+                "pipeArgs": ["-c"],
+                "pipeCwd": ""
+            },
+            "setupCommands": [
+                {
+                    "description": "gdb の再フォーマットを有効にする",
+                    "text": "-enable-pretty-printing",
+                    "ignoreFailures": true
+                }
+            ],
+            "sourceFileMap": {
+                "${command:extension.vscode-wsl-workspaceFolder}": "${workspaceFolder}"
+            }
+        },
+        {
+            "name": "GDB Debug for MCPP.",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${command:extension.vscode-wsl-workspaceFolder}/bin/mcpp",
+            "args": ["-c",
+                     "/mnt/c/source/mcc/test/mcpp/tst_preprocess.h",
+                     "-o",
+                     "/mnt/c/source/mcc/test/mcpp/output.h"],
             "stopAtEntry": false,
             "cwd": "${command:extension.vscode-wsl-workspaceFolder}/bin",
             "environment": [],

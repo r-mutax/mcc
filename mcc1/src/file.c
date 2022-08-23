@@ -37,7 +37,7 @@ void register_include_directory(char* path){
     int is_slash = path[len - 1] != '/';
 
     IncDir* inc = calloc(1, sizeof(IncDir));
-    inc->path = calloc(1, strlen(path) + is_slash);
+    inc->path = calloc(1, strlen(path) + 5);
     strcpy(inc->path, path);
 
     if(is_slash)
@@ -68,7 +68,7 @@ char* get_include_path(char* path){
     int path_len = strlen(path);
 
     while(cur){
-        char* inc_path = calloc(1, strlen(cur->path) + path_len);
+        char* inc_path = calloc(1, strlen(cur->path) + path_len + 10);
         sprintf(inc_path, "%s%s", cur->path, path);
         if(is_exist_path(inc_path)){
             return inc_path;
@@ -86,7 +86,7 @@ char* get_std_include_path(char* path){
     int path_len = strlen(path);
 
     while(cur){
-        char* inc_path = calloc(1, strlen(cur->path) + path_len);
+        char* inc_path = calloc(1, strlen(cur->path) + path_len + 10);
         sprintf(inc_path, "%s%s", cur->path, path);
         if(is_exist_path(inc_path)){
             return inc_path;
