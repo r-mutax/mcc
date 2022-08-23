@@ -12,10 +12,6 @@
 #include <errno.h>
 #endif
 
-#define STDLIB_PATH "/usr/include/"
-#define ADDITIVE_STDLIB_PATH "/usr/lib/gcc/x86_64-linux-gnu/9/include/"
-#define CSTDLIB_INC_PATH "/usr/include/x86_64-linux-gnu/"
-
 typedef struct Token Token;
 typedef struct Type Type;
 typedef struct Node Node;
@@ -24,23 +20,6 @@ typedef struct Function Function;
 typedef struct Symbol Symbol;
 typedef struct Member Member;
 typedef struct SrcFile SrcFile;
-typedef struct IncDir IncDir;
-typedef struct Macro Macro;
-
-// Macro definition -------------------------------
-struct Macro{
-    Token* def;
-    Token* val;
-    Token* param;
-    bool is_func;
-    Macro* next;
-};
-
-// directory definition ---------------------------
-struct IncDir {
-    char* path;
-    IncDir* next;
-};
 
 // sorce file definition --------------------------
 struct SrcFile{
@@ -265,7 +244,6 @@ typedef enum {
 
 typedef enum {
     NO_OPTION = 0,
-    INCLUDE_PATH,
     OUTPUT_FILE,
     C_SRC_FILE
 } MCC_OPTION;
