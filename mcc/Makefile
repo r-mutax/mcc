@@ -24,6 +24,8 @@ $(OBJDIR)/%.o: $(SRCDIR)/%.c
 
 test:$(TARGET)
 	$(TARGETDIR)/$(TARGET) -c $(TEST_DIR)/test.c -i ../stdlib/inc -o $(TEST_DIR)/test.s
+	cc -s -static $(TEST_DIR)/test.s $(TEST_DIR)/../test_func/foo.o -o $(TEST_DIR)/a.out
+	$(TEST_DIR)/a.out
 	
 clean:
 	-rm -f $(OBJECTS) $(DEPENDS) $(TARGET)

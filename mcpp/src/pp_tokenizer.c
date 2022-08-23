@@ -102,7 +102,7 @@ PP_Token* ptk_tokenize(char* p){
 
         if(*p == '\''){
             char a = *(++p);
-            cur = new_token(PTK_NUM, cur, p, 1);
+            cur = new_token(PTK_CHAR_CONST, cur, p, 1);
             cur->val = a;
 
             while(*p != '\''){

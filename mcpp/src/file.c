@@ -13,7 +13,8 @@ char* read_file(char* path){
 
     FILE *fp = fopen(path, "r");
     if(!fp){
-        error("invalid file path.");
+        fprintf(stderr, "invalid file path. %s\n", path);
+        error("");
     }
 
     char *buf = calloc(1, file_size + 2);
@@ -97,7 +98,7 @@ char* find_include_file(char* include_name){
         strcpy(path, cur->dir);
         strcat(path, include_name);
         if(is_file_exist(path)){
-            char* ret = calloc(strlen(path), sizeof(char));
+            char* ret = calloc(strlen(path) + 2, sizeof(char));
             strcpy(ret, path);
             return ret;
         }
@@ -113,7 +114,7 @@ char* find_std_include_file(char* include_name){
         strcpy(path, cur->dir);
         strcat(path, include_name);
         if(is_file_exist(path)){
-            char* ret = calloc(strlen(path), sizeof(char));
+            char* ret = calloc(strlen(path) + 2, sizeof(char));
             strcpy(ret, path);
             return ret;
         }
@@ -129,13 +130,23 @@ char* get_file_directory(char* filename, char* directory){
 
 void output_preprocessed_file(PP_Token* tok, FILE* fp){
     while(tok){
-        if(tok->kind == PTK_STRING_CONST){
-            fprintf(fp, "\"");
+
+        switch(tok->kind){
+            case PTK_STRING_CONST:
+                fprintf(fp, "\"");
+                fprintf(fp, "%s", tok->str);
+                fprintf(fp, "\"");
+                break;
+            case PTK_CHAR_CONST:
+                fprintf(fp, "'");
+                fprintf(fp, "%c", tok->val);
+                fprintf(fp, "'");
+                break;
+            default:
+                fprintf(fp, "%s", tok->str);
+                break;
         }
-        fprintf(fp, "%s", tok->str);
-        if(tok->kind == PTK_STRING_CONST){
-            fprintf(fp, "\"");
-        }
+
         tok = tok->next;
     }
     fclose(fp);

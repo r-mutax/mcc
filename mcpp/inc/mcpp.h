@@ -29,6 +29,7 @@ typedef enum {
     PTK_PP_KEYWORD,
     PTK_KEYWORD,
     PTK_STRING_CONST,
+    PTK_CHAR_CONST,
     PTK_HASH,
     PTK_NEWLINE,
     PTK_SPACE,

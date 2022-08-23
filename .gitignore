@@ -4,7 +4,8 @@ load/*
 bin/mcc
 mcc/load/*
 test/mcc/a.out
-test/mcc/test.stdlib
+test/mcc/test.s
+test/mcc/test.s.i
 
 # mcpp command
 bin/mcpp
