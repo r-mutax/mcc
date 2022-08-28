@@ -10,6 +10,9 @@ test/mcc/test.s.i
 # mcpp command
 bin/mcpp
 mcpp/load/*
+test/mcpp/output.h
+test/mcpp/stdlib/correct_std_output.h
+test/mcpp/stdlib/std_output.h
 
 # mcc1 command
 bin/mcc1
@@ -23,6 +26,5 @@ test/test_func/*.o
 test/a.out
 test/test.s
 test/tt.c
-test/mcpp/output.h
 stdlib/asm/*
 stdlib/load/*
