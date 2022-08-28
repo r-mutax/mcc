@@ -147,6 +147,12 @@ PP_Token* ptk_tokenize(char* p){
             continue;
         }
 
+        if(startswith(p, "##")){
+            cur = new_token(PTK_HASH_HASH, cur, p ,2);
+            p += 2;
+            continue;
+        }
+
         if(*p == '#'){
             cur = new_token(PTK_HASH, cur, p++, 1);
             continue;

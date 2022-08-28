@@ -33,6 +33,7 @@ typedef enum {
     PTK_HASH,
     PTK_NEWLINE,
     PTK_SPACE,
+    PTK_HASH_HASH,
     PTK_EOF
 } PP_TokenKind;
 
@@ -94,7 +95,7 @@ typedef enum {
 // tokenizer
 PP_Token* ptk_tokenize_file(char* path);
 PP_Token* new_token(PP_TokenKind kind, PP_Token* cur, char* str, int len);
-PP_Token* ptk_tokenize(char* path);
+PP_Token* ptk_tokenize(char* p);
 
 // preprocessor
 PP_Token* preprocess(PP_Token* tok);

@@ -42,6 +42,8 @@
             "program": "${command:extension.vscode-wsl-workspaceFolder}/bin/mcpp",
             "args": ["-c",
                      "/mnt/c/source/mcc/test/mcpp/tst_preprocess.h",
+                     "-i",
+                     "/mnt/c/source/mcc/test/mcpp/inc",
                      "-o",
                      "/mnt/c/source/mcc/test/mcpp/output.h"],
             "stopAtEntry": false,
