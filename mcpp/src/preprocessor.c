@@ -48,6 +48,7 @@ static PP_Token* get_endif(PP_Token* tok);
 static PP_Token* get_next(PP_Token* tok);
 static PP_Token* get_before_eof(PP_Token* tok);
 static PP_Token* get_end_token(PP_Token* tok);
+static PP_Token* get_begore_eol(PP_Token* tok);
 
 #define PRE_MACRO___STDC_VERSION__ "#define __STDC_VERSION__ 201112"
 #define PRE_MACRO___x86_64__ "#define __x86_64__ 1"
@@ -397,6 +398,21 @@ static PP_Token* expand_funclike_macro(PP_Token* target, Macro* mac, PP_Token** 
             } else {
                 error_at(tok, "unexpected preprocessor directive.\n");
             }
+        } else if(tok->kind == PTK_HASH_HASH){
+            tok = get_next(tok);
+
+            int len = cur->len + tok->len + 1;
+            char* p = calloc(len, sizeof(char));
+            strcpy(p, cur->str);
+            strcat(p, tok->str);
+
+            PP_Token* concat_token = ptk_tokenize(p);
+            PP_Token* eot = get_begore_eol(concat_token);
+            eot->next = tok->next;
+
+            memcpy(cur, concat_token, sizeof(PP_Token));
+            continue;
+            
         } else {
             Macro* m = find_macro(tok, param_list);
             if(m){
@@ -720,6 +736,22 @@ static PP_Token* get_before_eof(PP_Token* tok){
     return NULL;
 }
 
+static PP_Token* get_begore_eol(PP_Token* tok){
+    PP_Token head;
+    PP_Token* cur = &head;
+    head.next = tok;
+
+    while(get_next(cur)){
+        PP_Token* target = get_next(cur);
+        if(target->kind == PTK_NEWLINE){
+            return cur;
+        }
+        cur = get_next(cur);
+    }
+    return NULL;
+
+}
+
 static PP_Token* get_end_token(PP_Token* tok){
 
     PP_Token* ret = NULL;
@@ -784,6 +816,7 @@ static PP_Token* expand_defined(PP_Token* tok){
             PP_Token* val = calloc(1, sizeof(PP_Token));
             val->kind = PTK_NUM;
             val->val = find_macro(ident, macro) ? 1 : 0;
+            val->str = "0";
 
             cur->next = val;
             val->next = target;
@@ -825,6 +858,7 @@ static PP_Token* replace_ident_to_zero(PP_Token* tok){
             val->val = 0;
             cur->next = val;
             val->next = target->next;
+            val->str = "0";
             cur = val;
         }
 

@@ -124,3 +124,6 @@ int TEST_FUNCLIKE_MACRO = add(3, (1, 2, 4));
 
 #define CONVERT_TO_STRING(x)    #x
 char* TEST_HASH_OPERATER =  CONVERT_TO_STRING(TEST_IS_OK?);
+
+#define concat_with_no(A) A ## _TEST_IS_OK
+int concat_with_no(TOKEN_CONCAT);
