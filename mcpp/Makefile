@@ -26,6 +26,11 @@ test:$(TARGET)
 	$(TARGETDIR)/$(TARGET) $(TEST_DIR)/tst_preprocess.h -i $(TEST_DIR)/inc -o $(TEST_DIR)/output.h
 	diff -Bw $(TEST_DIR)/correct_output.h $(TEST_DIR)/output.h
 
+test_std:$(TARGET)
+	$(TARGETDIR)/$(TARGET) $(TEST_DIR)/stdlib/tst_stdlib_include.h -o $(TEST_DIR)/stdlib/std_output.h
+	cc -E -P $(TEST_DIR)/stdlib/tst_stdlib_include.h -o $(TEST_DIR)/stdlib/correct_std_output.h
+	diff -Bw $(TEST_DIR)/stdlib/correct_std_output.h $(TEST_DIR)/stdlib/std_output.h
+
 clean:
 	-rm -f $(OBJECTS) $(DEPENDS) $(TARGET)
 	-rm $(TARGETDIR)/mcpp
