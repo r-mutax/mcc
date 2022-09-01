@@ -142,7 +142,7 @@ PP_Token* ptk_tokenize(char* p){
             continue;
         }
 
-        if(strchr("+-*/,()<>:;={}&|^[].?!%", *p)){
+        if(strchr("+-*/,()<>:;={}&|^[].?!%~", *p)){
             cur = new_token(PTK_OPERAND, cur, p++, 1);
             continue;
         }

@@ -50,12 +50,16 @@ static PP_Token* get_before_eof(PP_Token* tok);
 static PP_Token* get_end_token(PP_Token* tok);
 static PP_Token* get_begore_eol(PP_Token* tok);
 
+extern char* PRE_MACRO[];
+
 #define PRE_MACRO___STDC_VERSION__ "#define __STDC_VERSION__ 201112"
 #define PRE_MACRO___x86_64__ "#define __x86_64__ 1"
 
 PP_Token* init_preprocess(){
-    add_predefined_macro(PRE_MACRO___STDC_VERSION__);
-    add_predefined_macro(PRE_MACRO___x86_64__);
+
+    for(int i = 0; i < 348; i++){
+        add_predefined_macro(PRE_MACRO[i]);
+    }
 }
 
 // preprocess exchange 
@@ -251,7 +255,7 @@ static bool is_funclike_macro(PP_Token* tok){
 
 static void add_macro_objlike(PP_Token* tok){
     if(find_macro(tok, macro)){
-        error_at(tok, "[error] redefined macro.\n");
+        //error_at(tok, "[error] redefined macro.\n");
     }
 
     Macro* mac = calloc(1, sizeof(Macro));
@@ -259,7 +263,11 @@ static void add_macro_objlike(PP_Token* tok){
     mac->def = copy_token(tok);
 
     if(get_next(tok)->kind != PTK_NEWLINE){
-         mac->val = copy_token_eol(get_next(tok));
+        mac->val = copy_token_eol(get_next(tok));
+    } else {
+        PP_Token* pm = calloc(1, sizeof(PP_Token));
+        pm->kind = PTK_PLACE_MAKER;
+        mac->val = pm;
     }
 
     mac->next = macro;
@@ -268,7 +276,7 @@ static void add_macro_objlike(PP_Token* tok){
 
 static void add_macro_funclike(PP_Token* tok){
     if(find_macro(tok, macro)){
-        error_at(tok, "[error] Redefined macro.\n");
+        //error_at(tok, "[error] Redefined macro.\n");
     }
 
     Macro* mac = calloc(1, sizeof(Macro));
@@ -345,19 +353,20 @@ static PP_Token* replace_token(PP_Token* tok, Macro* mac, Macro* list){
         Macro* m = find_macro(target, macro);
         if(m){
             cur->next = replace_token(target, m, list);
+            continue;
         }
         cur = get_next(cur);
     }
 
     // connect token
-    cur = val;
+    cur = head.next;
     while(get_next(cur)){
         cur = get_next(cur);
     }
 
     cur->next = to_tok;
 
-    return val;
+    return head.next;
 
 }
 
@@ -417,6 +426,7 @@ static PP_Token* expand_funclike_macro(PP_Token* target, Macro* mac, PP_Token** 
             Macro* m = find_macro(tok, param_list);
             if(m){
                 PP_Token* arg = copy_token_list(m->val);
+                arg = expand_macros(arg);
                 get_end_token(arg)->next = tok->next;
                 cur->next = arg;
             }
@@ -470,9 +480,16 @@ static PP_Token* copy_function_argument(PP_Token** p_target){
         if(equal_token("(", tok)){
             do {
                 cur = cur->next = copy_token(tok);
-                tok = get_next(tok);
+                tok = tok->next;
             } while(!equal_token(")", tok));
             cur = cur->next = copy_token(tok);
+
+            // convert newline token to space token.
+            if(cur->kind == PTK_NEWLINE){
+                cur->kind = PTK_SPACE;
+                cur->str = " ";
+                cur->len = 1;
+            }
             tok = get_next(tok);        // skipt ")" token.
         }
 
@@ -485,6 +502,14 @@ static PP_Token* copy_function_argument(PP_Token** p_target){
         }
 
         cur = cur->next = copy_token(tok);
+
+        // convert newline token to space token.
+        if(cur->kind == PTK_NEWLINE){
+            cur->kind = PTK_SPACE;
+            cur->str = " ";
+            cur->len = 1;
+        }
+
         tok = get_next(tok);
     }
 
@@ -511,7 +536,9 @@ static PP_Token* convert_token_list_to_string(PP_Token* tok){
     // convert token list to string constant.
     cur = tok;
     while(cur){
-        strcat(ret->str, cur->str);
+        if(cur->kind != PTK_PLACE_MAKER){
+            strcat(ret->str, cur->str);
+        }
         cur = get_next(cur);
     }
 
@@ -834,7 +861,7 @@ static PP_Token* expand_macros(PP_Token* tok){
     PP_Token* cur = &head;
     head.next = tok;
 
-    while(get_next(cur)->kind != PTK_NEWLINE){
+    while(cur->next && get_next(cur)->kind != PTK_NEWLINE){
         PP_Token* target = get_next(cur);
         Macro* mac = find_macro(target, macro);
         if(mac){
@@ -860,6 +887,7 @@ static PP_Token* replace_ident_to_zero(PP_Token* tok){
             val->next = target->next;
             val->str = "0";
             cur = val;
+            continue;
         }
 
         cur = get_next(cur);

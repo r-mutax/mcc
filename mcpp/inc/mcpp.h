@@ -34,6 +34,7 @@ typedef enum {
     PTK_NEWLINE,
     PTK_SPACE,
     PTK_HASH_HASH,
+    PTK_PLACE_MAKER,
     PTK_EOF
 } PP_TokenKind;
 
@@ -88,7 +89,7 @@ typedef enum {
     SRC_FILE_PATH = 0,
     INCLUDE_PATH,
     OUTPUT_FILE
-}MCPP_OPTION;
+} MCPP_OPTION;
 
 // -----------------------------------------------------------------
 
