@@ -142,6 +142,8 @@ void output_preprocessed_file(PP_Token* tok, FILE* fp){
                 fprintf(fp, "%c", tok->val);
                 fprintf(fp, "'");
                 break;
+            case PTK_PLACE_MAKER:
+                break;
             default:
                 fprintf(fp, "%s", tok->str);
                 break;
