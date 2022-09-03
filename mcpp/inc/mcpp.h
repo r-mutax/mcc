@@ -44,6 +44,7 @@ struct PP_Token{
     int             val;
     char*           str;
     int             len;
+    bool            is_hex;
 
     char*           pos;
     long            row;

@@ -190,12 +190,15 @@ PP_Token* ptk_tokenize(char* p){
                 char* q = p;
                 cur->val = strtol(p, &p, 16);
                 cur->len = p - q;
+                cur->is_hex = true;
+                cur->str = strndup(q, cur->len);
                 continue;
             } else if(isdigit(*(p + 1))){
                 cur = new_token(PTK_NUM, cur, p, 0);
                 char* q = p;
                 cur->val = strtol(p, &p, 8);
                 cur->len = p - q;
+                cur->str = strndup(q, cur->len);
                 continue;
             }
         }
