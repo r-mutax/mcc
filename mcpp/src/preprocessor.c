@@ -55,7 +55,7 @@ extern char* PRE_MACRO[];
 #define PRE_MACRO___STDC_VERSION__ "#define __STDC_VERSION__ 201112"
 #define PRE_MACRO___x86_64__ "#define __x86_64__ 1"
 
-#define BREAK_SRC "/usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h"
+#define BREAK_SRC "/usr/include/wchar.h"
 
 PP_Token* init_preprocess(){
 
@@ -76,7 +76,7 @@ PP_Token* preprocess(PP_Token* tok){
 
         if(target->src){
             if(memcmp(target->src->path, BREAK_SRC, strlen(BREAK_SRC)) == 0){
-                if(target->row == 20){
+                if(target->row == 693){
                     int a = 0;
                 }
             }
@@ -517,6 +517,14 @@ static PP_Token* copy_function_argument(PP_Token** p_target){
         if(equal_token("(", tok)){
             do {
                 cur = cur->next = copy_token(tok);
+
+                // convert newline token to space tokne.
+                if(cur->kind == PTK_NEWLINE){
+                    cur->kind = PTK_SPACE;
+                    cur->str = " ";
+                    cur->len = 1;
+                }
+
                 tok = tok->next;
             } while(!equal_token(")", tok));
             cur = cur->next = copy_token(tok);
