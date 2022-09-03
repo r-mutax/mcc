@@ -148,6 +148,12 @@ void output_preprocessed_file(PP_Token* tok, FILE* fp){
             //     fprintf(fp, "%s", tok->str);
             //     fprintf(fp, "# %s %d", tok->src->path, tok->row);
             //     break;
+            case PTK_NUM:
+                fprintf(fp, "%s", tok->str);
+                if(tok->is_hex){
+                    int a = 0;
+                }
+                break;
             default:
                 fprintf(fp, "%s", tok->str);
                 break;

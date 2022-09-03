@@ -7,7 +7,7 @@
 //#include <limits.h>
 #include <locale.h>
 #include <setjmp.h>
-//#include <signal.h>
+#include <signal.h>
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -21,4 +21,4 @@
 #include <wctype.h>
 #include <complex.h>
 #include <inttypes.h>
-// #include <fenv.h>
+#include <fenv.h>
