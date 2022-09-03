@@ -144,6 +144,10 @@ void output_preprocessed_file(PP_Token* tok, FILE* fp){
                 break;
             case PTK_PLACE_MAKER:
                 break;
+            // case PTK_NEWLINE:
+            //     fprintf(fp, "%s", tok->str);
+            //     fprintf(fp, "# %s %d", tok->src->path, tok->row);
+            //     break;
             default:
                 fprintf(fp, "%s", tok->str);
                 break;
