@@ -146,8 +146,12 @@ void output_preprocessed_file(PP_Token* tok, FILE* fp){
                 break;
             // case PTK_NEWLINE:
             //     fprintf(fp, "%s", tok->str);
-            //     fprintf(fp, "# %s %d", tok->src->path, tok->row);
+            //     fprintf(fp, "# %s %d\n", tok->src->path, tok->row);
             //     break;
+            case PTK_SPACE:
+                // space token length convert to one character.
+                fprintf(fp, " ");
+                break;
             case PTK_NUM:
                 fprintf(fp, "%s", tok->str);
                 if(tok->is_hex){
