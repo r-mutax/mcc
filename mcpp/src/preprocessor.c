@@ -48,12 +48,14 @@ static PP_Token* get_endif(PP_Token* tok);
 static PP_Token* get_next(PP_Token* tok);
 static PP_Token* get_before_eof(PP_Token* tok);
 static PP_Token* get_end_token(PP_Token* tok);
-static PP_Token* get_begore_eol(PP_Token* tok);
+static PP_Token* get_before_eol(PP_Token* tok);
 
 extern char* PRE_MACRO[];
 
 #define PRE_MACRO___STDC_VERSION__ "#define __STDC_VERSION__ 201112"
 #define PRE_MACRO___x86_64__ "#define __x86_64__ 1"
+
+#define BREAK_SRC "/usr/include/x86_64-linux-gnu/bits/mathcalls-helper-functions.h"
 
 PP_Token* init_preprocess(){
 
@@ -71,6 +73,14 @@ PP_Token* preprocess(PP_Token* tok){
 
     do {
         PP_Token* target = cur->next;
+
+        if(target->src){
+            if(memcmp(target->src->path, BREAK_SRC, strlen(BREAK_SRC)) == 0){
+                if(target->row == 20){
+                    int a = 0;
+                }
+            }
+        }
 
         if(target->kind == PTK_HASH){
             
@@ -352,6 +362,9 @@ static PP_Token* replace_token(PP_Token* tok, Macro* mac, Macro* list){
 
         Macro* m = find_macro(target, macro);
         if(m){
+            if(cur->next->kind == PTK_SPACE){
+                cur = cur->next;
+            }
             cur->next = replace_token(target, m, list);
             continue;
         }
@@ -410,16 +423,36 @@ static PP_Token* expand_funclike_macro(PP_Token* target, Macro* mac, PP_Token** 
         } else if(tok->kind == PTK_HASH_HASH){
             tok = get_next(tok);
 
-            int len = cur->len + tok->len + 1;
-            char* p = calloc(len, sizeof(char));
-            strcpy(p, cur->str);
-            strcat(p, tok->str);
+            if(cur->kind == PTK_PLACE_MAKER
+                && tok->kind == PTK_PLACE_MAKER){
+                cur->next = tok->next;
+            } else if(cur->kind == PTK_PLACE_MAKER){
+                cur->next = tok;
+            } else {
 
-            PP_Token* concat_token = ptk_tokenize(p);
-            PP_Token* eot = get_begore_eol(concat_token);
-            eot->next = tok->next;
+                Macro* m = find_macro(tok, param_list);
+                if(m){
+                    PP_Token* arg = copy_token_list(m->val);
+                    get_end_token(arg)->next = tok->next;
+                    tok = arg;
+                }
 
-            memcpy(cur, concat_token, sizeof(PP_Token));
+                if(tok->kind == PTK_PLACE_MAKER){
+                    cur->next = tok->next;
+
+                } else {
+                    int len = cur->len + tok->len + 1;
+                    char* p = calloc(len, sizeof(char));
+                    strcpy(p, cur->str);
+                    strcat(p, tok->str);
+
+                    PP_Token* concat_token = ptk_tokenize(p);
+                    PP_Token* eot = get_before_eol(concat_token);
+                    eot->next = tok->next;
+
+                    memcpy(cur, concat_token, sizeof(PP_Token));
+                }
+            }
             continue;
             
         } else {
@@ -428,6 +461,10 @@ static PP_Token* expand_funclike_macro(PP_Token* target, Macro* mac, PP_Token** 
                 PP_Token* arg = copy_token_list(m->val);
                 arg = expand_macros(arg);
                 get_end_token(arg)->next = tok->next;
+
+                if(cur->next->kind == PTK_SPACE){
+                    cur = cur->next;
+                }
                 cur->next = arg;
             }
         }
@@ -514,6 +551,11 @@ static PP_Token* copy_function_argument(PP_Token** p_target){
     }
 
     *p_target = tok;
+
+    if(!head.next){
+        head.next = calloc(1, sizeof(PP_Token));
+        head.next->kind = PTK_PLACE_MAKER;
+    }
 
     return head.next;
 }
@@ -763,7 +805,7 @@ static PP_Token* get_before_eof(PP_Token* tok){
     return NULL;
 }
 
-static PP_Token* get_begore_eol(PP_Token* tok){
+static PP_Token* get_before_eol(PP_Token* tok){
     PP_Token head;
     PP_Token* cur = &head;
     head.next = tok;
