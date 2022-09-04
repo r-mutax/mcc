@@ -3,6 +3,7 @@
 #define STDLIB_PATH "/usr/include/"
 #define ADDITIVE_STDLIB_PATH "/usr/lib/gcc/x86_64-linux-gnu/9/include/"
 #define CSTDLIB_INC_PATH "/usr/include/x86_64-linux-gnu/"
+#define LOCAL_INCLUDE "/usr/local/include"
 
 static void read_arguments(int argc, char** argv);
 
@@ -26,9 +27,10 @@ int main(int argc, char** argv){
     add_include_path(cdir);
 
     // Add Stdlib directory to std-include path
-    add_std_include_path(STDLIB_PATH);
     add_std_include_path(ADDITIVE_STDLIB_PATH);
+    add_std_include_path(LOCAL_INCLUDE);
     add_std_include_path(CSTDLIB_INC_PATH);
+    add_std_include_path(STDLIB_PATH);
 
     // init-preprocess
     init_preprocess();

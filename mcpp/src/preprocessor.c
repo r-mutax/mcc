@@ -4,6 +4,7 @@ static Macro* macro;
 
 // include directive
 static PP_Token* read_include(PP_Token* hash);
+static PP_Token* read_include_next(PP_Token* hash);
 static char* get_include_filename(PP_Token* hash);
 
 // if-group section
@@ -59,7 +60,7 @@ extern char* PRE_MACRO[];
 
 PP_Token* init_preprocess(){
 
-    for(int i = 0; i < 348; i++){
+    for(int i = 0; i < 347; i++){
         add_predefined_macro(PRE_MACRO[i]);
     }
 }
@@ -87,7 +88,10 @@ PP_Token* preprocess(PP_Token* tok){
             switch(get_preprocess_kind(target)){
                 case PP_INCLUDE:
                     cur->next = read_include(target);
-                    continue;;
+                    continue;
+                case PP_INCLUDE_NEXT:
+                    cur->next = read_include_next(target);
+                    continue;
                 case PP_IF:
                 case PP_IFDEF:
                 case PP_IFNDEF:
@@ -165,6 +169,38 @@ static PP_Token* read_include(PP_Token* hash){
     return inc;
 }
 
+static PP_Token* read_include_next(PP_Token* hash){
+
+    PP_Token* val = get_directive_value(hash);
+
+    char* filepath_1 = NULL;
+    if(val->kind == PTK_STRING_CONST){
+        filepath_1 = strdup(val->str);
+    } else if(equal_token("<", val)){
+        val = get_next(val);
+
+        char filepath_2[256] = { 0 };
+        while(!equal_token(">", val)){
+            char buf[256] = { 0 };
+            sprintf(buf, "%s", val->str);
+            strcat(filepath_2, buf);
+            val = get_next(val);
+        }
+
+        filepath_1 = strdup(filepath_2);
+    }
+
+    char* filepath = find_include_next_file(filepath_1);
+    PP_Token* inc = ptk_tokenize_file(filepath);
+
+    // reconnect token
+    PP_Token* newline = get_next_newline(hash);
+    PP_Token* bef_eof = get_before_eof(inc);
+    bef_eof->next = newline->next;
+
+    return inc;
+}
+
 static char* get_include_filename(PP_Token* hash){
     PP_Token* cur = get_directive_value(hash);
 
@@ -201,6 +237,8 @@ static PP_KIND get_preprocess_kind(PP_Token* token){
     PP_KIND kind = PP_NONE;
     if(equal_token("include", target)){
         kind = PP_INCLUDE;
+    } else if(equal_token("include_next", target)){
+        kind = PP_INCLUDE_NEXT;
     } else if(equal_token("if", target)){
         kind = PP_IF;
     } else if(equal_token("ifdef", target)){
