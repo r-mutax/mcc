@@ -123,6 +123,50 @@ char* find_std_include_file(char* include_name){
     return NULL;
 }
 
+
+char* find_include_next_file(char* include_name){
+
+    bool is_found = false;
+
+    // step 1 serch at StdIncDir
+    IncludeDir* cur = StdIncDir;
+    while(cur){
+        char path[256] = { 0 };
+        strcpy(path, cur->dir);
+        strcat(path, include_name);
+        if(is_file_exist(path)){
+            if(is_found){
+                char* ret = calloc(strlen(path) + 2, sizeof(char));
+                strcpy(ret, path);
+                return ret;
+            } else {
+                is_found = true;
+            }
+        }
+        cur = cur->next;
+    }
+
+    // step 2 serch at IncDir
+    cur = IncDir;
+    while(cur){
+        char path[256] = { 0 };
+        strcpy(path, cur->dir);
+        strcat(path, include_name);
+        if(is_file_exist(path)){
+            if(is_found){
+                char* ret = calloc(strlen(path) + 2, sizeof(char));
+                strcpy(ret, path);
+                return ret;
+            } else {
+                is_found = true;
+            }
+        }
+        cur = cur->next;
+    }
+
+    return NULL;
+}
+
 char* get_file_directory(char* filename, char* directory){
     int len = strrchr(filename, '/') - filename + 1;
     strncpy(directory, filename, len);

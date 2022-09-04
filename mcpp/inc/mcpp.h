@@ -54,6 +54,7 @@ struct PP_Token{
 typedef enum {
     PP_NONE = 0,
     PP_INCLUDE,
+    PP_INCLUDE_NEXT,
     PP_IF,
     PP_IFDEF,
     PP_IFNDEF,
@@ -110,6 +111,7 @@ void add_include_path(char* path);
 void add_std_include_path(char* path);
 char* find_include_file(char* include_name);
 char* find_std_include_file(char* include_name);
+char* find_include_next_file(char* include_name);
 char* get_file_directory(char* filename, char* directory);
 void output_preprocessed_file(PP_Token* tok, FILE* fp);
 

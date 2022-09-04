@@ -28,7 +28,7 @@ test:$(TARGET)
 
 test_std:$(TARGET)
 	$(TARGETDIR)/$(TARGET) $(TEST_DIR)/stdlib/tst_stdlib_include.h -o $(TEST_DIR)/stdlib/std_output.h
-	cc -E -P $(TEST_DIR)/stdlib/tst_stdlib_include.h -o $(TEST_DIR)/stdlib/correct_std_output.h
+	cc -E -P -std=c11 $(TEST_DIR)/stdlib/tst_stdlib_include.h -o $(TEST_DIR)/stdlib/correct_std_output.h
 	diff -Bw $(TEST_DIR)/stdlib/correct_std_output.h $(TEST_DIR)/stdlib/std_output.h
 
 clean:
