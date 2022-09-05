@@ -10,6 +10,9 @@ static void read_arguments(int argc, char** argv);
 char* src_path = NULL;
 FILE* output_file = NULL;
 
+// option flags
+bool opt_debug_output = false;
+
 int main(int argc, char** argv){
 
     if(argc < 2){
@@ -61,6 +64,15 @@ static void read_arguments(int argc, char** argv){
                 case 'o':
                 case 'O':
                     opt = OUTPUT_FILE;
+                    break;
+                case 'd':
+                case 'D':
+                    switch(argv[i][2]){
+                        case 'o':
+                        case 'O':
+                            opt_debug_output = true;
+                            break;
+                    }
                     break;
             }
             continue;

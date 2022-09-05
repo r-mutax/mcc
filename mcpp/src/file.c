@@ -1,5 +1,7 @@
 #include "mcpp.h"
 
+extern bool opt_debug_output;
+
 static IncludeDir* IncDir = NULL;
 static IncludeDir* IncTail = NULL;
 static IncludeDir* StdIncDir = NULL;
@@ -200,11 +202,11 @@ void output_preprocessed_file(PP_Token* tok, FILE* fp){
                 break;
             case PTK_NEWLINE:
                 fprintf(fp, "\n");
-                // if(!is_top_line){
-                //     fprintf(fp, "%s", tok->str);
-                //     fprintf(fp, "# %s %d\n", tok->src->path, tok->row);
-                //     is_top_line = true;
-                // }
+                if(opt_debug_output && !is_top_line){
+                    fprintf(fp, "%s", tok->str);
+                    fprintf(fp, "# %s %ld\n", tok->src->path, tok->row);
+                    is_top_line = true;
+                }
                 break;
             case PTK_SPACE:
                 if(!is_top_line){
