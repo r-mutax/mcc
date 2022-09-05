@@ -56,7 +56,7 @@ extern char* PRE_MACRO[];
 #define PRE_MACRO___STDC_VERSION__ "#define __STDC_VERSION__ 201112"
 #define PRE_MACRO___x86_64__ "#define __x86_64__ 1"
 
-#define BREAK_SRC "/usr/include/wchar.h"
+#define BREAK_SRC "/usr/include/x86_64-linux-gnu/bits/types.h"
 
 PP_Token* init_preprocess(){
 
@@ -77,7 +77,7 @@ PP_Token* preprocess(PP_Token* tok){
 
         if(target->src){
             if(memcmp(target->src->path, BREAK_SRC, strlen(BREAK_SRC)) == 0){
-                if(target->row == 693){
+                if(target->row == 144){
                     int a = 0;
                 }
             }
@@ -378,7 +378,7 @@ static PP_Token* replace_token(PP_Token* tok, Macro* mac, Macro* list){
         val = expand_funclike_macro(tok, mac, &to_tok);
     } else {
         val = copy_token_list(mac->val);
-        to_tok = get_next(tok);
+        to_tok = tok->next;
     }
 
     if(!val){
@@ -391,6 +391,10 @@ static PP_Token* replace_token(PP_Token* tok, Macro* mac, Macro* list){
     PP_Token* cur = &head;
     while(cur->next){
         PP_Token* target = get_next(cur);
+
+        if(!target){
+            break;
+        }
 
         if(is_expanded(target, list)){
             // "target" is expanded macro, skip expanding macro.

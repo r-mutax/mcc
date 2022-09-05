@@ -1,5 +1,7 @@
 #include "mcpp.h"
 
+extern bool opt_debug_output;
+
 static IncludeDir* IncDir = NULL;
 static IncludeDir* IncTail = NULL;
 static IncludeDir* StdIncDir = NULL;
@@ -173,7 +175,14 @@ char* get_file_directory(char* filename, char* directory){
 }
 
 void output_preprocessed_file(PP_Token* tok, FILE* fp){
+
+    bool is_top_line = true;
+
     while(tok){
+
+        if(tok->kind != PTK_SPACE && tok->kind != PTK_NEWLINE){
+            is_top_line = false;
+        }
 
         switch(tok->kind){
             case PTK_STRING_CONST:
@@ -184,17 +193,26 @@ void output_preprocessed_file(PP_Token* tok, FILE* fp){
             case PTK_CHAR_CONST:
                 fprintf(fp, "'");
                 fprintf(fp, "%c", tok->val);
+                if(tok->val == '\\'){
+                    fprintf(fp, "%c", tok->val);
+                }
                 fprintf(fp, "'");
                 break;
             case PTK_PLACE_MAKER:
                 break;
-            // case PTK_NEWLINE:
-            //     fprintf(fp, "%s", tok->str);
-            //     fprintf(fp, "# %s %d\n", tok->src->path, tok->row);
-            //     break;
+            case PTK_NEWLINE:
+                fprintf(fp, "\n");
+                if(opt_debug_output && !is_top_line){
+                    fprintf(fp, "%s", tok->str);
+                    fprintf(fp, "# %s %ld\n", tok->src->path, tok->row);
+                    is_top_line = true;
+                }
+                break;
             case PTK_SPACE:
-                // space token length convert to one character.
-                fprintf(fp, " ");
+                if(!is_top_line){
+                    // space token length convert to one character.
+                    fprintf(fp, " ");
+                }
                 break;
             case PTK_NUM:
                 fprintf(fp, "%s", tok->str);
