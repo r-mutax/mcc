@@ -9,6 +9,8 @@ static bool check_keyword(char* keyword, char** p, PP_Token** tok, PP_TokenKind 
 static bool is_keyword(char* lhs, char* rhs);
 static bool is_ident1(char p);
 static bool is_ident2(char p);
+static PP_Token* read_string_literal(char* p, PP_Token* cur);
+static char* get_string_literal_end(char* p);
 
 PP_Token* ptk_tokenize_file(char* path){
 
@@ -91,24 +93,23 @@ PP_Token* ptk_tokenize(char* p){
         }
 
         if(*p == '"'){
-            char* start = ++p;
-            while(*p != '"'){
-                p++;
-            }
-            cur = new_token(PTK_STRING_CONST, cur, start, p - start);
-            p++;
+            cur = read_string_literal(p, cur);
+            p += cur->len + 2;
             continue;
         }
 
-        if(*p == '\''){
+        if(*p == 0x27){
             cur = new_token(PTK_CHAR_CONST, cur, p, 1);
 
             // escape sequence
-            if(*(p + 1) == '\\'){
+            if(*(p + 1) == 0x5c){
                 p += 2;
                 switch(*p){
                     case 'n':
                         cur->val = 0x0a;
+                        break;
+                    case 'r':
+                        cur->val = 0x2d;
                         break;
                     case '0':
                         cur->val = 0x00;
@@ -116,7 +117,7 @@ PP_Token* ptk_tokenize(char* p){
                     case 't':
                         cur->val = 0x09;
                         break;
-                    case '\\':
+                    case 0x5c:
                         cur->val = 0x5c;
                         break;
                 }
@@ -124,7 +125,7 @@ PP_Token* ptk_tokenize(char* p){
                 cur->val = *(++p);
             }
 
-            while(*p != '\''){
+            while(*p != 0x27){
                 p++;
             }
             p++;
@@ -232,6 +233,9 @@ PP_Token* ptk_tokenize(char* p){
             continue;
         }
 
+        if(cur_file){
+            fprintf(stderr, "filepath : %s, line : %ld\n", cur_file->path, row);
+        }
         error("find cannnot tokenize words.\n");
     }
 
@@ -288,4 +292,24 @@ static bool check_keyword(char* keyword, char** p, PP_Token** tok, PP_TokenKind 
     }
 
     return false;
+}
+
+static PP_Token* read_string_literal(char* p, PP_Token* cur){
+    char* start = p + 1;
+    char* end = get_string_literal_end(p + 1);
+
+    PP_Token* ret = new_token(PTK_STRING_CONST, cur, start, end - start);
+    return ret;
+}
+
+// find end of double-quote
+static char* get_string_literal_end(char* p){
+    char* start = p;
+    for(; *p != '"'; p++){
+        if(*p == '\\') {
+            // escape sequence skip next character.
+            p++;
+        }
+    }
+    return p;
 }
