@@ -192,9 +192,23 @@ void output_preprocessed_file(PP_Token* tok, FILE* fp){
                 break;
             case PTK_CHAR_CONST:
                 fprintf(fp, "'");
-                fprintf(fp, "%c", tok->val);
-                if(tok->val == '\\'){
-                    fprintf(fp, "%c", tok->val);
+
+                switch(tok->val){
+                    case 0x0a:
+                        fprintf(fp, "\\n");     // LF
+                        break;
+                    case 0x00:
+                        fprintf(fp, "\\0");     // null
+                        break;
+                    case 0x09:
+                        fprintf(fp, "\\t");     // horizontal tab
+                        break;
+                    case 0x5c:                  //  \\ mark
+                        fprintf(fp, "\\\\");
+                        break;
+                    default:
+                        fprintf(fp, "%c", tok->val);
+                        break;
                 }
                 fprintf(fp, "'");
                 break;
@@ -219,6 +233,12 @@ void output_preprocessed_file(PP_Token* tok, FILE* fp){
                 if(tok->is_hex){
                     int a = 0;
                 }
+                break;
+            case PTK_NOTHING:
+            case PTK_EOF:
+            //case PTK_PP_KEYWORD:
+            case PTK_HASH:
+            case PTK_HASH_HASH:
                 break;
             default:
                 fprintf(fp, "%s", tok->str);

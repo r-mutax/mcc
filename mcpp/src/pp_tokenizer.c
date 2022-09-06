@@ -101,9 +101,28 @@ PP_Token* ptk_tokenize(char* p){
         }
 
         if(*p == '\''){
-            char a = *(++p);
             cur = new_token(PTK_CHAR_CONST, cur, p, 1);
-            cur->val = a;
+
+            // escape sequence
+            if(*(p + 1) == '\\'){
+                p += 2;
+                switch(*p){
+                    case 'n':
+                        cur->val = 0x0a;
+                        break;
+                    case '0':
+                        cur->val = 0x00;
+                        break;
+                    case 't':
+                        cur->val = 0x09;
+                        break;
+                    case '\\':
+                        cur->val = 0x5c;
+                        break;
+                }
+            } else {
+                cur->val = *(++p);
+            }
 
             while(*p != '\''){
                 p++;
