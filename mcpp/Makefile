@@ -13,6 +13,11 @@ DEPENDS			= $(OBJECTS:.o=.d)
 
 TEST_DIR		= $(CUR_MCPP_DIR)/../test/mcpp
 
+TEST_S_DIR		= $(TEST_DIR)/self_host
+TEST_I_1		= $(addprefix $(TEST_S_DIR)/,$(notdir $(SOURCES:.c=1.i)))
+TEST_I_2		= $(addprefix $(TEST_S_DIR)/,$(notdir $(SOURCES:.c=2.i)))
+TEST_I_DIFF		= $(addprefix $(TEST_S_DIR)/,$(notdir $(SOURCES:.c=.diff)))
+
 
 $(TARGET) : $(OBJECTS)
 	-mkdir -p $(TARGETDIR)
@@ -31,20 +36,28 @@ test_std:$(TARGET)
 	cc -E -P -std=c11 $(TEST_DIR)/stdlib/tst_stdlib_include.h -o $(TEST_DIR)/stdlib/correct_std_output.h
 	diff -Bw $(TEST_DIR)/stdlib/correct_std_output.h $(TEST_DIR)/stdlib/std_output.h
 
-test_self_host:$(TARGET)
-	# self host test at mcpp.
+$(TEST_S_DIR)/%1.i: $(SRCDIR)/%.c
+	######### EXEC MCPP $< #########
 	-mkdir -p $(TEST_DIR)/self_host
-	$(TARGETDIR)/$(TARGET) $(SRCDIR)/main.c -I $(INCDIR) -o $(TEST_DIR)/self_host/main1.i
-	cc -E -P -std=c11 $(SRCDIR)/main.c -I$(INCDIR) -o $(TEST_DIR)/self_host/main2.i
-	diff -Bw $(TEST_DIR)/self_host/main1.i $(TEST_DIR)/self_host/main2.i
+	$(TARGETDIR)/$(TARGET) $< -i $(INCDIR) -o $@
 
-	# $(TARGETDIR)/$(TARGET) $(SRCDIR)/expr.c -I $(INCDIR) -o $(TEST_DIR)/self_host/expr1.i
-	# cc -E -P -std=c11 $(SRCDIR)/expr.c -I$(INCDIR) -o $(TEST_DIR)/self_host/expr2.i
-	# diff -Bw $(TEST_DIR)/self_host/expr1.i $(TEST_DIR)/self_host/expr2.i
+$(TEST_S_DIR)/%2.i: $(SRCDIR)/%.c
+	######### EXEC cc $< #########
+	-mkdir -p $(TEST_DIR)/self_host
+	cc -E -P -std=c11 $< -I$(INCDIR) -o $@
+
+$(TEST_S_DIR)/%.diff: $(SRCDIR)/%.c
+	diff -Bw $(subst .c,1.i,$(subst $(SRCDIR),$(TEST_S_DIR),$<)) $(subst .c,2.i, $(subst $(SRCDIR),$(TEST_S_DIR),$<)) 
+
+test_self_host:clean_self_host $(TARGET) $(TEST_I_1) $(TEST_I_2) $(TEST_I_DIFF)
+	echo test complete
+
+clean_self_host:
+	-rm -f $(TEST_I_1)
 
 clean:
 	-rm -f $(OBJECTS) $(DEPENDS) $(TARGET)
 	-rm $(TARGETDIR)/mcpp
 	-rmdir $(OBJDIR)
 
-.PHONY: clean test
+.PHONY: clean test test_std test_self_host clean_self_host
