@@ -209,6 +209,9 @@ void output_preprocessed_file(PP_Token* tok, FILE* fp){
                     case 0x5c:                  //  \\ mark
                         fprintf(fp, "\\\\");
                         break;
+                    case 0x27:
+                        fprintf(fp, "\\\'");
+                        break;
                     default:
                         fprintf(fp, "%c", tok->val);
                         break;

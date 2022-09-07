@@ -121,6 +121,10 @@ PP_Token* ptk_tokenize(char* p){
                     case 0x5c:              // back slash
                         cur->val = 0x5c;
                         break;
+                    case 0x27:
+                        cur->val = 0x27;
+                        p++;
+                        break;
                 }
             } else {
                 cur->val = *(++p);
