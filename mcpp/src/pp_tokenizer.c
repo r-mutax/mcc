@@ -59,11 +59,11 @@ PP_Token* ptk_tokenize(char* p){
             continue;
         }
 
-        if(isspace(*p)){
+        if(isspace(*p) && *p != '\n'){
             char* start = p;
             do { 
                 p++;
-            } while(isspace(*p));
+            } while(isspace(*p) && *p != '\n');
             cur = new_token(PTK_SPACE, cur, start, p - start);
             continue;
         }
@@ -74,6 +74,7 @@ PP_Token* ptk_tokenize(char* p){
                 p++;
             }
             p++;
+            cur = new_token(PTK_NEWLINE, cur, p, 1);
             continue;
         }
 
@@ -106,18 +107,18 @@ PP_Token* ptk_tokenize(char* p){
                 p += 2;
                 switch(*p){
                     case 'n':
-                        cur->val = 0x0a;
+                        cur->val = 0x0a;    // LF
                         break;
                     case 'r':
-                        cur->val = 0x2d;
+                        cur->val = 0xd;     // CR
                         break;
                     case '0':
-                        cur->val = 0x00;
+                        cur->val = 0x00;    // 0
                         break;
                     case 't':
-                        cur->val = 0x09;
+                        cur->val = 0x09;    // Horizontal Tab
                         break;
-                    case 0x5c:
+                    case 0x5c:              // back slash
                         cur->val = 0x5c;
                         break;
                 }

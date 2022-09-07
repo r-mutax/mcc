@@ -197,7 +197,7 @@ void output_preprocessed_file(PP_Token* tok, FILE* fp){
                     case 0x0a:
                         fprintf(fp, "\\n");     // LF
                         break;
-                    case 0x2d:
+                    case 0xd:
                         fprintf(fp, "\\r");      // CR
                         break;
                     case 0x00:

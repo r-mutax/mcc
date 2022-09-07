@@ -56,7 +56,7 @@ extern char* PRE_MACRO[];
 #define PRE_MACRO___STDC_VERSION__ "#define __STDC_VERSION__ 201112"
 #define PRE_MACRO___x86_64__ "#define __x86_64__ 1"
 
-#define BREAK_SRC "/usr/include/x86_64-linux-gnu/bits/types.h"
+#define BREAK_SRC "/mnt/c/source/mcc/mcpp/src/pp_tokenizer.c"
 
 PP_Token* init_preprocess(){
 
@@ -77,7 +77,7 @@ PP_Token* preprocess(PP_Token* tok){
 
         if(target->src){
             if(memcmp(target->src->path, BREAK_SRC, strlen(BREAK_SRC)) == 0){
-                if(target->row == 144){
+                if(target->row == 211){
                     int a = 0;
                 }
             }
@@ -555,38 +555,23 @@ static PP_Token* copy_function_argument(PP_Token** p_target){
     PP_Token head = { 0 };
     PP_Token* cur = &head;
     PP_Token* tok = *p_target;
+
+    int level = 0;
     while(1){
+
         if(equal_token("(", tok)){
-            do {
-                cur = cur->next = copy_token(tok);
-
-                // convert newline token to space tokne.
-                if(cur->kind == PTK_NEWLINE){
-                    cur->kind = PTK_SPACE;
-                    cur->str = " ";
-                    cur->len = 1;
-                }
-
-                tok = tok->next;
-            } while(!equal_token(")", tok));
-            cur = cur->next = copy_token(tok);
-
-            // convert newline token to space token.
-            if(cur->kind == PTK_NEWLINE){
-                cur->kind = PTK_SPACE;
-                cur->str = " ";
-                cur->len = 1;
+            level++;
+        } else if(equal_token(",", tok)){
+            if(level == 0){
+                break;
             }
-            tok = get_next(tok);        // skipt ")" token.
-        }
-
-        if(equal_token(",", tok) || equal_token(")", tok)){
-            break;
-        }
-
-        if(tok->kind == PTK_EOF){
-            error_at(*p_target, "unexpected token.\n");
-        }
+        } else if(equal_token(")", tok)){
+            if(level == 0){
+                break;
+            } else {
+                level--;
+            }
+        } 
 
         cur = cur->next = copy_token(tok);
 
