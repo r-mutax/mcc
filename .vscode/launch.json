@@ -6,12 +6,12 @@
     "configurations": [
 
         {
-            "name": "GDB Debug for MCC.",
+            "name": "GDB Debug for MCC1.",
             "type": "cppdbg",
             "request": "launch",
             "program": "${command:extension.vscode-wsl-workspaceFolder}/bin/mcc1",
             "args": ["-c",
-                     "/mnt/c/source/mcc/test/mcc/test.s.i", 
+                     "/mnt/c/source/mcc/test/mcc1/test.s.i", 
                      "-o", 
                      "/mnt/c/source/mcc/test/test.s"],
             "stopAtEntry": false,

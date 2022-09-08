@@ -1,6 +1,6 @@
 #ifndef NODE_INC_H
 #define NODE_INC_H
-#include "mcc.h"
+#include "mcc1.h"
 
 // parser data definition ----------------------------------
 

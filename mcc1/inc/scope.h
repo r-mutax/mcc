@@ -1,4 +1,4 @@
-#include "mcc.h"
+#include "mcc1.h"
 
 void sc_init_scope();
 bool sc_is_grobal();

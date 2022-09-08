@@ -1,4 +1,4 @@
-#include "mcc.h"
+#include "mcc1.h"
 #include "node.h"
 #include "tokenize.h"
 #include "symtbl.h"

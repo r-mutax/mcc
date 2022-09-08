@@ -1,4 +1,4 @@
-#include "mcc.h"
+#include "mcc1.h"
 #include "tokenize.h"
 #include "node.h"
 #include "codegen.h"
@@ -11,7 +11,7 @@ FILE* output_file = NULL;
 
 int read_option(char argc, char** argv){
 
-    MCC_OPTION opt = C_SRC_FILE;
+    MCC1_OPTION opt = C_SRC_FILE;
 
     for(char i = 0; i < argc; i++){
         if(argv[i][0] == '-'){
@@ -46,7 +46,7 @@ int read_option(char argc, char** argv){
 int main(int argc, char **argv){
 
     if(argc < 2){
-        fprintf(stderr, "mcc: error: Invalid Argument num.\n");
+        fprintf(stderr, "mcc1: error: Invalid Argument num.\n");
     }
    
     output_file = stdout;

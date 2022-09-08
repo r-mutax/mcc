@@ -1,6 +1,6 @@
 #ifndef TOKENIZE_INC_H
 #define TOKENIZE_INC_H
-#include "mcc.h"
+#include "mcc1.h"
 
 // function definition ----------------------------
 Token*  tk_tokenize_file(char* path);

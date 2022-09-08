@@ -1,4 +1,4 @@
-#include "mcc.h"
+#include "mcc1.h"
 #include "tokenize.h"
 #include "type.h"
 #include "errormsg.h"
