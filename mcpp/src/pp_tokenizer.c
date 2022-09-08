@@ -106,24 +106,39 @@ PP_Token* ptk_tokenize(char* p){
             if(*(p + 1) == 0x5c){
                 p += 2;
                 switch(*p){
+                    case 'a':               // ring a bell
+                        cur->val = 0x07;
+                        break;
+                    case 'b':               // back space
+                        cur->val = 0x08;
+                        break;
+                    case 'f':               // form feed
+                        cur->val = 0x0c;
+                        break;                   
                     case 'n':
                         cur->val = 0x0a;    // LF
                         break;
                     case 'r':
                         cur->val = 0xd;     // CR
                         break;
-                    case '0':
-                        cur->val = 0x00;    // 0
-                        break;
                     case 't':
                         cur->val = 0x09;    // Horizontal Tab
                         break;
-                    case 0x5c:              // back slash
-                        cur->val = 0x5c;
+                    case 'v':               // vertical Tab
+                        cur->val = 0x0b;
                         break;
-                    case 0x27:
+                    case '\'':              // single quote
                         cur->val = 0x27;
                         p++;
+                        break;
+                    case '"':               // double quote
+                        cur->val = 0x22;
+                        break;
+                    case '\\':              // back slash
+                        cur->val = 0x5c;
+                        break;
+                    case '0':               // null caracter
+                        cur->val = 0x00;
                         break;
                 }
             } else {

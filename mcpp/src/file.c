@@ -194,23 +194,38 @@ void output_preprocessed_file(PP_Token* tok, FILE* fp){
                 fprintf(fp, "'");
 
                 switch(tok->val){
+                    case 0x07:
+                        fprintf(fp, "\\a");     // ring abell
+                        break;
+                    case 0x08:
+                        fprintf(fp, "\\b");     // back space
+                        break;
+                    case 0x0c:
+                        fprintf(fp, "\\f");     // form feed
+                        break;
                     case 0x0a:
                         fprintf(fp, "\\n");     // LF
                         break;
                     case 0xd:
-                        fprintf(fp, "\\r");      // CR
-                        break;
-                    case 0x00:
-                        fprintf(fp, "\\0");     // null
+                        fprintf(fp, "\\r");     // CR
                         break;
                     case 0x09:
                         fprintf(fp, "\\t");     // horizontal tab
                         break;
-                    case 0x5c:                  //  \\ mark
+                    case 0x0b:
+                        fprintf(fp, "\\v");     // vertical tab
+                        break;
+                    case 0x27:                  // single quote
+                        fprintf(fp, "\\\'");
+                        break;
+                    case 0x22:                  // double quote
+                        fprintf(fp, "\"");
+                        break;
+                    case 0x5c:                  // back slash
                         fprintf(fp, "\\\\");
                         break;
-                    case 0x27:
-                        fprintf(fp, "\\\'");
+                    case 0x00:
+                        fprintf(fp, "\\0");     // null
                         break;
                     default:
                         fprintf(fp, "%c", tok->val);
