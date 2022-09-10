@@ -17,6 +17,9 @@ test/mcpp/self_host
 # mcc1 command
 bin/mcc1
 mcc1/load/*
+test/mcc1/a.out
+test/mcc1/test.s
+test/mcc1/test.s.i
 
 bin/mlibc
 

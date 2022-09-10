@@ -324,6 +324,7 @@ bool tk_istype(){
     if(ty != NULL
         || (memcmp(token->str, "static", 6) == 0 && token->len == 6)
         || (memcmp(token->str, "const", 5) == 0 && token->len == 5)
+        || (memcmp(token->str, "volatile", 8) == 0 && token->len == 8)
         || (memcmp(token->str, "typedef", 7) == 0 && token->len == 7)
         || (memcmp(token->str, "enum", 4) == 0 && token->len == 4)
         || (memcmp(token->str, "struct", 6) == 0 && token->len == 6)){
