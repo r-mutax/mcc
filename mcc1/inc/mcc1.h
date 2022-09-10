@@ -1,9 +1,9 @@
-#ifndef MCC_INC_H
-#define MCC_INC_H
+#ifndef MCC1_INC_H
+#define MCC1_INC_H
 
 #include <stdbool.h>
 
-#ifndef MCC_COMPILER
+#ifndef MCC1_COMPILER
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -246,6 +246,6 @@ typedef enum {
     NO_OPTION = 0,
     OUTPUT_FILE,
     C_SRC_FILE
-} MCC_OPTION;
+} MCC1_OPTION;
 
 #endif

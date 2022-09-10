@@ -1,4 +1,4 @@
-#include "mcc.h"
+#include "mcc1.h"
 #include "type.h"
 #include "scope.h"
 #include "errormsg.h"
@@ -35,7 +35,7 @@ Type* ty_register_newtype(Symbol* new_name, Type* type){
     return ty;
 }
 
-// In mcc Compiler type system,
+// In mcc1 Compiler type system,
 // different length array is different type.
 Type* ty_array_of(Type* base_type, int array_len){
 

@@ -1,4 +1,4 @@
-#include "mcc.h"
+#include "mcc1.h"
 #include "symtbl.h"
 #include "type.h"
 #include "scope.h"

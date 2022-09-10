@@ -1,4 +1,4 @@
-#include "mcc.h"
+#include "mcc1.h"
 #include "node.h"
 #include "tokenize.h"
 #include "symtbl.h"
@@ -426,6 +426,8 @@ static Type* decl_spec(StorageClassKind* sck){
     // parse type specifies.
     int type_flg = 0;
     bool is_const = false;
+    bool is_volatile = false;
+    bool is_restrict = false;
     Type* ty = NULL;
     while(tk_istype()){
         Token* tok = tk_get_token();
@@ -447,6 +449,14 @@ static Type* decl_spec(StorageClassKind* sck){
         if(tk_consume_keyword("const")){
             if(is_const) error_at(tok, "duplicate const.");
             is_const = true;
+            continue;
+        }
+
+        // volatile is ignore mcc.
+        // But, duplicate them is illigal. If there are duplicate, output error.
+        if(tk_consume_keyword("volatile")){
+            if(is_volatile) error_at(tok, "duplicate volatile.");
+            is_volatile = true;
             continue;
         }
 

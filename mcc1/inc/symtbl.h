@@ -1,6 +1,6 @@
 #ifndef SYMTBL_INC_H
 #define SYMTBL_INC_H
-#include "mcc.h"
+#include "mcc1.h"
 
 void st_init();
 Symbol* st_make_symbol(Token* tok, Type* ty);

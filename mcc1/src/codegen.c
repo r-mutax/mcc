@@ -1,4 +1,4 @@
-#include "mcc.h"
+#include "mcc1.h"
 #include "codegen.h"
 #include "errormsg.h"
 

@@ -1,8 +1,10 @@
-#include "test.h"
+int exit_error(char* p);
+int printf(char* p);
+void print_int(int a);
+int foo();
 
-#define TEST_DEF 1
-#define TEST_NO_VALUE_MACRO
 long g_x;
+
 
 void assert_c(char lhs, char rhs, char* p){
     if(lhs != rhs){
@@ -620,118 +622,6 @@ void test_typedef(){
     return;
 }
 
-void test_preprocess(){
-    int a = TEST_DEF;
-    assert(1, a, "error : #define num.\n");
-
-#ifdef TEST_DEF1
-    assert(0, 1, "error : not defined pattern , not invalid path.\n");
-#else
-    printf("#ifdef : not defined pattern #else path OK.\n");
-#endif
-
-#ifdef TEST_DEF
-    printf("#ifdef : defined pattern #true path OK.\n");
-#else
-    assert(0, 1, "error : defined pattern , not invalid path.\n");
-#endif
-
-#ifdef TEST_DEF
-#ifdef TEST_DEF1
-    assert(0, 1, "error : Nesting #ifdef pattern 1.\n");
-#else
-    printf("#ifdef : Nesting pattern test OK.\n");
-#endif
-#else
-    assert(0, 1, "error : Nesting #ifdef pattern 2.\n");
-#endif
-
-#ifdef TEST_DEF
-    printf("#ifdef : No #else pattern test OK.\n");
-#endif
-
-#ifndef TEST_DEF1
-    printf("#ifndef : No #else pattern test OK.\n");
-#endif
-
-#ifndef TEST_DEF
-#ifdef TEST_DEF1
-    1;
-#endif
-#else
-#ifdef TEST_DEF
-    printf("#ifndef : Nesting pattern test OK.\n");
-#endif
-#endif
-
-#if (2 * 3 - 6)
-    exit_error("error : #if multile - sub.\n");
-#endif
-
-#if (4 / 2 + 4) - 6
-    exit_error("error : #if div - add.\n");
-#endif
-
-#if (4 / 2 + 4) - 6
-    exit_error("error : #if div - sub.\n");
-#endif
-
-#if (5 % 3 + 1) - 3
-    exit_error("error : #if mod - add.\n");
-#endif
-
-#if (1 << 3 + 2) - 32
-    exit_error("error : #if bitShift(left) - add.\n");
-#endif
-
-#if (8 >> 3 - 2) - 4
-    exit_error("error : #if bitShift(right) - sub.\n");
-#endif
-
-#if (7 < 4 << 1) - 1
-    exit_error("error : #if less than - bitShift(left).\n");
-#endif
-
-#if (2 <= 8 >> 2) - 1
-    exit_error("error : #if less equal - bitShift(right).\n");
-#endif
-
-#if (17 > 4 << 2) - 1
-    exit_error("error : #if grater than - bitShift(left).\n");
-#endif
-
-#if (1 >= 4 >> 2) - 1
-    exit_error("error : #if grater than - bitShift(left).\n");
-#endif
-
-#if (1 == 2 > 0 != 2) - 1
-    exit_error("error : #if equal and not equal- lt.\n");
-#endif
-
-#if (2 & 5 ^ 3 | 9) - 11
-    exit_error("error : #if bitAnd - bitXor - bitOr.\n");
-#endif
-
-#if (3 == 3 && 4 != 4 ? 3 : 9) - 9
-    exit_error("error : #if condition expr - logicAnd.\n");
-#endif
-
-#if ! defined TEST_DEF
-    exit_error("error : #if logical NOT.\n");   
-#endif
-
-#if ! \
-defined TEST_DEF
-    exit_error("error : skip continuous \\ and newline.\n");   
-#endif
-
-    assert(5, FUNC_MACRO(2, 3), "error : Function like macro.\n");
-
-    printf("preprocess test is completed.\n");
-
-    return;
-}
-
 void test_cast(){
 
     struct TEST_DATA {
@@ -798,7 +688,6 @@ int main(){
     test_literal();
     test_enum();
     test_typedef();
-    test_preprocess();
     test_cast();
 
     printf("test completed !\n");

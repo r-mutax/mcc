@@ -1,6 +1,6 @@
 #ifndef TYPE_INC_H
 #define TYPE_INC_H
-#include "mcc.h"
+#include "mcc1.h"
 
 void ty_init();
 Type* ty_register_type(char* type_name, int type_size, TypeKind type_kind);
