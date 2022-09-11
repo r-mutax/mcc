@@ -1,4 +1,4 @@
 int main(){
-    volatile int a = 0;
+    unsigned int a = 0;
     return 0;
 }

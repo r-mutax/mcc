@@ -192,9 +192,10 @@ struct Type {
     TypeKind    kind;
     Type*       pointer_from;
     Type*       pointer_to;
-    bool        is_typedef;
+    bool        is_user_type;
     bool        is_imcomplete;
     bool        is_const;
+    bool        is_unsigned;
     Type*       base_type;
 
     Member*     member;

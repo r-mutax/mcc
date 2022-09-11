@@ -30,7 +30,7 @@ Type* ty_register_newtype(Symbol* new_name, Type* type){
 
     Type* ty = ty_register_type(new_name->name, type->size, type->kind);
 
-    ty->is_typedef = true;
+    ty->is_user_type = true;
     ty->base_type = type;
     return ty;
 }
@@ -104,12 +104,22 @@ Type* ty_get_type(char* type_name, int len){
                 while(cur->base_type){
                     cur = cur->base_type;
                 }
-
+                Type* ret = calloc(1, sizeof(Type));
+                memcpy(ret, cur, sizeof(Type));
+                ret->next = NULL;
                 return cur;
             }
         }
     }
 
+    return NULL;
+}
+
+Type* ty_find_user_type(char* type_name, int len){
+    Type* ret = ty_get_type(type_name, len);
+    if(ret && ret->is_user_type){
+        return ret;
+    }
     return NULL;
 }
 

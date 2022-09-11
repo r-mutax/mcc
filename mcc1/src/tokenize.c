@@ -192,6 +192,8 @@ Token* tk_tokenize(char* p){
             || check_keyword("default", &p, &cur)
             || check_keyword("break", &p, &cur)
             || check_keyword("sizeof", &p, &cur)
+            || check_keyword("signed", &p, &cur)
+            || check_keyword("unsigned", &p, &cur)
             || check_keyword("int", &p, &cur)
             || check_keyword("char", &p, &cur)
             || check_keyword("long", &p, &cur)
@@ -325,6 +327,8 @@ bool tk_istype(){
         || (memcmp(token->str, "static", 6) == 0 && token->len == 6)
         || (memcmp(token->str, "const", 5) == 0 && token->len == 5)
         || (memcmp(token->str, "volatile", 8) == 0 && token->len == 8)
+        || (memcmp(token->str, "signed", 6) == 0 && token->len == 6)
+        || (memcmp(token->str, "unsigned", 8) == 0 && token->len == 8)
         || (memcmp(token->str, "typedef", 7) == 0 && token->len == 7)
         || (memcmp(token->str, "enum", 4) == 0 && token->len == 4)
         || (memcmp(token->str, "struct", 6) == 0 && token->len == 6)){
@@ -349,6 +353,14 @@ Type* tk_expect_type(){
     
     token = token->next;
     
+    return ty;
+}
+
+Type* tk_consume_user_type(){
+    Type* ty = ty_find_user_type(token->str, token->len);
+    if(ty){
+        token = token->next;
+    }
     return ty;
 }
 

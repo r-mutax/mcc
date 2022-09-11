@@ -475,6 +475,10 @@ void test_variable(){
     const volatile int cvr_test = 0;
     assert(cvr_test, 0, "error : const, volatile, restrict type.\n");
 
+    unsigned char uc = 0;
+    unsigned short us = 1;
+    unsigned int ui = 2;
+    unsigned long ul = 3;
 
     printf("variable test is completed !\n");
     return;
