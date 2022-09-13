@@ -236,6 +236,7 @@ static Node* compound_stmt(){
             cur->next = declaration();
         } else {
             cur->next = stmt();
+            ty_add_type(cur->next);
         }
         cur = cur->next;        
     }
@@ -502,25 +503,25 @@ static Type* decl_spec(StorageClassKind* sck){
     if(!ty){
         switch(type_flg){
             case K_VOID:
-                ty = ty_get_type("void", 4);
+                ty = ty_void;
                 break;
             case K_BOOL:
-                ty = ty_get_type("_Bool", 5);
+                ty = ty_Bool;
                 break;
             case K_CHAR:
             case K_SIGNED + K_CHAR:
-                ty = ty_get_type("char", 4);
+                ty = ty_char;
                 break;
             case K_SHORT:
             case K_SHORT + K_INT:
             case K_SIGNED + K_SHORT:
             case K_SIGNED + K_SHORT + K_INT:
-                ty = ty_get_type("short", 5);
+                ty = ty_short;
                 break;
             case K_INT:
             case K_SIGNED:
             case K_SIGNED + K_INT:
-                ty = ty_get_type("int", 3);
+                ty = ty_int;
                 break;
             case K_LONG:
             case K_LONG + K_INT:
@@ -530,27 +531,23 @@ static Type* decl_spec(StorageClassKind* sck){
             case K_SIGNED + K_LONG + K_INT:
             case K_SIGNED + K_LONG + K_LONG:
             case K_SIGNED + K_LONG + K_LONG + K_INT:
-                ty = ty_get_type("long", 4);
+                ty = ty_long;
                 break;
             case K_UNSIGNED + K_CHAR:
-                ty = ty_get_type("char", 4);
-                ty->is_unsigned = true;
+                ty = ty_uchar;
                 break;
             case K_UNSIGNED + K_SHORT:
             case K_UNSIGNED + K_SHORT + K_INT:
-                ty = ty_get_type("short", 5);
-                ty->is_unsigned = true;
+                ty = ty_ushort;
                 break;
             case K_UNSIGNED + K_INT:
-                ty = ty_get_type("int", 3);
-                ty->is_unsigned = true;
+                ty = ty_uint;
                 break;
             case K_UNSIGNED + K_LONG:
             case K_UNSIGNED + K_LONG + K_INT:
             case K_UNSIGNED + K_LONG + K_LONG:
             case K_UNSIGNED + K_LONG + K_LONG + K_INT:
-                ty = ty_get_type("long", 4);
-                ty->is_unsigned = true;
+                ty = ty_ulong;
                 break;
             default:
                 error_at(tk_get_token(), "Invalid type.\n");
@@ -1306,7 +1303,7 @@ static Node* new_node_num(int val){
 
     node->kind = ND_NUM;
     node->val = val;
-    node->type = ty_get_type("long", 4);
+    node->type = ty_long;
     return node;
 }
 

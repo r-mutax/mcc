@@ -323,16 +323,24 @@ void tk_expect_keyword(char* keyword){
 bool tk_istype(){
     Type* ty = ty_get_type(token->str, token->len);
 
-    if(ty != NULL
-        || (memcmp(token->str, "static", 6) == 0 && token->len == 6)
-        || (memcmp(token->str, "const", 5) == 0 && token->len == 5)
-        || (memcmp(token->str, "volatile", 8) == 0 && token->len == 8)
-        || (memcmp(token->str, "signed", 6) == 0 && token->len == 6)
-        || (memcmp(token->str, "unsigned", 8) == 0 && token->len == 8)
-        || (memcmp(token->str, "typedef", 7) == 0 && token->len == 7)
-        || (memcmp(token->str, "enum", 4) == 0 && token->len == 4)
-        || (memcmp(token->str, "struct", 6) == 0 && token->len == 6)){
-            return true;
+    if(ty
+        || startswith(token->str, "signed")
+        || startswith(token->str, "unsigned")
+        || startswith(token->str, "void")
+        || startswith(token->str, "char")
+        || startswith(token->str, "short")
+        || startswith(token->str, "int")
+        || startswith(token->str, "long")
+        || startswith(token->str, "_Bool")
+        || startswith(token->str, "static")
+        || startswith(token->str, "const")
+        || startswith(token->str, "volatile")
+        || startswith(token->str, "signed")
+        || startswith(token->str, "unsigned")
+        || startswith(token->str, "typedef")
+        || startswith(token->str, "enum")
+        || startswith(token->str, "struct")){
+        return true;
     }
     return false;
 }

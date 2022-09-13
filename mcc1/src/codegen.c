@@ -483,7 +483,8 @@ static void gen(Node* node){
             gen_cast(node->lhs->type, node->type);
             if(node->type->kind == TY_BOOL){
                 fprintf(output_file, "  cmp rax, 0\n");
-                fprintf(output_file, "  setne al\n");               
+                fprintf(output_file, "  setne al\n");
+                fprintf(output_file, "  movzx rax, al\n");               
             }
             fprintf(output_file, "  push rax\n");
             return;

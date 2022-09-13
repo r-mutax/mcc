@@ -3,17 +3,44 @@
 #include "scope.h"
 #include "errormsg.h"
 
+Type* ty_void;
+Type* ty_Bool;
+
+Type* ty_char;
+Type* ty_short;
+Type* ty_int;
+Type* ty_long;
+
+Type* ty_uchar;
+Type* ty_ushort;
+Type* ty_uint;
+Type* ty_ulong;
+
+
 void ty_init(){
-    ty_register_type("long", 8, TY_INTEGER);
-    ty_register_type("int", 4, TY_INTEGER);
-    ty_register_type("char", 1, TY_INTEGER);
-    ty_register_type("short", 2, TY_INTEGER);
-    ty_register_type("_Bool", 1, TY_BOOL);
-    ty_register_type("void", 0, TY_VOID);
+
+    ty_void = ty_create_type("void", 0, TY_VOID);
+    ty_Bool = ty_create_type("_Bool", 1, TY_BOOL);
+
+    ty_char = ty_create_type("char", 1, TY_INTEGER);
+    ty_short = ty_create_type("short", 2, TY_INTEGER);
+    ty_int = ty_create_type("int", 4, TY_INTEGER);
+    ty_long = ty_create_type("long", 8, TY_INTEGER);
+    
+    ty_uchar = ty_create_type("unsigned char", 1, TY_INTEGER);
+    ty_uchar->is_unsigned = true;
+
+    ty_ushort = ty_create_type("unsigned short", 2, TY_INTEGER);
+    ty_ushort->is_unsigned = true;
+
+    ty_uint = ty_create_type("unsigned int", 4, TY_INTEGER);
+    ty_uint->is_unsigned = true;
+
+    ty_ulong = ty_create_type("unsigned long", 8, TY_INTEGER);
+    ty_ulong->is_unsigned = true;
 }
 
-Type* ty_register_type(char* type_name, int type_size, TypeKind type_kind){
-
+Type* ty_create_type(char* type_name, int type_size, TypeKind type_kind){
     Type* ty = calloc(1, sizeof(Type));
 
     ty->name = type_name;
@@ -21,6 +48,12 @@ Type* ty_register_type(char* type_name, int type_size, TypeKind type_kind){
     ty->size = type_size;
     ty->kind = type_kind;
 
+    return ty;
+}
+
+Type* ty_register_type(char* type_name, int type_size, TypeKind type_kind){
+
+    Type* ty = ty_create_type(type_name, type_size, type_kind);
     sc_add_type(ty);
 
     return ty;
@@ -104,9 +137,6 @@ Type* ty_get_type(char* type_name, int len){
                 while(cur->base_type){
                     cur = cur->base_type;
                 }
-                Type* ret = calloc(1, sizeof(Type));
-                memcpy(ret, cur, sizeof(Type));
-                ret->next = NULL;
                 return cur;
             }
         }
@@ -150,7 +180,7 @@ Symbol* ty_get_member(Type* ty, Token* tok){
 
 void ty_add_type(Node* node){
 
-    if(node == NULL || node->type){
+    if(node == NULL){
         return;
     }
 
@@ -165,6 +195,10 @@ void ty_add_type(Node* node){
 
     for(Node* cur = node->arg; cur; cur = cur->arg){
         ty_add_type(cur);
+    }
+
+    if(node->type){
+        return;
     }
 
     switch(node->kind){
@@ -188,7 +222,7 @@ void ty_add_type(Node* node){
         case ND_OR:
         case ND_NUM:
         case ND_NOT:
-            node->type = ty_get_type("long", 4);
+            node->type = ty_long;
             break;
         case ND_COND_EXPR:
             node->type = node->lhs->type;
