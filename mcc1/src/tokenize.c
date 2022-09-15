@@ -192,6 +192,8 @@ Token* tk_tokenize(char* p){
             || check_keyword("default", &p, &cur)
             || check_keyword("break", &p, &cur)
             || check_keyword("sizeof", &p, &cur)
+            || check_keyword("signed", &p, &cur)
+            || check_keyword("unsigned", &p, &cur)
             || check_keyword("int", &p, &cur)
             || check_keyword("char", &p, &cur)
             || check_keyword("long", &p, &cur)
@@ -227,7 +229,7 @@ Token* tk_tokenize(char* p){
         if(isdigit(*p)){
             cur = new_token(TK_NUM, cur, p, 0);
             char* q = p;
-            cur->val = strtol(p, &p, 10);
+            cur->val = strtoul(p, &p, 10);
             cur->len = p - q;
             continue;
         }
@@ -256,11 +258,11 @@ void tk_expect(char* p){
     token = token->next;
 }
 
-int tk_expect_num(){
+unsigned long tk_expect_num(){
     if(token->kind != TK_NUM){
         error_at(token, "expect number.\n");
     }
-    int ret = token->val;
+    unsigned long ret = token->val;
     token = token->next;
     return ret;
 }
@@ -321,14 +323,24 @@ void tk_expect_keyword(char* keyword){
 bool tk_istype(){
     Type* ty = ty_get_type(token->str, token->len);
 
-    if(ty != NULL
-        || (memcmp(token->str, "static", 6) == 0 && token->len == 6)
-        || (memcmp(token->str, "const", 5) == 0 && token->len == 5)
-        || (memcmp(token->str, "volatile", 8) == 0 && token->len == 8)
-        || (memcmp(token->str, "typedef", 7) == 0 && token->len == 7)
-        || (memcmp(token->str, "enum", 4) == 0 && token->len == 4)
-        || (memcmp(token->str, "struct", 6) == 0 && token->len == 6)){
-            return true;
+    if(ty
+        || startswith(token->str, "signed")
+        || startswith(token->str, "unsigned")
+        || startswith(token->str, "void")
+        || startswith(token->str, "char")
+        || startswith(token->str, "short")
+        || startswith(token->str, "int")
+        || startswith(token->str, "long")
+        || startswith(token->str, "_Bool")
+        || startswith(token->str, "static")
+        || startswith(token->str, "const")
+        || startswith(token->str, "volatile")
+        || startswith(token->str, "signed")
+        || startswith(token->str, "unsigned")
+        || startswith(token->str, "typedef")
+        || startswith(token->str, "enum")
+        || startswith(token->str, "struct")){
+        return true;
     }
     return false;
 }
@@ -349,6 +361,14 @@ Type* tk_expect_type(){
     
     token = token->next;
     
+    return ty;
+}
+
+Type* tk_consume_user_type(){
+    Type* ty = ty_find_user_type(token->str, token->len);
+    if(ty){
+        token = token->next;
+    }
     return ty;
 }
 

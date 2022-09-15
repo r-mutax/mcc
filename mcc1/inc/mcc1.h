@@ -41,16 +41,16 @@ typedef enum {
 } TokenKind;
 
 struct Token { 
-    TokenKind   kind;
-    Token*      next;
-    int         val;
-    char*       str;
-    int         len;
+    TokenKind       kind;
+    Token*          next;
+    unsigned long   val;
+    char*           str;
+    int             len;
 
     // for errormsg
-    char*       pos;
-    long        row;
-    SrcFile*    src;
+    char*           pos;
+    long            row;
+    SrcFile*        src;
 };
 
 // parser data definition ----------------------------------
@@ -105,7 +105,7 @@ struct Node {
     NodeKind    kind;
     Node*       lhs;
     Node*       rhs;
-    int         val;
+    unsigned long val;
     int         offset;
     Type*       type;
 
@@ -192,9 +192,10 @@ struct Type {
     TypeKind    kind;
     Type*       pointer_from;
     Type*       pointer_to;
-    bool        is_typedef;
+    bool        is_user_type;
     bool        is_imcomplete;
     bool        is_const;
+    bool        is_unsigned;
     Type*       base_type;
 
     Member*     member;
@@ -239,7 +240,11 @@ typedef enum {
     i8 = 0,
     i16,
     i32,
-    i64
+    i64,
+    u8,
+    u16,
+    u32,
+    u64
 } SIZE_TYPE_ID;
 
 typedef enum {

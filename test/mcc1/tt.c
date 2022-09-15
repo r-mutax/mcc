@@ -1,4 +1,6 @@
 int main(){
-    volatile int a = 0;
+
+    long l = 4294967295;
+    return (unsigned int)l;
     return 0;
 }

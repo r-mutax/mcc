@@ -67,7 +67,7 @@
 
 // local function forward declaration. ------------
 static Node* new_node(NodeKind kind, Node* lhs, Node* rhs);
-static Node* new_node_num(int val);
+static Node* new_node_num(unsigned long val);
 static Node* new_node_add(Node* lhs, Node* rhs);
 static Node* new_node_sub(Node* lhs, Node* rhs);
 static Node* new_node_mul(Node* lhs, Node* rhs);
@@ -236,6 +236,7 @@ static Node* compound_stmt(){
             cur->next = declaration();
         } else {
             cur->next = stmt();
+            ty_add_type(cur->next);
         }
         cur = cur->next;        
     }
@@ -274,6 +275,7 @@ static Type* struct_spec(){
                 ty->name = tok->str;
                 ty->len = tok->len;
                 ty->is_imcomplete = true;
+                ty->is_user_type = true;
                 ty_register_struct(ty);
             }
             return ty;
@@ -460,22 +462,21 @@ static Type* decl_spec(StorageClassKind* sck){
             continue;
         }
 
-        // user type2 (which is registerd with typedef).
-        Type* buf = tk_consume_type();
-        if(buf){
-            if(ty || type_flg)
-                error_at(tok, "duplicate type keyword.\n");
-            ty = buf;
-            type_flg += K_USER;
-            continue;
-        }
-
-
         // enumeration.
         if(tk_consume_keyword("enum")){
             if(ty || type_flg)
                 error_at(tok, "duplicate type keyword.\n");
             ty = enum_spec();
+            type_flg += K_USER;
+            continue;
+        }
+
+        // user type2 (which is registerd with typedef).
+        Type* buf = tk_consume_user_type();
+        if(buf){
+            if(ty || type_flg)
+                error_at(tok, "duplicate type keyword.\n");
+            ty = buf;
             type_flg += K_USER;
             continue;
         }
@@ -502,22 +503,25 @@ static Type* decl_spec(StorageClassKind* sck){
     if(!ty){
         switch(type_flg){
             case K_VOID:
-                ty = ty_get_type("void", 4);
+                ty = ty_void;
+                break;
+            case K_BOOL:
+                ty = ty_Bool;
                 break;
             case K_CHAR:
             case K_SIGNED + K_CHAR:
-                ty = ty_get_type("char", 4);
+                ty = ty_char;
                 break;
             case K_SHORT:
             case K_SHORT + K_INT:
             case K_SIGNED + K_SHORT:
             case K_SIGNED + K_SHORT + K_INT:
-                ty = ty_get_type("short", 5);
+                ty = ty_short;
                 break;
             case K_INT:
             case K_SIGNED:
             case K_SIGNED + K_INT:
-                ty = ty_get_type("int", 3);
+                ty = ty_int;
                 break;
             case K_LONG:
             case K_LONG + K_INT:
@@ -527,7 +531,23 @@ static Type* decl_spec(StorageClassKind* sck){
             case K_SIGNED + K_LONG + K_INT:
             case K_SIGNED + K_LONG + K_LONG:
             case K_SIGNED + K_LONG + K_LONG + K_INT:
-                ty = ty_get_type("long", 4);
+                ty = ty_long;
+                break;
+            case K_UNSIGNED + K_CHAR:
+                ty = ty_uchar;
+                break;
+            case K_UNSIGNED + K_SHORT:
+            case K_UNSIGNED + K_SHORT + K_INT:
+                ty = ty_ushort;
+                break;
+            case K_UNSIGNED + K_INT:
+                ty = ty_uint;
+                break;
+            case K_UNSIGNED + K_LONG:
+            case K_UNSIGNED + K_LONG + K_INT:
+            case K_UNSIGNED + K_LONG + K_LONG:
+            case K_UNSIGNED + K_LONG + K_LONG + K_INT:
+                ty = ty_ulong;
                 break;
             default:
                 error_at(tk_get_token(), "Invalid type.\n");
@@ -1278,12 +1298,12 @@ static Node* new_node(NodeKind kind, Node* lhs, Node* rhs){
     return node;
 }
 
-static Node* new_node_num(int val){
+static Node* new_node_num(unsigned long val){
     Node* node = calloc(1, sizeof(Node));
 
     node->kind = ND_NUM;
     node->val = val;
-    node->type = ty_get_type("long", 4);
+    node->type = ty_long;
     return node;
 }
 

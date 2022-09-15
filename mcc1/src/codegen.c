@@ -19,22 +19,31 @@ static char i32_i8[] = "movsx eax, al";
 static char i16_i8[] = "movsx ax, al";
 static char i8_i16[] = "mov rdi, 0\n  mov dil, al\n  mov rax, rdi";
 static char i32_i16[] = "movsx eax, ax";
-static char i64_i16[] = "movsx eax, ax";
+static char i64_i16[] = "movsx rax, ax";
 static char i8_i32[] = "mov rdi, 0\n  mov dil, al\n  mov rax, rdi";
 static char i16_i32[] = "mov rdi, 0\n  mov di, ax\n  mov rax, rdi";
+static char i32_i64[] = "mov eax, eax";
 static char i64_i32[] = "movsx rax, eax";
 static char i8_i64[] = "mov rdi, 0\n  mov dil, al\n  mov rax, rdi";
 static char i16_i64[] = "mov rdi, 0\n  mov di, ax\n  mov rax, rdi";
 
+static char u32_i8[] = "movzx eax, al";
+static char u32_i16[] = "movzx eax, ax";
+static char u32_i64[] = "mov eax, eax";
+
 
 // cast instruction table
 // column : source, row : destination
-static char* cast_table[][4] = {
-    //  i8         i16         i32          i64
-    {   NULL,      i8_i16,     i8_i32,      i8_i64  },  // i8
-    {   i16_i8,    NULL,       i16_i32,     i16_i64 },  // i16
-    {   i32_i8,    i32_i16,    NULL,        NULL    },  // i32
-    {   i64_i8,    i64_i16,    NULL,        NULL    }   // i64
+static char* cast_table[][8] = {
+    //  i8       i16       i32       i64       u8       u16       u32       u64
+    {   NULL,    i8_i16,   i8_i32,   i8_i64,   i32_i8,  i32_i8,   i32_i8,   i32_i8   },  // i8
+    {   i16_i8,  NULL,     i16_i32,  i16_i64,  u32_i8,  i32_i16,  i32_i16,  i32_i16  },  // i16
+    {   i32_i8,  i32_i16,  NULL,     NULL,     u32_i8,  u32_i16,  NULL,     i32_i64  },  // i32
+    {   i64_i8,  i64_i16,  i64_i32,  NULL,     u32_i8,  u32_i16,  NULL,     NULL     },  // i64
+    {   u32_i8,  u32_i8,   u32_i8,   u32_i8,   NULL,    u32_i8,   u32_i8,   u32_i8   },  // u8
+    {   u32_i8,  u32_i16,  u32_i16,  u32_i16,  u32_i8,  u32_i16,  u32_i16,  u32_i16  },  // u16
+    {   u32_i8,  u32_i16,  NULL,     u32_i64,  u32_i8,  u32_i16,  NULL,     u32_i64  },  // u32
+    {   u32_i8,  u32_i16,  NULL,     NULL,     u32_i8,  u32_i16,  NULL,     NULL     }   // u64
 };
 
 // local function forward declaration. ------------
@@ -295,7 +304,7 @@ static void gen_stmt(Node* node){
             if(g_stack_idx == -1){
                 error("case label not with in switch statement.\n");
             }
-            fprintf(output_file, ".LCase%d_%d:\n", g_label_stack[g_stack_idx], node->lhs->val);
+            fprintf(output_file, ".LCase%d_%lu:\n", g_label_stack[g_stack_idx], node->lhs->val);
             return;
         case ND_BREAK:
             if(g_stack_idx == -1){
@@ -311,8 +320,8 @@ static void gen_stmt(Node* node){
             fprintf(output_file, "  pop rax\n");
             Node* cur_case = node->case_label;
             while(cur_case){
-                fprintf(output_file, "  cmp rax, %d\n", cur_case->val);
-                fprintf(output_file, "  je .LCase%d_%d\n", label, cur_case->val);
+                fprintf(output_file, "  cmp rax, %lu\n", cur_case->val);
+                fprintf(output_file, "  je .LCase%d_%lu\n", label, cur_case->val);
                 cur_case = cur_case->next;
             }
             if(node->default_label)
@@ -345,7 +354,8 @@ static void gen(Node* node){
 
     switch(node->kind){
         case ND_NUM:
-            fprintf(output_file, "  push %d\n", node->val);
+            fprintf(output_file, "  mov rax, %lu\n", node->val);
+            fprintf(output_file, "  push rax\n");
             return;
         case ND_LVAR:
         case ND_GVAR:
@@ -368,8 +378,13 @@ static void gen(Node* node){
         case ND_CALL:
             {
                 int nargs = 0;
-                for(Node* cur = node->arg; cur; cur = cur->next){
+                Symbol* param = node->sym->args;
+                for(Node* cur = node->arg; cur; cur = cur->next, param = param->next){
                     gen(cur);
+
+                    // implicit cast at function arguments.
+                    gen_cast(cur->type, param->type);
+                    fprintf(output_file, "  push rax\n");
                     nargs++;
                 }
 
@@ -483,7 +498,8 @@ static void gen(Node* node){
             gen_cast(node->lhs->type, node->type);
             if(node->type->kind == TY_BOOL){
                 fprintf(output_file, "  cmp rax, 0\n");
-                fprintf(output_file, "  setne al\n");               
+                fprintf(output_file, "  setne al\n");
+                fprintf(output_file, "  movzx rax, al\n");               
             }
             fprintf(output_file, "  push rax\n");
             return;
@@ -498,7 +514,8 @@ static void gen(Node* node){
     }
 
     if(node->kind == ND_NUM){
-        fprintf(output_file, "  push %d\n", node->val);
+        fprintf(output_file, "  mov rax, %lu\n", node->val);
+        fprintf(output_file, "  push rax\n");
         return;
     }
 
@@ -632,16 +649,16 @@ static SIZE_TYPE_ID get_size_type_id(Type* ty)
     SIZE_TYPE_ID id = 0;
     switch(ty->size){
         case 1:
-            id = i8;
+            id = ty->is_unsigned ? u8 : i8;
             break;
         case 2:
-            id = i16;
+            id = ty->is_unsigned ? u16 : i16;
             break;
         case 4:
-            id = i32;
+            id = ty->is_unsigned ? u32 : i32;
             break;
         case 8:
-            id = i64;
+            id = ty->is_unsigned ? u64 : i64;
             break;
         default:
             id = ierr;

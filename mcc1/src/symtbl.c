@@ -78,7 +78,7 @@ Symbol* st_register_literal(Token* tok){
 
     // string literal is including the null terminator.
     // so that length is string length + 1.
-    sym->type = ty_get_type("char", 4);
+    sym->type = ty_char;
     sym->type = ty_array_of(sym->type, tok->len + 1);
 
     sym->name = calloc(1, sizeof(char) * 20);
