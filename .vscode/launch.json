@@ -11,7 +11,7 @@
             "request": "launch",
             "program": "${command:extension.vscode-wsl-workspaceFolder}/bin/mcc1",
             "args": ["-c",
-                     "/mnt/c/source/mcc/test/mcc1/test.c", 
+                     "/mnt/c/source/mcc/test/mcc1/tt.c", 
                      "-o", 
                      "/mnt/c/source/mcc/test/mcc1/test.s"],
             "stopAtEntry": false,

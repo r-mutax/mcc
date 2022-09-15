@@ -67,7 +67,7 @@
 
 // local function forward declaration. ------------
 static Node* new_node(NodeKind kind, Node* lhs, Node* rhs);
-static Node* new_node_num(int val);
+static Node* new_node_num(unsigned long val);
 static Node* new_node_add(Node* lhs, Node* rhs);
 static Node* new_node_sub(Node* lhs, Node* rhs);
 static Node* new_node_mul(Node* lhs, Node* rhs);
@@ -1298,7 +1298,7 @@ static Node* new_node(NodeKind kind, Node* lhs, Node* rhs){
     return node;
 }
 
-static Node* new_node_num(int val){
+static Node* new_node_num(unsigned long val){
     Node* node = calloc(1, sizeof(Node));
 
     node->kind = ND_NUM;

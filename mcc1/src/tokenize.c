@@ -229,7 +229,7 @@ Token* tk_tokenize(char* p){
         if(isdigit(*p)){
             cur = new_token(TK_NUM, cur, p, 0);
             char* q = p;
-            cur->val = strtol(p, &p, 10);
+            cur->val = strtoul(p, &p, 10);
             cur->len = p - q;
             continue;
         }
@@ -258,11 +258,11 @@ void tk_expect(char* p){
     token = token->next;
 }
 
-int tk_expect_num(){
+unsigned long tk_expect_num(){
     if(token->kind != TK_NUM){
         error_at(token, "expect number.\n");
     }
-    int ret = token->val;
+    unsigned long ret = token->val;
     token = token->next;
     return ret;
 }

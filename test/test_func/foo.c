@@ -26,6 +26,10 @@ void print_fizz_bazz(){
     printf("FizzBazz ");
 }
 
+void print_long(long a){
+    printf("%ld ", a);
+}
+
 void print_int(int a){
     printf("%d ", a);
 }

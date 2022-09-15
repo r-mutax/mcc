@@ -1,37 +1,17 @@
 int exit_error(char* p);
 int printf(char* p);
-void print_int(int a);
+void print_long(long a);
 int foo();
 
 long g_x;
 
 
-void assert_c(char lhs, char rhs, char* p){
-    if(lhs != rhs){
-        print_int(lhs);
-        print_int(rhs);
-
-        exit_error(p);
-    }
-    return;
-}
-
-void assert_s(short lhs, short rhs, char* p){
-    if(lhs != rhs){
-        print_int(lhs);
-        print_int(rhs);
-
-        exit_error(p);
-    }
-    return;
-}
-
-void assert(int lhs, int rhs, char* p){
+void assert(long lhs, long rhs, char* p){
     if(lhs != rhs)
     {
-        print_int(lhs);
+        print_long(lhs);
 
-        print_int(rhs);
+        print_long(rhs);
 
         exit_error(p);
     }
@@ -39,8 +19,8 @@ void assert(int lhs, int rhs, char* p){
 }
 
 void assert2(int lhs, int rhs, char* p){
-    print_int(rhs);
-    print_int(lhs);
+    print_long(rhs);
+    print_long(lhs);
     exit_error(p);
     return;
 }
@@ -284,8 +264,8 @@ void test_expr(){
     a += 1;
     assert(1, a, "error : += operater.\n");
 
-    a -= 2;
-    assert(-1, a, "error : -= operater.\n");
+    a = -1;
+    assert(-1, (long)a, "error : -= operater.\n");
 
     a *= -6;
     assert(6, a, "error : *= operater.\n");
@@ -477,7 +457,7 @@ void test_variable(){
 
     unsigned char uc = 0;
     unsigned short us = 1;
-    unsigned int ui = 2;
+    unsigned int ul = 2;
     unsigned long ul = 3;
 
     printf("variable test is completed !\n");
@@ -635,36 +615,109 @@ void test_cast(){
         long l;
     };
 
-    char c = 127;
-    short s = 32767;
-    int i = 2147483647;
-    long l = 9223372036854775807;
+    char c = -1;
+    short s = -1;
+    int i = -1;
+    long l = -1;
 
     struct TEST_DATA test_str;
 
     // char data cast...
-    assert((short)c, 127, "error : char to short cast.\n");
-    assert((int)c, 127, "error : char to int cast.\n");
-    assert((long)c, 127, "error : char to long cast.\n");
+    assert((short)c, -1, "error : char to short cast.\n");
+    assert((int)c, -1, "error : char to int cast.\n");
+    assert((long)c, -1, "error : char to long cast.\n");
+
+    assert((unsigned char)c, 255, "error : char to unsigned char cast.\n");
+    assert((unsigned short)c, 255, "error : char to unsigned short cast.\n");
+    assert((unsigned int)c, 255, "error : char to unsigned int cast.\n");
+    assert((unsigned long)c, 255, "error : char to unsigned long cast.\n");
+
     assert((_Bool)c, 1, "error : char to _Bool cast.\n");
 
     // short data cast to...
-    assert_c((char)s, -1, "error : short to char cast.\n");
-    assert((int)s, 32767, "error : short to int cast.\n");
-    assert((long)s, 32767, "error : short to long cast.\n");
+    assert((char)s, -1, "error : short to char cast.\n");
+    assert((int)s, -1, "error : short to int cast.\n");
+    assert((long)s, -1, "error : short to long cast.\n");
+
+    assert((unsigned char)s, 255, "error : short to unsigned char cast.\n");
+    assert((unsigned short)s, 65535, "error : short to unsigned short cast.\n");
+    assert((unsigned int)s, 65535, "error : short to unsigned int cast.\n");
+    assert((unsigned long)s, 65535, "error : short to unsigned long cast.\n");
+
     assert((_Bool)s, 1, "error : short to _Bool cast.\n");
 
     // int data cast to...
-    assert_c((char)i, -1, "error : int to char cast.\n");
-    assert_s((short)i, -1, "error : int to short cast.\n");
-    assert((long)i, 2147483647, "error : int to long cast.\n");
+    assert((char)i, -1, "error : int to char cast.\n");
+    assert((short)i, -1, "error : int to short cast.\n");
+    assert((long)i, -1, "error : int to long cast.\n");
+
+    assert((unsigned char)i, 255, "error : int to unsigned char cast.\n");
+    assert((unsigned short)i, 65535, "error : int to unsigned short cast.\n");
+    assert((unsigned int)i, 4294967295, "error : int to unsigned int cast.\n");
+    assert((unsigned long)i, 4294967295, "error : int to unsigned long cast.\n");
+
     assert((_Bool)i, 1, "error : int to _Bool cast.\n");
     
     // long data cast to...
-    assert_c((char)l, -1, "error : long to char cast.\n");
-    assert_s((short)l, -1, "error : long to short cast.\n");
+    assert((char)l, -1, "error : long to char cast.\n");
+    assert((short)l, -1, "error : long to short cast.\n");
     assert((int)l, -1, "error : long to int cast.\n");
+
+    assert((unsigned char)l, 255, "error : long to unsigned char cast.\n");
+    assert((unsigned short)l, 65535, "error : long to unsigned short cast.\n");
+    assert((unsigned int)l, 4294967295, "error : long to unsigned int cast.\n");
+    assert((unsigned long)l, 18446744073709551615, "error : long to unsigned long cast.\n");
+
     assert((_Bool)l, 1, "error : long to _Bool cast.\n");
+
+
+    // unsigned char data to ...
+    unsigned char uc = 255;
+
+    assert((char)uc, -1, "error : unsigned char to char cast.\n");
+    assert((short)uc, 255, "error : unsigned char to short cast.\n");
+    assert((int)uc, 255, "error : unsigned char to int cast.\n");
+    assert((long)uc, 255, "error : unsigned char to long cast.\n");
+
+    assert((unsigned short)uc, 255, "error : unsigned char to unsigned short cast.\n");
+    assert((unsigned int)uc, 255, "error : unsigned char to unsigned int cast.\n");
+    assert((unsigned long)uc, 255, "error : unsigned char to unsigned long cast.\n");
+    
+    // usigned short data to ...
+    unsigned short us = 65535;
+
+    assert((char)us, -1, "error : unsigned short to char cast.\n");
+    assert((short)us, -1, "error : unsigned short to short cast.\n");
+    assert((int)us, 65535, "error : unsigned short to int cast.\n");
+    assert((long)us, 65535, "error : unsigned short to long cast.\n");
+
+    assert((unsigned char)us, 255, "error : unsigned short to unsigned char cast.\n");
+    assert((unsigned int)us, 65535, "error : unsigned short to unsigned int cast.\n");
+    assert((unsigned long)us, 65535, "error : unsigned short to unsigned long cast.\n");
+
+    // unsigned int data to ...
+    unsigned int ui = 4294967295;
+
+    assert((char)ui, -1, "error : unsigned int to char cast.\n");
+    assert((short)ui, -1, "error : unsigned int to short cast.\n");
+    assert((int)ui, -1, "error : unsigned int to int cast.\n");
+    assert((long)ui, 4294967295, "error : unsigned int to long cast.\n");
+    
+    assert((unsigned char)ui, 255, "error : unsigned int to unsigned char cast.\n");
+    assert((unsigned short)ui, 65535, "error : unsigned int to unsigned short cast.\n");
+    assert((unsigned long)ui, 4294967295, "error : unsigned int to unsigned long cast.\n");
+
+    // unsigned long data to ...
+    unsigned long ul = 18446744073709551615;
+
+    assert((char)ul, -1, "error : unsigned long to char cast.\n");
+    assert((short)ul, -1, "error : unsigned long to short cast.\n");
+    assert((int)ul, -1, "error : unsigned long to int cast.\n");
+    assert((long)ul, -1, "error : unsigned long to long cast.\n");
+    
+    assert((unsigned char)ul, 255, "error : unsigned long to unsigned char cast.\n");
+    assert((unsigned short)ul, 65535, "error : unsigned long to unsigned short cast.\n");
+    assert((unsigned int)ul, 4294967295, "error : unsigned long to unsigned int cast.\n");
 
     test_str.c = 100;
     test_str.i = 100;

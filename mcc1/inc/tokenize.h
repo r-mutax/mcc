@@ -7,7 +7,7 @@ Token*  tk_tokenize_file(char* path);
 Token*  tk_tokenize(char* p);
 bool    tk_iseof();
 void    tk_expect(char* p);
-int     tk_expect_num();
+unsigned long tk_expect_num();
 bool    tk_consume(char* p);
 Token*  tk_consume_ident();
 Token*  tk_expect_ident();
